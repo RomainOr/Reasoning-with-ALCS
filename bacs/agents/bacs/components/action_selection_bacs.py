@@ -8,7 +8,7 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
-def choose_action(cll, cfg, prob_x: float) -> Classifier:
+def choose_action(cll, cfg, epsilon: float) -> Classifier:
     """
     Chooses which action to execute given classifier list (match set).
 
@@ -18,7 +18,7 @@ def choose_action(cll, cfg, prob_x: float) -> Classifier:
         list of classifiers
     cfg:
         Configuration that contains the number of possible actions
-    prob_x: float
+    epsilon: float
         Probability of executing exploration path
 
     Returns
@@ -26,7 +26,7 @@ def choose_action(cll, cfg, prob_x: float) -> Classifier:
     int
         number of chosen action
     """
-    if random.random() < prob_x:
+    if random.random() < epsilon:
         logger.debug("\t\tExploration path")
         return explore(cll, cfg)
 

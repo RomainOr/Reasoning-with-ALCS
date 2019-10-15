@@ -18,7 +18,7 @@ class Configuration:
                  gamma: float=0.95,
                  theta_i: float=0.1,
                  theta_r: float=0.9,
-                 prob_x: float=0.5,
+                 epsilon: float=0.5,
                  u_max: int=100000,
                  theta_exp: int=20,
                  theta_ga: int=100,
@@ -43,7 +43,7 @@ class Configuration:
         :param gamma:
         :param theta_i: inadequacy threshold
         :param theta_r:
-        :param prob_x:
+        :param epsilon:
         :param u_max:
         :param theta_exp:
         :param theta_as:
@@ -67,7 +67,7 @@ class Configuration:
         self.gamma = gamma
         self.theta_i = theta_i
         self.theta_r = theta_r
-        self.prob_x = prob_x
+        self.epsilon = epsilon
         self.u_max = u_max
         self.theta_ga = theta_ga
         self.theta_as = theta_as
@@ -86,7 +86,7 @@ class Configuration:
                "\n\t- Do Action Planning: [{}]" \
                "\n\t- Beta: [{}]" \
                "\n\t- ..." \
-               "\n\t- prob_x: [{}]" \
+               "\n\t- epsilon: [{}]" \
                "\n\t- bs_max: [{}]" \
             .format(self.classifier_length,
                     self.number_of_possible_actions,
@@ -96,5 +96,5 @@ class Configuration:
                     self.do_subsumption,
                     self.do_action_planning,
                     self.beta,
-                    self.prob_x,
+                    self.epsilon,
                     self.bs_max)

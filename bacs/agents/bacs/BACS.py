@@ -101,7 +101,7 @@ class BACS(Agent):
                         self.cfg.do_subsumption,
                         self.cfg.theta_exp)
             
-            action_classifier = choose_action(match_set, self.cfg, self.cfg.prob_x)
+            action_classifier = choose_action(match_set, self.cfg, self.cfg.epsilon)
             if action_classifier:
                 action = action_classifier.action
             else:
@@ -186,7 +186,6 @@ class BACS(Agent):
             action_set = match_set.form_action_set(action)
 
             # Do the action
-            prev_state = state
             raw_state, last_reward, done, _ = env.step(iaction)
             state = self.cfg.environment_adapter.to_genotype(raw_state)
 
