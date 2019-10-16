@@ -19,7 +19,7 @@ class Classifier:
     def __init__(self,
                  condition: Union[Condition, str, None] = None,
                  action: Optional[int] = None,
-                 behavioral_sequence: List[int] = [],
+                 behavioral_sequence: Optional[List[int]] = None,
                  effect: Union[Effect, str, None] = None,
                  quality: float=0.5,
                  reward: float=0.5,
@@ -93,6 +93,7 @@ class Classifier:
     def __repr__(self):
         return f"{self.condition} " \
                f"{self.action} " \
+               f"{str(self.behavioral_sequence)} " \
                f"{str(self.effect):16} " \
                f"{'(' + str(self.mark) + ')':21} q: {self.q:<5.3} " \
                f"r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
@@ -339,7 +340,7 @@ class Classifier:
         Returns
         -------
         bool
-            True if `other` classifier is more general
+            True if classifier is more general than other
         """
         return self.condition.specificity < other.condition.specificity
 

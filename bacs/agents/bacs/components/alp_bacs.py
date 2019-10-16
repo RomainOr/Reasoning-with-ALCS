@@ -2,7 +2,7 @@ from random import random
 from typing import Optional
 
 from bacs import Perception
-from bacs.agents.bacs import Classifier, Condition, Configuration, PMark
+from bacs.agents.bacs import Classifier, ClassifiersList, Condition, Configuration, PMark
 
 
 def cover(p0: Perception,
@@ -70,14 +70,48 @@ def specification_of_unchanging_components_status(condition: Condition,
         return not situation.does_match(p0)
     return True
 
-def expected_case(cl: Classifier,
+def passthrough(percept, A, B, L, wildcard):
+    for i in range(L):
+        if B[i] == wildcard:
+            percept[i] = A[i]
+        else:
+            percept[i] = B[i]
+
+def create_behavioral_classifier(
+        last_activated_classifier: Classifier,
+        cl: Classifier) -> Optional[Classifier]:
+    if last_activated_classifier and last_activated_classifier.does_anticipate_change():
+        child = Classifier(
+            action=last_activated_classifier.action, 
+            behavioral_sequence=[],
+            cfg=cl.cfg)
+        child.q = last_activated_classifier.q
+        child.r = (cl.r + last_activated_classifier.r) / 2
+        if last_activated_classifier.behavioral_sequence:
+            child.behavioral_sequence.extend(last_activated_classifier.behavioral_sequence)
+        child.behavioral_sequence.append(cl.action)
+        if cl.behavioral_sequence:
+            child.behavioral_sequence.extend(cl.behavioral_sequence)
+        if len(child.behavioral_sequence) <= child.cfg.bs_max:
+            # Passthrough operation on child condition - An alternative should be to use directly the condition of the last activated classifier
+            passthrough(child.condition, cl.condition, last_activated_classifier.condition, cl.cfg.classifier_length,cl.cfg.classifier_wildcard)
+            # Passthrough operation on child effect
+            passthrough(child.effect, last_activated_classifier.effect, cl.effect, cl.cfg.classifier_length,cl.cfg.classifier_wildcard)
+            return child
+    return None
+
+def expected_case(last_activated_classifier: Classifier,
+                  cl: Classifier,
                   p0: Perception,
                   time: int) -> Optional[Classifier]:
     """
     Controls the expected case of a classifier. If the classifier
     is too specific it tries to add some randomness to it by
     generalizing some attributes.
+    Controls also the case when the specification of unchanging
+    components failed by creating classifiers with action chunks.
 
+    :param last_activated_classifier:
     :param cl:
     :param p0:
     :param time:
@@ -85,9 +119,10 @@ def expected_case(cl: Classifier,
     """
     diff = cl.mark.get_differences(p0)
 
-    # TODO creation of behavioral sequence here
-    #if not specification_of_unchanging_components_status(cl.condition, cl.mark, p0):
-        #print("plop")
+    if not specification_of_unchanging_components_status(cl.condition, cl.mark, p0):
+        child = create_behavioral_classifier(last_activated_classifier, cl)
+        if child:
+            return child
 
     if diff.specificity == 0:
         cl.increase_quality()

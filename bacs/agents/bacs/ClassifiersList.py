@@ -32,8 +32,8 @@ class ClassifiersList(TypedList):
         matching = [cl for cl in self if cl.action == action]
         return ClassifiersList(*matching)
 
-    def form_behavioral_sequence_set(self, behavioral_sequence: List[int]) -> ClassifiersList:
-        matching = [cl for cl in self if cl.behavioral_sequence == behavioral_sequence]
+    def form_behavioral_sequence_set(self, action_classifier: Classifier) -> ClassifiersList:
+        matching = [cl for cl in self if cl.behavioral_sequence == action_classifier.behavioral_sequence and cl.action == action_classifier.action]
         return ClassifiersList(*matching)
 
     def expand(self) -> List[Classifier]:
@@ -74,6 +74,7 @@ class ClassifiersList(TypedList):
                   p0: Perception,
                   action: int,
                   p1: Perception,
+                  last_activated_classifier: Classifier,
                   time: int,
                   theta_exp: int,
                   cfg: Configuration) -> None:
@@ -90,6 +91,7 @@ class ClassifiersList(TypedList):
         p0: Perception
         action: int
         p1: Perception
+        last_activated_classifier: Classifier
         time: int
         theta_exp
         cfg: Configuration
@@ -108,7 +110,7 @@ class ClassifiersList(TypedList):
             cl.set_alp_timestamp(time)
 
             if cl.does_anticipate_correctly(p0, p1):
-                new_cl = alp_bacs.expected_case(cl, p0, time)
+                new_cl = alp_bacs.expected_case(last_activated_classifier, cl, p0, time)
                 was_expected_case = True
             else:
                 new_cl = alp_bacs.unexpected_case(cl, p0, p1, time)
@@ -124,7 +126,10 @@ class ClassifiersList(TypedList):
 
             if new_cl is not None:
                 new_cl.tga = time
-                alp.add_classifier(new_cl, action_set, new_list, theta_exp)
+                if new_cl.behavioral_sequence:
+                    alp.add_classifier(new_cl, population, new_list, theta_exp)
+                else:
+                    alp.add_classifier(new_cl, action_set, new_list, theta_exp)
 
         # No classifier anticipated correctly - generate new one
         if not was_expected_case:
@@ -145,13 +150,73 @@ class ClassifiersList(TypedList):
                   match_set: ClassifiersList,
                   action_set: ClassifiersList,
                   p0: Perception,
-                  behavioral_sequence: List[int],
+                  action: int,
                   p1: Perception,
+                  last_activated_classifier: Classifier,
                   time: int,
                   theta_exp: int,
                   cfg: Configuration) -> None:
-        # TODO update of classifiers with behavioral sequences
-        1
+        """
+        The Anticipatory Learning Process when a behavioral sequence has been executed
+
+        Parameters
+        ----------
+        population
+        match_set
+        action_set
+        p0: Perception
+        action: int
+        p1: Perception
+        last_activated_classifier: Classifier
+        time: int
+        theta_exp
+        cfg: Configuration
+
+        Returns
+        -------
+
+        """
+        new_list = ClassifiersList()
+        new_cl: Optional[Classifier] = None
+        delete_count = 0
+
+        for cl in action_set:
+            cl.increase_experience()
+            cl.set_alp_timestamp(time)
+
+            # Useless case
+            if (p0 == p1):
+                cl.decrease_quality()
+            # Expected case
+            elif cl.does_anticipate_correctly(p0, p1):
+                cl.increase_quality()
+            # Unexpected case
+            else:
+                # If new_cl is not none, we are in the correctable case, otherwise, we are in the not correctable case
+                new_cl = alp_bacs.unexpected_case(cl, p0, p1, time)
+                if new_cl is not None:
+                    new_cl.tga = time
+                    alp.add_classifier(new_cl, action_set, new_list, theta_exp)
+
+            # Quality Anticipation check
+            if cl.is_inadequate():
+                # Removes classifier from population, match set
+                # and current list
+                delete_count += 1
+                lists = [x for x in [population, match_set, action_set]
+                            if x]
+                for lst in lists:
+                    lst.safe_remove(cl)
+
+        # Merge classifiers from new_list into action_set and population
+        action_set.extend(new_list)
+        population.extend(new_list)
+
+        if match_set is not None:
+            new_matching = [cl for cl in new_list if
+                            cl.condition.does_match(p1)]
+            match_set.extend(new_matching)
+
 
     @staticmethod
     def apply_reinforcement_learning(action_set: ClassifiersList,

@@ -9,7 +9,7 @@ from bacs.agents.bacs.Effect import Effect
 from bacs.agents.bacs.components.action_planning_bacs import \
     search_goal_sequence, suitable_cl_exists
 from bacs.agents.bacs.components.subsumption_bacs import does_subsume
-from bacs.agents.bacs.components.action_selection_bacs import choose_action, choose_fittest_classifier, choose_random_action
+from bacs.agents.bacs.components.action_selection_bacs import choose_action, choose_fittest_classifier
 
 import numpy as np
 
@@ -53,6 +53,13 @@ class BACS(Agent):
         action_set = ClassifiersList()
         done = False
 
+        # For action chunking
+        t_2_activated_classifier = None
+        t_1_activated_classifier = None
+
+        # Foralp on behavioral set
+        is_behavioral_sequence = False
+
         while not done:
             
             if self.cfg.do_action_planning and \
@@ -70,16 +77,30 @@ class BACS(Agent):
 
             if steps > 0:
                 # Apply learning in the last action set
-                ClassifiersList.apply_alp(
-                    self.population,
-                    match_set,
-                    action_set,
-                    prev_state,
-                    action,
-                    state,
-                    time + steps,
-                    self.cfg.theta_exp,
-                    self.cfg)
+                if is_behavioral_sequence and t_2_activated_classifier:
+                    ClassifiersList.apply_alp_behavioral_sequence(
+                        self.population,
+                        match_set,
+                        action_set,
+                        prev_state,
+                        action,
+                        state,
+                        t_2_activated_classifier,
+                        time + steps,
+                        self.cfg.theta_exp,
+                        self.cfg)
+                else:
+                    ClassifiersList.apply_alp(
+                        self.population,
+                        match_set,
+                        action_set,
+                        prev_state,
+                        action,
+                        state,
+                        t_2_activated_classifier,
+                        time + steps,
+                        self.cfg.theta_exp,
+                        self.cfg)
                 ClassifiersList.apply_reinforcement_learning(
                     action_set,
                     last_reward,
@@ -102,11 +123,9 @@ class BACS(Agent):
                         self.cfg.theta_exp)
             
             action_classifier = choose_action(match_set, self.cfg, self.cfg.epsilon)
-            if action_classifier:
-                action = action_classifier.action
-            else:
-                action = choose_random_action(self.cfg.number_of_possible_actions)
-            
+
+            is_behavioral_sequence = False
+            action = action_classifier.action
             # Use environment adapter and create action set
             iaction = self.cfg.environment_adapter.to_lcs_action(action)
             logger.debug("\tExecuting action: [%d]", action)
@@ -116,18 +135,61 @@ class BACS(Agent):
             raw_state, last_reward, done, _ = env.step(iaction)
             state = self.cfg.environment_adapter.to_genotype(raw_state)
 
+            # Enter the if condition only if we have chosen a behavioral classifier
+            if action_classifier.behavioral_sequence :
+                # Constitute the behavioral learning set
+                behavioral_set = match_set.form_behavioral_sequence_set(action_classifier)
+                is_behavioral_sequence = True
+                # Initialize the message list usefull to decrease quality of classifiers containing looping sequences
+                message_list = [state]
+                for act in action_classifier.behavioral_sequence:
+                    action = act
+                    # Use environment adapter to execute the action act and perceive its results
+                    iaction = self.cfg.environment_adapter.to_lcs_action(act)
+                    logger.debug("\tExecuting action from behavioral sequence: [%d]", act)
+                    raw_state, last_reward, done, _ = env.step(iaction)
+                    state = self.cfg.environment_adapter.to_genotype(raw_state)
+                    if state in message_list:
+                        for cl in behavioral_set:    
+                            cl.decrease_quality()
+                    else:
+                        message_list.append(state)
+                    if done:
+                        break
+                    steps += 1
+                # Create action set from the learning set
+                action_set = behavioral_set
+
+            #Record last activated classifier
+            t_2_activated_classifier = t_1_activated_classifier
+            t_1_activated_classifier = action_classifier
+
             if done:
                 # Apply algorithms
-                ClassifiersList.apply_alp(
-                    self.population,
-                    ClassifiersList(),
-                    action_set,
-                    prev_state,
-                    action,
-                    state,
-                    time + steps,
-                    self.cfg.theta_exp,
-                    self.cfg)
+                if is_behavioral_sequence and t_2_activated_classifier:
+                    ClassifiersList.apply_alp_behavioral_sequence(
+                        self.population,
+                        ClassifiersList(),
+                        action_set,
+                        prev_state,
+                        action,
+                        state,
+                        t_2_activated_classifier,
+                        time + steps,
+                        self.cfg.theta_exp,
+                        self.cfg)
+                else:
+                    ClassifiersList.apply_alp(
+                        self.population,
+                        ClassifiersList(),
+                        action_set,
+                        prev_state,
+                        action,
+                        state,
+                        t_2_activated_classifier,
+                        time + steps,
+                        self.cfg.theta_exp,
+                        self.cfg)
                 ClassifiersList.apply_reinforcement_learning(
                     action_set,
                     last_reward,
@@ -176,18 +238,31 @@ class BACS(Agent):
                     self.cfg.beta,
                     self.cfg.gamma)
 
-            action_classifier = choose_fittest_classifier(match_set)
-            if action_classifier:
-                action = action_classifier.action
-            else:
-                action = choose_random_action(self.cfg.number_of_possible_actions)
-
-            iaction = self.cfg.environment_adapter.to_env_action(action)
+            action_classifier = choose_fittest_classifier(match_set, self.cfg)
+            action = action_classifier.action
+            # Use environment adapter and create action set
+            iaction = self.cfg.environment_adapter.to_lcs_action(action)
+            logger.debug("\tExecuting action: [%d]", action)
             action_set = match_set.form_action_set(action)
-
             # Do the action
             raw_state, last_reward, done, _ = env.step(iaction)
             state = self.cfg.environment_adapter.to_genotype(raw_state)
+
+            # Enter the if condition only if we have chosen a behavioral classifier
+            if action_classifier.behavioral_sequence :
+                # Constitute the behavioral learning set
+                behavioral_set = match_set.form_behavioral_sequence_set(action_classifier)
+                for act in action_classifier.behavioral_sequence:
+                    # Use environment adapter to execute the action act and perceive its results
+                    iaction = self.cfg.environment_adapter.to_lcs_action(act)
+                    logger.debug("\tExecuting action from behavioral sequence: [%d]", act)
+                    raw_state, last_reward, done, _ = env.step(iaction)
+                    state = self.cfg.environment_adapter.to_genotype(raw_state)
+                    if done:
+                        break
+                    steps += 1
+                # Create action set from the learning set
+                action_set = behavioral_set
 
             if done:
                 # Apply algorithms

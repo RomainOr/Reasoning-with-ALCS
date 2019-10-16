@@ -31,8 +31,8 @@ def choose_action(cll, cfg, epsilon: float) -> Classifier:
         return explore(cll, cfg)
 
     logger.debug("\t\tExploitation path")
-    #return roulette_wheel_selection(cll)
-    return choose_fittest_classifier(cll)
+    #return roulette_wheel_selection(cll, cfg)
+    return choose_fittest_classifier(cll, cfg)
 
 def explore(cll, cfg, pb: float = 0.5) -> Classifier:
     """
@@ -57,7 +57,7 @@ def explore(cll, cfg, pb: float = 0.5) -> Classifier:
         else:
             return choose_action_from_knowledge_array(cll, cfg)
 
-    return choose_random_classifiers(cll)
+    return choose_random_classifiers(cll, cfg)
 
 def choose_latest_action(cll, cfg) -> Classifier:
     """
@@ -87,7 +87,9 @@ def choose_latest_action(cll, cfg) -> Classifier:
         for action, nCls in number_of_cls_per_action.items():
             if nCls == 0:
                 return Classifier(action=action, cfg=cfg)
-    return last_executed_cls
+        return last_executed_cls
+
+    return choose_random_classifiers(cll, cfg)
 
 def choose_action_from_knowledge_array(cll, cfg) -> Classifier:
     """
@@ -126,10 +128,10 @@ def choose_action_from_knowledge_array(cll, cfg) -> Classifier:
         if len(classifiers_that_match_action) > 0:
             return classifiers_that_match_action[0]
 
-    return None
+    return choose_random_classifiers(cll, cfg)
 
 
-def choose_random_classifiers(cll) -> Classifier:
+def choose_random_classifiers(cll, cfg) -> Classifier:
     """
     Chooses one of the possible classifiers in the matching set randomly
 
@@ -145,10 +147,10 @@ def choose_random_classifiers(cll) -> Classifier:
     """
     if len(cll) > 0:
         return cll[np.random.randint(len(cll))]
-    return None
+    return Classifier(action=choose_random_action(cfg.number_of_possible_actions), cfg=cfg)
 
 
-def roulette_wheel_selection(cll) -> Classifier:
+def roulette_wheel_selection(cll, cfg) -> Classifier:
     """
     Chooses one of the possible actions in the environment by roulette wheel selection
 
@@ -173,10 +175,10 @@ def roulette_wheel_selection(cll) -> Classifier:
                 if r <= probabilities[idx]:
                     return cl
         return cll[np.random.randint(len(cll))]
-    return None
+    return choose_random_classifiers(cll, cfg)
 
 
-def choose_fittest_classifier(cll) -> Classifier:
+def choose_fittest_classifier(cll, cfg) -> Classifier:
     """
     Chooses the fittest classifiers in the matching set
 
@@ -194,7 +196,8 @@ def choose_fittest_classifier(cll) -> Classifier:
         anticipated_change = [cl for cl in cll if cl.does_anticipate_change()]
         if len(anticipated_change) > 0:
             return max(anticipated_change, key=lambda cl: cl.fitness * cl.num)
-    return None
+        return max(cll, key=lambda cl: cl.fitness * cl.num)
+    return choose_random_classifiers(cll, cfg)
 
 
 def choose_random_action(all_actions: int) -> int:
