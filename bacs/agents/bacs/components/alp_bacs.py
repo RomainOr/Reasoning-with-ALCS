@@ -80,7 +80,7 @@ def passthrough(percept, A, B, L, wildcard):
 def create_behavioral_classifier(
         last_activated_classifier: Classifier,
         cl: Classifier) -> Optional[Classifier]:
-    if last_activated_classifier and last_activated_classifier.does_anticipate_change():
+    if last_activated_classifier and last_activated_classifier.does_anticipate_change() and cl.does_anticipate_change():
         child = Classifier(
             action=last_activated_classifier.action, 
             behavioral_sequence=[],
