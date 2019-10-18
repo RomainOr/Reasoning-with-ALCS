@@ -251,7 +251,7 @@ class BACS(Agent):
             # Enter the if condition only if we have chosen a behavioral classifier
             if action_classifier.behavioral_sequence :
                 # Constitute the behavioral learning set
-                behavioral_set = match_set.form_behavioral_sequence_set(action_classifier)
+                action_set = match_set.form_behavioral_sequence_set(action_classifier)
                 for act in action_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(act)
@@ -261,8 +261,6 @@ class BACS(Agent):
                     if done:
                         break
                     steps += 1
-                # Create action set from the learning set
-                action_set = behavioral_set
 
             if done:
                 # Apply algorithms

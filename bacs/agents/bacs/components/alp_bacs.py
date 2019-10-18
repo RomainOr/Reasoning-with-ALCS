@@ -97,7 +97,11 @@ def create_behavioral_classifier(
             passthrough(child.condition, cl.condition, last_activated_classifier.condition, cl.cfg.classifier_length,cl.cfg.classifier_wildcard)
             # Passthrough operation on child effect
             passthrough(child.effect, last_activated_classifier.effect, cl.effect, cl.cfg.classifier_length,cl.cfg.classifier_wildcard)
-            return child
+            for idx, effect_item in enumerate(child.effect):
+                if effect_item != cl.cfg.classifier_wildcard and effect_item == child.condition[idx]:
+                    child.effect[idx] = cl.cfg.classifier_wildcard
+            if child.does_anticipate_change():
+                return child
     return None
 
 def expected_case(last_activated_classifier: Classifier,

@@ -47,6 +47,7 @@ def does_subsume(cl, other_cl, theta_exp: int) -> bool:
         cl.is_more_general(other_cl) and \
         cl.condition.subsumes(other_cl.condition) and \
             cl.action == other_cl.action and \
+            cl.behavioral_sequence == other_cl.behavioral_sequence and \
             cl.effect.subsumes(other_cl.effect):
         return True
 

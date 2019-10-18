@@ -29,7 +29,7 @@ class ClassifiersList(TypedList):
         return ClassifiersList(*matching)
 
     def form_action_set(self, action: int) -> ClassifiersList:
-        matching = [cl for cl in self if cl.action == action]
+        matching = [cl for cl in self if cl.action == action and cl.behavioral_sequence is None]
         return ClassifiersList(*matching)
 
     def form_behavioral_sequence_set(self, action_classifier: Classifier) -> ClassifiersList:
