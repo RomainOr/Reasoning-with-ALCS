@@ -30,7 +30,7 @@ class BACS(Agent):
     def clean_population(self):
         for cl in self.population:
             for other in self.population:
-                if does_subsume(cl, other, self.cfg.theta_exp):
+                if cl != other and does_subsume(cl, other, self.cfg.theta_exp):
                     self.population.safe_remove(other)
         pop = [cl for cl in self.population if cl.does_anticipate_change()]
         self.population = ClassifiersList(*pop)

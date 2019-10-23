@@ -8,6 +8,7 @@ from ..envs.MazeB import MazeB
 from ..envs.MazeD import MazeD
 from ..envs.MazeE1 import MazeE1
 from ..envs.MazeE2 import MazeE2
+from ..envs.MazeE3 import MazeE3
 from ..envs.MazeF1 import MazeF1
 from ..envs.MazeF2 import MazeF2
 from ..envs.MazeF3 import MazeF3

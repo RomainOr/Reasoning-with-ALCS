@@ -6,8 +6,6 @@ import numpy as np
 from bacs import Perception
 from bacs.agents.bacs.components.subsumption_bacs import find_subsumers
 
-# TODO update with behavioral sequences
-
 def should_apply(action_set, time: int, theta_ga: int) -> bool:
     """
     Checks the average last GA application to determine if a GA
@@ -79,7 +77,7 @@ def roulette_wheel_selection(population, fitnessfunc: Callable):
     tuple
         two classifiers selected as parents
     """
-    choices = {cl: fitnessfunc(cl) for cl in population}
+    choices = {cl: fitnessfunc(cl) for cl in population if cl.behavioral_sequence is not None}
 
     parent1 = _weighted_random_choice(choices)
     parent2 = _weighted_random_choice(choices)
@@ -182,7 +180,8 @@ def delete_classifiers(population, match_set, action_set,
         cl_del = None
 
         while cl_del is None:  # We must delete at least one
-            for cl in action_set.expand():
+            set_to_iterate = [cl for cl in action_set.expand() if cl.behavioral_sequence is not None]
+            for cl in set_to_iterate:
                 if random.random() < .3:
                     if cl_del is None:
                         cl_del = cl
@@ -222,7 +221,7 @@ def _is_preferred_to_delete(cl_del, cl) -> bool:
     if abs(cl.q - cl_del.q) <= 0.1:
         if cl.is_marked() and not cl_del.is_marked():
             return True
-        elif cl.is_marked or not cl_del.is_marked():
+        elif cl.is_marked() or not cl_del.is_marked():
             if cl.tav > cl_del.tav:
                 return True
 

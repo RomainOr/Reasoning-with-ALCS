@@ -31,6 +31,9 @@ def _maze_metrics(pop, env):
             if any([True for cl in reliable_classifiers
                     if cl.predicts_successfully(p0, action, p1)]):
                 nr_correct += 1
+            elif any([True for cl in reliable_classifiers
+                    if cl.behavioral_sequence and cl.predicts_successfully_bs(p0, action, p1) ]):
+                nr_correct += 1
         return nr_correct / len(transitions) * 100.0
 
     metrics = {
@@ -75,6 +78,29 @@ def find_best_classifier(population, situation, cfg):
         return max(anticipated_change_cls, key=lambda cl: cl.fitness * cl.num)
     return None
 
+def update_matrix_index(tmp_x, tmp_y, action):
+    if action == 0:
+        tmp_x -= 1
+    elif action == 1:
+        tmp_x -= 1
+        tmp_y += 1
+    elif action == 2:
+        tmp_y += 1
+    elif action == 3:
+        tmp_x += 1
+        tmp_y += 1
+    elif action == 4:
+        tmp_x += 1
+    elif action == 5:
+        tmp_x += 1
+        tmp_y -= 1
+    elif action == 6:
+        tmp_y -= 1
+    elif action == 7:
+        tmp_x -= 1
+        tmp_y -= 1
+    return tmp_x, tmp_y
+
 def build_fitness_matrix(env, population, cfg):
     original = env.env.maze.matrix
     fitness = original.copy()
@@ -85,7 +111,15 @@ def build_fitness_matrix(env, population, cfg):
             perception = env.env.maze.perception(index[1], index[0])
             best_cl = find_best_classifier(population, perception, cfg)
             if best_cl:
-                fitness[index] = best_cl.fitness
+                fitness[index] = max(best_cl.fitness, fitness[index])
+                if best_cl.behavioral_sequence:
+                    tmp_x, tmp_y = update_matrix_index(index[0], index[1], best_cl.action)
+                    fitness[(tmp_x, tmp_y)] = max(fitness[(tmp_x, tmp_y)], best_cl.fitness)
+                    if len(best_cl.behavioral_sequence) > 1:
+                        for idx, seq in enumerate(best_cl.behavioral_sequence):
+                            if idx != len(best_cl.behavioral_sequence) -1:
+                                tmp_x, tmp_y = update_matrix_index(tmp_x, tmp_y, seq)
+                                fitness[(tmp_x, tmp_y)] = max(fitness[(tmp_x, tmp_y)], best_cl.fitness)
             else:
                 fitness[index] = -1
         # Wall - fitness = 0
@@ -96,7 +130,7 @@ def build_fitness_matrix(env, population, cfg):
             fitness[index] = fitness.max () + 500
     return fitness
 
-def build_action_matrix(env, population, cfg):
+def build_action_matrix(env, population, cfg, fitness_matrix):
     ACTION_LOOKUP = {
         0: u'↑', 1: u'↗', 2: u'→', 3: u'↘',
         4: u'↓', 5: u'↙', 6: u'←', 7: u'↖'
@@ -110,7 +144,18 @@ def build_action_matrix(env, population, cfg):
             perception = env.env.maze.perception(index[1], index[0])
             best_cl = find_best_classifier(population, perception, cfg)
             if best_cl:
-                action[index] = ACTION_LOOKUP[best_cl.action]
+                if int(best_cl.fitness) == fitness_matrix[index]:
+                    action[index] = ACTION_LOOKUP[best_cl.action]
+                if best_cl.behavioral_sequence:
+                    tmp_x, tmp_y = update_matrix_index(index[0], index[1], best_cl.action)
+                    if int(best_cl.fitness) == fitness_matrix[(tmp_x, tmp_y)]:
+                        action[(tmp_x, tmp_y)] = ACTION_LOOKUP[best_cl.behavioral_sequence[0]]
+                    if len(best_cl.behavioral_sequence) > 1:
+                        for idx, seq in enumerate(best_cl.behavioral_sequence):
+                            if idx != len(best_cl.behavioral_sequence) -1:
+                                tmp_x, tmp_y = update_matrix_index(tmp_x, tmp_y, seq)
+                                if int(best_cl.fitness) == fitness_matrix[(tmp_x, tmp_y)]:
+                                    action[(tmp_x, tmp_y)] = ACTION_LOOKUP[best_cl.behavioral_sequence[idx+1]]
             else:
                 action[index] = '?'
         # Wall - fitness = 0
@@ -126,11 +171,10 @@ def plot_policy(env, agent, cfg, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12)
         ax = plt.gca()
     ax.set_aspect("equal")
     # Handy variables
-    maze_countours = env.env.maze.matrix
     max_x = env.env.maze.max_x
     max_y = env.env.maze.max_y
     fitness_matrix = build_fitness_matrix(env, agent.population, cfg)
-    action_matrix = build_action_matrix(env, agent.population, cfg)
+    action_matrix = build_action_matrix(env, agent.population, cfg, fitness_matrix)
     # Render maze as image
     plt.imshow(fitness_matrix, interpolation='nearest', cmap='Reds', aspect='auto',
            extent=[0, max_x, max_y, 0])
@@ -175,7 +219,6 @@ def plot_classifiers(df, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12, LEGEND_
     if ax is None:
         ax = plt.gca()
     explore_df = df.query("phase == 'explore'")
-    exploit_df = df.query("phase == 'exploit'")
     df['numerosity'].plot(ax=ax, c='blue')
     df['reliable'].plot(ax=ax, c='red')
     ax.axvline(x=len(explore_df), c='black', linestyle='dashed')

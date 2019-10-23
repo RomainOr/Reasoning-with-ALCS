@@ -126,6 +126,13 @@ register(
 )
 
 register(
+    id='MazeE3-v0',
+    entry_point='my_mazes.envs:MazeE3',
+    max_episode_steps=100,
+    nondeterministic=False
+)
+
+register(
     id='MazeF1-v0',
     entry_point='my_mazes.envs:MazeF1',
     max_episode_steps=100,

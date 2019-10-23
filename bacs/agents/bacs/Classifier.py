@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class Classifier:
 
     __slots__ = ['condition', 'action','behavioral_sequence' ,'effect', 'mark', 'q', 'r',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'ee', 'cfg']
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'ee', 'cfg', 'intermediate_perceptions']
 
     def __init__(self,
                  condition: Union[Condition, str, None] = None,
@@ -29,7 +29,8 @@ class Classifier:
                  talp: int=0,
                  tga: int=0,
                  tav: float=0.0,
-                 cfg: Optional[Configuration] = None) -> None:
+                 cfg: Optional[Configuration] = None,
+                 intermediate_perceptions: Optional[List[Perception]] = None) -> None:
 
         if cfg is None:
             raise TypeError("Configuration should be passed to Classifier")
@@ -76,6 +77,9 @@ class Classifier:
         # Whether classifier is enhanceable
         self.ee = False
 
+        # Useful for metrics compuation
+        self.intermediate_perceptions = intermediate_perceptions
+
     def __eq__(self, other):
         if self.condition == other.condition and \
                 self.action == other.action and \
@@ -94,6 +98,7 @@ class Classifier:
         return f"{self.condition} " \
                f"{self.action} " \
                f"{str(self.behavioral_sequence)} " \
+               f"{str(self.intermediate_perceptions)} " \
                f"{str(self.effect):16} " \
                f"{'(' + str(self.mark) + ')':21} q: {self.q:<5.3} " \
                f"r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
@@ -128,7 +133,8 @@ class Classifier:
             quality=old_cls.q,
             reward=old_cls.r,
             immediate_reward=old_cls.ir,
-            cfg=old_cls.cfg)
+            cfg=old_cls.cfg,
+            intermediate_perceptions=old_cls.intermediate_perceptions)
 
         new_cls.tga = time
         new_cls.talp = time
@@ -242,12 +248,65 @@ class Classifier:
         bool
             True if classifier makes successful predictions, False otherwise
         """
-        # TODO update with behavioral sequence
         if self.condition.does_match(p0):
             if self.action == action:
                 if self.does_anticipate_correctly(p0, p1):
                     return True
 
+        return False
+
+    def predicts_successfully_bs(self,
+                              p0: Perception,
+                              action: int,
+                              p1: Perception) -> bool:
+        """
+        Check if classifier matches previous situation `p0`,
+        has action `action` and predicts the effect `p1`,
+        when the classifier is a behavioral one
+
+        Parameters
+        ----------
+        p0: Perception
+            previous situation
+        action: int
+            action
+        p1: Perception
+            anticipated situation after execution action
+
+        Returns
+        -------
+        bool
+            True if classifier makes successful predictions, False otherwise
+        """
+
+        if self.condition.does_match(p0):
+            if self.action == action:
+                if self.intermediate_perceptions[0] == p1:
+                    return True
+
+        last_index = len(self.intermediate_perceptions) - 1
+
+        if len(self.intermediate_perceptions) > 1:
+            for idx, intermediate_percept in enumerate(self.intermediate_perceptions):
+                if idx != last_index:
+                    if intermediate_percept == p0:
+                        if self.behavioral_sequence[idx] == action:
+                            if self.intermediate_perceptions[idx+1] == p1:
+                                return True
+                                
+        if self.intermediate_perceptions[last_index] == p0:
+            if self.behavioral_sequence[last_index] == action:
+                tmp_percept = []
+                for idx, e_item in enumerate(self.effect):
+                    if e_item != self.cfg.classifier_wildcard:
+                        tmp_percept.append(e_item)
+                    elif self.condition.__getitem__(idx) != self.cfg.classifier_wildcard:
+                        tmp_percept.append(self.condition.__getitem__(idx))
+                    else:
+                        tmp_percept.append(p0.__getitem__(idx))
+                if Perception(tmp_percept) == p1:
+                    return True
+                    
         return False
 
     def does_anticipate_correctly(self,
@@ -318,7 +377,6 @@ class Classifier:
         time: int
             current step
         """
-        # TODO p5: write test
         if 1. / self.exp > self.cfg.beta:
             self.tav = (self.tav * self.exp + (time - self.talp)) / (
                 self.exp + 1)
