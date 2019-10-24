@@ -83,6 +83,7 @@ class Classifier:
     def __eq__(self, other):
         if self.condition == other.condition and \
                 self.action == other.action and \
+                self.behavioral_sequence == other.behavioral_sequence and \
                 self.effect == other.effect:
             return True
 
