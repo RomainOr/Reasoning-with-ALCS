@@ -122,12 +122,13 @@ def build_fitness_matrix(env, population, cfg):
                                 fitness[(tmp_x, tmp_y)] = max(fitness[(tmp_x, tmp_y)], best_cl.fitness)
             else:
                 fitness[index] = -1
+    for index, x in np.ndenumerate(original):
         # Wall - fitness = 0
         if x == 1:
             fitness[index] = 0
         # Reward - inf fitness
         if x == 9:
-            fitness[index] = fitness.max () + 500
+            fitness[index] = fitness.max() + 500
     return fitness
 
 def build_action_matrix(env, population, cfg, fitness_matrix):
