@@ -9,7 +9,7 @@ from bacs.agents.bacs.Effect import Effect
 from bacs.agents.bacs.components.action_planning_bacs import \
     search_goal_sequence, suitable_cl_exists
 from bacs.agents.bacs.components.subsumption_bacs import does_subsume
-from bacs.agents.bacs.components.action_selection_bacs import choose_action, choose_fittest_classifier
+from bacs.agents.bacs.components.action_selection_bacs import choose_classifier, choose_fittest_classifier
 
 import numpy as np
 
@@ -27,13 +27,14 @@ class BACS(Agent):
     def get_population(self):
         return self.population
 
-    def clean_population(self):
+    def clean_population(self, does_anticipate_change:bool = True):
         for cl in self.population:
             for other in self.population:
                 if does_subsume(cl, other, self.cfg.theta_exp):
                     self.population.safe_remove(other)
-        pop = [cl for cl in self.population if cl.does_anticipate_change()]
-        self.population = ClassifiersList(*pop)
+        if does_anticipate_change:
+            pop = [cl for cl in self.population if cl.does_anticipate_change()]
+            self.population = ClassifiersList(*pop)
         
 
     def get_cfg(self):
@@ -77,7 +78,7 @@ class BACS(Agent):
 
             if steps > 0:
                 # Apply learning in the last action set
-                if is_behavioral_sequence and t_2_activated_classifier:
+                if is_behavioral_sequence:
                     ClassifiersList.apply_alp_behavioral_sequence(
                         self.population,
                         match_set,
@@ -85,7 +86,6 @@ class BACS(Agent):
                         prev_state,
                         action,
                         state,
-                        t_2_activated_classifier,
                         time + steps,
                         self.cfg.theta_exp,
                         self.cfg)
@@ -122,7 +122,7 @@ class BACS(Agent):
                         self.cfg.do_subsumption,
                         self.cfg.theta_exp)
             
-            action_classifier = choose_action(match_set, self.cfg, self.cfg.epsilon)
+            action_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
 
             is_behavioral_sequence = False
             action = action_classifier.action
@@ -166,7 +166,7 @@ class BACS(Agent):
 
             if done:
                 # Apply algorithms
-                if is_behavioral_sequence and t_2_activated_classifier:
+                if is_behavioral_sequence:
                     ClassifiersList.apply_alp_behavioral_sequence(
                         self.population,
                         ClassifiersList(),
@@ -174,7 +174,6 @@ class BACS(Agent):
                         prev_state,
                         action,
                         state,
-                        t_2_activated_classifier,
                         time + steps,
                         self.cfg.theta_exp,
                         self.cfg)

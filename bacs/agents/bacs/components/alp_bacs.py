@@ -50,7 +50,9 @@ def specification_of_unchanging_components_status(condition: Condition,
                   p0: Perception) -> bool:
     """
     Check if the specification of unchanging components succeed or failed.
-    Help to detect aliased states in POMDPs
+    Help to detect aliased states in POMDPs.
+    This specification will failed if the complementary of the condition and the mark 
+    corresponds to more than one state.
 
     Parameters
     ----------
@@ -62,6 +64,8 @@ def specification_of_unchanging_components_status(condition: Condition,
     -------
     :return: bool
     """
+    if not mark.is_marked() and condition.wildcard_count == 0:
+        return False
     if mark.one_situation_in_mark():
         situation = Condition(condition)
         for idx, item in enumerate(condition):
@@ -99,7 +103,8 @@ def create_behavioral_classifier(
             child.intermediate_perceptions.extend(cl.intermediate_perceptions)
         if len(child.behavioral_sequence) <= child.cfg.bs_max:
             # Passthrough operation on child condition - An alternative should be to use directly the condition of the last activated classifier
-            passthrough(child.condition, cl.condition, last_activated_classifier.condition, cl.cfg.classifier_length,cl.cfg.classifier_wildcard)
+            #passthrough(child.condition, cl.condition, last_activated_classifier.condition, cl.cfg.classifier_length,cl.cfg.classifier_wildcard)
+            child.condition = last_activated_classifier.condition
             # Passthrough operation on child effect
             passthrough(child.effect, last_activated_classifier.effect, cl.effect, cl.cfg.classifier_length,cl.cfg.classifier_wildcard)
             for idx, effect_item in enumerate(child.effect):
@@ -126,7 +131,6 @@ def expected_case(last_activated_classifier: Classifier,
     :param time:
     :return: new classifier or None
     """
-    diff = cl.mark.get_differences(p0)
 
     if not specification_of_unchanging_components_status(cl.condition, cl.mark, p0):
         child = create_behavioral_classifier(last_activated_classifier, cl)
@@ -134,6 +138,7 @@ def expected_case(last_activated_classifier: Classifier,
             child.intermediate_perceptions.append(p0)
             return child
 
+    diff = cl.mark.get_differences(p0)
     if diff.specificity == 0:
         cl.increase_quality()
         return None

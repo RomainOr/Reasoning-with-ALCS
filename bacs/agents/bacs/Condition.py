@@ -23,6 +23,16 @@ class Condition(PerceptionString):
         """
         return sum(1 for attr in self if attr != self.wildcard)
 
+    @property
+    def wildcard_count(self) -> int:
+        """
+        Returns
+        -------
+        int
+            Number of generic (wildcards) attributes
+        """
+        return sum(1 for attr in self if attr == self.wildcard)
+
     def specialize_with_condition(self, other: Condition) -> None:
         for idx, new_el in enumerate(other):
             if new_el != self.wildcard:

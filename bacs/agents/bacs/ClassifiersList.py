@@ -152,7 +152,6 @@ class ClassifiersList(TypedList):
                   p0: Perception,
                   action: int,
                   p1: Perception,
-                  last_activated_classifier: Classifier,
                   time: int,
                   theta_exp: int,
                   cfg: Configuration) -> None:
@@ -167,7 +166,6 @@ class ClassifiersList(TypedList):
         p0: Perception
         action: int
         p1: Perception
-        last_activated_classifier: Classifier
         time: int
         theta_exp
         cfg: Configuration
