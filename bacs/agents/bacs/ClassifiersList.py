@@ -187,14 +187,14 @@ class ClassifiersList(TypedList):
                 cl.decrease_quality()
             # Expected case
             elif cl.does_anticipate_correctly(p0, p1):
-                cl.increase_quality()
+                new_cl = alp_bacs.expected_case_bs(cl, p0, time)
             # Unexpected case
             else:
-                # If new_cl is not none, we are in the correctable case, otherwise, we are in the not correctable case
                 new_cl = alp_bacs.unexpected_case(cl, p0, p1, time)
-                if new_cl is not None:
-                    new_cl.tga = time
-                    alp.add_classifier(new_cl, action_set, new_list, theta_exp)
+
+            if new_cl is not None:
+                new_cl.tga = time
+                alp.add_classifier(new_cl, action_set, new_list, theta_exp)
 
             # Quality Anticipation check
             if cl.is_inadequate():
