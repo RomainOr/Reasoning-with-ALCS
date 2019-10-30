@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class Classifier:
 
     __slots__ = ['condition', 'action','behavioral_sequence' ,'effect', 'mark', 'q', 'r',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'ee', 'cfg', 'intermediate_perceptions']
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'cfg', 'intermediate_perceptions']
 
     def __init__(self,
                  condition: Union[Condition, str, None] = None,
@@ -73,9 +73,6 @@ class Classifier:
 
         # Application average
         self.tav = tav
-
-        # Whether classifier is enhanceable
-        self.ee = False
 
         # Useful for metrics compuation
         self.intermediate_perceptions = intermediate_perceptions
@@ -355,19 +352,14 @@ class Classifier:
 
     def set_mark(self, perception: Perception) -> None:
         """
-        Marks classifier with given perception taking into consideration its
-        condition.
-
-        Specializes the mark in all attributes which are not specified
-        in the conditions, yet
+        Specializes the mark in all attributes
 
         Parameters
         ----------
         perception: Perception
             current situation
         """
-        if self.mark.set_mark_using_condition(self.condition, perception):
-            self.ee = False
+        self.mark.set_mark(perception)
 
     def set_alp_timestamp(self, time: int) -> None:
         """

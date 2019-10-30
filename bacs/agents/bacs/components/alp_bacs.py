@@ -51,8 +51,6 @@ def specification_of_unchanging_components_status(condition: Condition,
     """
     Check if the specification of unchanging components succeed or failed.
     Help to detect aliased states in POMDPs.
-    This specification will failed if the complementary of the condition and the mark 
-    corresponds to more than one state.
 
     Parameters
     ----------
@@ -64,8 +62,6 @@ def specification_of_unchanging_components_status(condition: Condition,
     -------
     :return: bool
     """
-    if not mark.is_marked() and condition.wildcard_count == 0:
-        return False
     if mark.one_situation_in_mark():
         situation = Condition(condition)
         for idx, item in enumerate(condition):

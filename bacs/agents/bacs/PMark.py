@@ -20,38 +20,18 @@ class PMark(TypedList):
         """
         return any(len(attrib) != 0 for attrib in self)
 
-    def complement_marks(self, perception: Perception) -> bool:
+    def set_mark(self, perception: Perception):
         """
-        Directly further specializes all specified attributes in the mark
+        Specializes the mark in all attributes
 
-        :param perception:
-        :return: True if something was specialized
+        Parameters
+        ----------
+        perception: Perception
+            current situation
         """
-        changed = False
-
-        for idx, item in enumerate(self):
-            if len(item) > 0:
+        for idx, item in enumerate(perception):
+            if item not in self[idx]:
                 self[idx].add(perception[idx])
-                changed = True
-
-        return changed
-
-    def set_mark_using_condition(self,
-                                 condition: Condition,
-                                 perception: Perception) -> bool:
-        if self.is_marked():
-            # Mark is already specified. Further specialize all
-            # specified attributes
-            return self.complement_marks(perception)
-
-        changed = False
-
-        for idx, item in enumerate(condition):
-            if item == self.cfg.classifier_wildcard:
-                self[idx].add(perception[idx])
-                changed = True
-
-        return changed
 
     def get_differences(self, p0: Perception) -> Condition:
         """
