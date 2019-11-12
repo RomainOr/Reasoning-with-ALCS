@@ -75,6 +75,7 @@ class ClassifiersList(TypedList):
                   action: int,
                   p1: Perception,
                   last_activated_classifier: Classifier,
+                  perception_of_last_activated_classifier: Perception,
                   time: int,
                   theta_exp: int,
                   cfg: Configuration) -> None:
@@ -92,6 +93,7 @@ class ClassifiersList(TypedList):
         action: int
         p1: Perception
         last_activated_classifier: Classifier
+        perception_of_last_activated_classifier: Perception
         time: int
         theta_exp
         cfg: Configuration
@@ -110,7 +112,7 @@ class ClassifiersList(TypedList):
             cl.set_alp_timestamp(time)
 
             if cl.does_anticipate_correctly(p0, p1):
-                new_cl = alp_bacs.expected_case(last_activated_classifier, cl, p0, time)
+                new_cl = alp_bacs.expected_case(perception_of_last_activated_classifier, last_activated_classifier, cl, p0, time)
                 was_expected_case = True
             else:
                 new_cl = alp_bacs.unexpected_case(cl, p0, p1, time)
