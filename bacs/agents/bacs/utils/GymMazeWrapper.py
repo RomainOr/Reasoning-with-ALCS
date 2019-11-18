@@ -78,25 +78,25 @@ def find_best_classifier(population, situation, cfg):
         return max(anticipated_change_cls, key=lambda cl: cl.fitness * cl.num)
     return None
 
-def update_matrix_index(tmp_x, tmp_y, action):
-    if action == 0:
+def update_matrix_index(original, tmp_x, tmp_y, action):
+    if action == 0 and original[(tmp_x, tmp_y)]== 0:
         tmp_x -= 1
-    elif action == 1:
+    elif action == 1 and original[(tmp_x, tmp_y)]== 0:
         tmp_x -= 1
         tmp_y += 1
-    elif action == 2:
+    elif action == 2 and original[(tmp_x, tmp_y)]== 0:
         tmp_y += 1
-    elif action == 3:
+    elif action == 3 and original[(tmp_x, tmp_y)]== 0:
         tmp_x += 1
         tmp_y += 1
-    elif action == 4:
+    elif action == 4 and original[(tmp_x, tmp_y)]== 0:
         tmp_x += 1
-    elif action == 5:
+    elif action == 5 and original[(tmp_x, tmp_y)]== 0:
         tmp_x += 1
         tmp_y -= 1
-    elif action == 6:
+    elif action == 6 and original[(tmp_x, tmp_y)]== 0:
         tmp_y -= 1
-    elif action == 7:
+    elif action == 7 and original[(tmp_x, tmp_y)]== 0:
         tmp_x -= 1
         tmp_y -= 1
     return tmp_x, tmp_y
@@ -113,12 +113,12 @@ def build_fitness_matrix(env, population, cfg):
             if best_cl:
                 fitness[index] = max(best_cl.fitness, fitness[index])
                 if best_cl.behavioral_sequence:
-                    tmp_x, tmp_y = update_matrix_index(index[0], index[1], best_cl.action)
+                    tmp_x, tmp_y = update_matrix_index(original, index[0], index[1], best_cl.action)
                     fitness[(tmp_x, tmp_y)] = max(fitness[(tmp_x, tmp_y)], best_cl.fitness)
                     if len(best_cl.behavioral_sequence) > 1:
                         for idx, seq in enumerate(best_cl.behavioral_sequence):
                             if idx != len(best_cl.behavioral_sequence) -1:
-                                tmp_x, tmp_y = update_matrix_index(tmp_x, tmp_y, seq)
+                                tmp_x, tmp_y = update_matrix_index(original, tmp_x, tmp_y, seq)
                                 fitness[(tmp_x, tmp_y)] = max(fitness[(tmp_x, tmp_y)], best_cl.fitness)
             else:
                 fitness[index] = -1
@@ -140,23 +140,27 @@ def build_action_matrix(env, population, cfg, fitness_matrix):
     action = original.copy().astype(str)
     # Think about more 'functional' way of doing this
     for index, x in np.ndenumerate(original):
+        action[index] = ''
+    for index, x in np.ndenumerate(original):
         # Path - best classfier fitness
         if x == 0:
             perception = env.env.maze.perception(index[1], index[0])
             best_cl = find_best_classifier(population, perception, cfg)
             if best_cl:
-                if int(best_cl.fitness) == fitness_matrix[index]:
-                    action[index] = ACTION_LOOKUP[best_cl.action]
+                if action[index].find(ACTION_LOOKUP[best_cl.action]) == -1:
+                    action[index] += ACTION_LOOKUP[best_cl.action]
                 if best_cl.behavioral_sequence:
-                    tmp_x, tmp_y = update_matrix_index(index[0], index[1], best_cl.action)
+                    tmp_x, tmp_y = update_matrix_index(original, index[0], index[1], best_cl.action)
                     if int(best_cl.fitness) == fitness_matrix[(tmp_x, tmp_y)]:
-                        action[(tmp_x, tmp_y)] = ACTION_LOOKUP[best_cl.behavioral_sequence[0]]
+                            if action[(tmp_x, tmp_y)].find(ACTION_LOOKUP[best_cl.behavioral_sequence[0]]) == -1:
+                                action[(tmp_x, tmp_y)] += ACTION_LOOKUP[best_cl.behavioral_sequence[0]]
                     if len(best_cl.behavioral_sequence) > 1:
                         for idx, seq in enumerate(best_cl.behavioral_sequence):
                             if idx != len(best_cl.behavioral_sequence) -1:
-                                tmp_x, tmp_y = update_matrix_index(tmp_x, tmp_y, seq)
+                                tmp_x, tmp_y = update_matrix_index(original, tmp_x, tmp_y, seq)
                                 if int(best_cl.fitness) == fitness_matrix[(tmp_x, tmp_y)]:
-                                    action[(tmp_x, tmp_y)] = ACTION_LOOKUP[best_cl.behavioral_sequence[idx+1]]
+                                    if action[(tmp_x, tmp_y)].find(ACTION_LOOKUP[best_cl.behavioral_sequence[idx+1]]) == -1:
+                                        action[(tmp_x, tmp_y)] += ACTION_LOOKUP[best_cl.behavioral_sequence[idx+1]]
             else:
                 action[index] = '?'
         # Wall - fitness = 0
