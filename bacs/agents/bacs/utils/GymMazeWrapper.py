@@ -47,7 +47,7 @@ def _maze_metrics(pop, env):
 
 # Provide a wrapper for plotting
 
-def parse_metrics_to_df(explore_metrics, exploit_metrics):
+def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metrics_exploit, metrics_trial_frequency_exploit):
     def extract_details(row):
         row['trial'] = row['trial']
         row['steps'] = row['steps_in_trial']
@@ -56,8 +56,8 @@ def parse_metrics_to_df(explore_metrics, exploit_metrics):
         row['knowledge'] = row['knowledge']
         return row
     # Load both metrics into data frame
-    explore_df = pd.DataFrame(explore_metrics)
-    exploit_df = pd.DataFrame(exploit_metrics)
+    explore_df = pd.DataFrame(metrics_explore)
+    exploit_df = pd.DataFrame(metrics_exploit)
     # Mark them with specific phase
     explore_df['phase'] = 'explore'
     exploit_df['phase'] = 'exploit'
@@ -65,7 +65,7 @@ def parse_metrics_to_df(explore_metrics, exploit_metrics):
     explore_df = explore_df.apply(extract_details, axis=1)
     exploit_df = exploit_df.apply(extract_details, axis=1)
     # Adjuts exploit trial counter
-    exploit_df['trial'] = exploit_df.apply(lambda r: r['trial']+len(explore_df), axis=1)
+    exploit_df['trial'] = exploit_df.apply(lambda r: r['trial']+len(explore_df)*metrics_trial_frequency_explore, axis=1)
     # Concatenate both dataframes
     df = pd.concat([explore_df, exploit_df])
     df.set_index('trial', inplace=True)
@@ -195,52 +195,52 @@ def plot_policy(env, agent, cfg, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12)
     ax.set_yticks(range(0, max_y+1))
     ax.grid(True)
 
-def plot_knowledge(df, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12):
+def plot_knowledge(df, metrics_trial_frequency_explore, metrics_trial_frequency_exploit, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12):
     if ax is None:
         ax = plt.gca()
     explore_df = df.query("phase == 'explore'")
     exploit_df = df.query("phase == 'exploit'")
     explore_df['knowledge'].plot(ax=ax, c='blue')
     exploit_df['knowledge'].plot(ax=ax, c='red')
-    ax.axvline(x=len(explore_df), c='black', linestyle='dashed')
+    ax.axvline(x=len(explore_df)*metrics_trial_frequency_explore, c='black', linestyle='dashed')
     ax.set_title("Achieved knowledge", fontsize=TITLE_TEXT_SIZE)
     ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylabel("Knowledge [%]", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylim([0, 105])
 
-def plot_steps(df, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12):
+def plot_steps(df, metrics_trial_frequency_explore, metrics_trial_frequency_exploit, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12):
     if ax is None:
         ax = plt.gca()
     explore_df = df.query("phase == 'explore'")
     exploit_df = df.query("phase == 'exploit'")
     explore_df['steps'].plot(ax=ax, c='blue', linewidth=.5)
     exploit_df['steps'].plot(ax=ax, c='red', linewidth=0.5)
-    ax.axvline(x=len(explore_df), c='black', linestyle='dashed')
+    ax.axvline(x=len(explore_df)*metrics_trial_frequency_explore, c='black', linestyle='dashed')
     ax.set_title("Steps", fontsize=TITLE_TEXT_SIZE)
     ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylabel("Steps", fontsize=AXIS_TEXT_SIZE)
 
-def plot_classifiers(df, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12, LEGEND_TEXT_SIZE=14):
+def plot_classifiers(df, metrics_trial_frequency_explore, metrics_trial_frequency_exploit, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12, LEGEND_TEXT_SIZE=14):
     if ax is None:
         ax = plt.gca()
     explore_df = df.query("phase == 'explore'")
     df['numerosity'].plot(ax=ax, c='blue')
     df['reliable'].plot(ax=ax, c='red')
-    ax.axvline(x=len(explore_df), c='black', linestyle='dashed')
+    ax.axvline(x=len(explore_df)*metrics_trial_frequency_explore, c='black', linestyle='dashed')
     ax.set_title("Classifiers", fontsize=TITLE_TEXT_SIZE)
     ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylabel("Classifiers", fontsize=AXIS_TEXT_SIZE)
     ax.legend(fontsize=LEGEND_TEXT_SIZE)
 
-def plot_performance(agent, maze, metrics_df, cfg, env_name):
+def plot_performance(agent, maze, metrics_df, cfg, env_name, metrics_trial_frequency_explore, metrics_trial_frequency_exploit):
     plt.figure(figsize=(13, 10), dpi=100)
     plt.suptitle(f'BACS Performance in {env_name} environment', fontsize=32)
     ax1 = plt.subplot(221)
     plot_policy(maze, agent, cfg, ax1)
     ax2 = plt.subplot(222)
-    plot_knowledge(metrics_df, ax2)
+    plot_knowledge(metrics_df,metrics_trial_frequency_explore, metrics_trial_frequency_exploit, ax2)
     ax3 = plt.subplot(223)
-    plot_classifiers(metrics_df, ax3)
+    plot_classifiers(metrics_df,metrics_trial_frequency_explore, metrics_trial_frequency_exploit, ax3)
     ax4 = plt.subplot(224)
-    plot_steps(metrics_df, ax4)
+    plot_steps(metrics_df,metrics_trial_frequency_explore, metrics_trial_frequency_exploit, ax4)
     plt.subplots_adjust(top=0.86, wspace=0.3, hspace=0.3)

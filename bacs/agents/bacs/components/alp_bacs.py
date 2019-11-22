@@ -98,17 +98,16 @@ def create_behavioral_classifier(
         if cl.intermediate_perceptions:
             child.intermediate_perceptions.extend(cl.intermediate_perceptions)
         if len(child.behavioral_sequence) <= child.cfg.bs_max:
-            # Passthrough operation on child condition - An alternative should be to use directly the condition of the last activated classifier
-            #passthrough(child.condition, cl.condition, last_activated_classifier.condition, cl.cfg.classifier_length,cl.cfg.classifier_wildcard)
-            #child.condition = perception_of_last_activated_classifier
-            for i in range(cl.cfg.classifier_length):
-                child.condition[i] = perception_of_last_activated_classifier[i]
+            # Passthrough operation on child condition was not used because it can creat notrelevatn classifiers. We prefer setting up the child condition the same as the last activvated classifier.
+            # Thus, we garantee the creation of a classifier that can be used within the environment.
+            child.condition = last_activated_classifier.condition
+            #for i in range(cl.cfg.classifier_length):
+            #    child.condition[i] = perception_of_last_activated_classifier[i]
             # Passthrough operation on child effect
             passthrough(child.effect, last_activated_classifier.effect, cl.effect, cl.cfg.classifier_length,cl.cfg.classifier_wildcard)
             for idx, effect_item in enumerate(child.effect):
                 if effect_item != cl.cfg.classifier_wildcard and effect_item == child.condition[idx]:
                     child.effect[idx] = cl.cfg.classifier_wildcard
-            #if child.does_anticipate_change():
             return child
     return None
 
@@ -191,6 +190,26 @@ def expected_case_bs(cl: Classifier,
         return None
 
     child = cl.copy_from(cl, time)
+
+    no_spec = len(cl.specified_unchanging_attributes)
+    no_spec_new = diff.specificity
+    if no_spec >= cl.cfg.u_max:
+        while no_spec >= cl.cfg.u_max:
+            res = cl.generalize_unchanging_condition_attribute()
+            assert res is True
+            no_spec -= 1
+        while no_spec + no_spec_new > cl.cfg.u_max:
+            if random() < 0.5:
+                diff.generalize_specific_attribute_randomly()
+                no_spec_new -= 1
+            else:
+                if cl.generalize_unchanging_condition_attribute():
+                    no_spec -= 1
+    else:
+        while no_spec + no_spec_new > cl.cfg.u_max:
+            diff.generalize_specific_attribute_randomly()
+            no_spec_new -= 1
+
     child.condition.specialize_with_condition(diff)
 
     if child.q < 0.5:
