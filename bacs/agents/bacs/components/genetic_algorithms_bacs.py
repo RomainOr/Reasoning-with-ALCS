@@ -180,7 +180,7 @@ def delete_classifiers(population, match_set, action_set,
         cl_del = None
 
         while cl_del is None:  # We must delete at least one
-            set_to_iterate = [cl for cl in action_set.expand() if cl.behavioral_sequence is not None]
+            set_to_iterate = [cl for cl in action_set.expand()]
             for cl in set_to_iterate:
                 if random.random() < .3:
                     if cl_del is None:

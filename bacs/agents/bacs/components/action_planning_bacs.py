@@ -29,7 +29,6 @@ def suitable_cl_exists(classifiers: ClassifiersList,
         and predicts situation.
         False otherwise.
     """
-    # TODO updatewith behavioral sequences
     def _ok(cl):
         return cl.is_reliable() \
             and cl.does_match(p0) \

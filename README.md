@@ -1,3 +1,12 @@
 # BACS
 
-Work in progress about using behavioral acts with ACS2
+To use BACS or ACS2, you have to install the following python modules :
+    - gym
+    - numpy
+    - panda
+    - matplotlib
+    - parmap
+    - jupyter
+    - networkx
+    - tqdm
+    - pyalcs

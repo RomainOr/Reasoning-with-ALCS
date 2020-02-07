@@ -1,6 +1,5 @@
 from gym.envs.registration import register
 
-# noinspection PyUnresolvedReferences
 from .maze import Maze, PATH_MAPPING, WALL_MAPPING, REWARD_MAPPING
 
 ACTION_LOOKUP = {

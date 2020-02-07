@@ -64,8 +64,6 @@ class BACS(Agent):
         # For action chunking
         t_2_activated_classifier = None
         t_1_activated_classifier = None
-        t_2_perception = None
-        t_1_perception = None
 
         # For applying alp on behavioral set
         is_behavioral_sequence = False
@@ -107,7 +105,6 @@ class BACS(Agent):
                         action,
                         state,
                         t_2_activated_classifier,
-                        t_2_perception,
                         time + steps,
                         self.cfg.theta_exp,
                         self.cfg)
@@ -172,9 +169,7 @@ class BACS(Agent):
 
             #Record last activated classifier
             t_2_activated_classifier = t_1_activated_classifier
-            t_2_perception = t_1_perception
             t_1_activated_classifier = action_classifier
-            t_1_perception = prev_state
 
             if done:
                 # Apply algorithms
@@ -198,7 +193,6 @@ class BACS(Agent):
                         action,
                         state,
                         t_2_activated_classifier,
-                        t_2_perception,
                         time + steps,
                         self.cfg.theta_exp,
                         self.cfg)

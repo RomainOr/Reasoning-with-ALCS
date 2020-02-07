@@ -14,8 +14,6 @@ from bacs.metrics import population_metrics
 
 ### Provide a helper method for calculating obtained knowledge
 
-# TODO update with behavioral sequences
-
 def _maze_metrics(pop, env):
 
     def _maze_knowledge(population, environment) -> float:

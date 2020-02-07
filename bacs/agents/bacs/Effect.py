@@ -55,8 +55,6 @@ class Effect(PerceptionString):
         :param perception: Perception
         :return:
         """
-        # TODO: implement the rest after PEEs are implemented
-        # ('getBestChar' function)
         ant = list(perception)
         for idx, item in enumerate(self):
             if item != self.wildcard:
@@ -68,17 +66,13 @@ class Effect(PerceptionString):
                                             situation: Perception) -> bool:
         """
         Returns if the effect part specifies at least one of the percepts.
-        An PEE attribute never specifies the corresponding percept.
         :param back_anticipation: Perception
         :param situation: Perception
         :return:
         """
         for item, back_ant, sit in zip(self, back_anticipation, situation):
             if item == self.wildcard and back_ant != sit:
-                # change anticipated backwards although no change should occur
                 return False
-            # TODO: if PEEs are implemented, 'isEnhanced()' should be added
-            # to the condition below
             if item != self.wildcard and item == back_ant:
                 return False
         return True

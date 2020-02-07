@@ -78,7 +78,6 @@ def passthrough(percept, A, B, L, wildcard):
             percept[i] = B[i]
 
 def create_behavioral_classifier(
-        perception_of_last_activated_classifier: Perception,
         last_activated_classifier: Classifier,
         cl: Classifier) -> Optional[Classifier]:
     if last_activated_classifier and last_activated_classifier.does_anticipate_change() and cl.does_anticipate_change():
@@ -98,13 +97,12 @@ def create_behavioral_classifier(
         if cl.intermediate_perceptions:
             child.intermediate_perceptions.extend(cl.intermediate_perceptions)
         if len(child.behavioral_sequence) <= child.cfg.bs_max:
-            # Passthrough operation on child condition was not used because it can creat notrelevatn classifiers. We prefer setting up the child condition the same as the last activvated classifier.
+            # Passthrough operation on child condition was not used because it can create not relevant classifiers. We prefer setting up the child condition the same as the last activated classifier.
             # Thus, we garantee the creation of a classifier that can be used within the environment.
             child.condition = last_activated_classifier.condition
-            #for i in range(cl.cfg.classifier_length):
-            #    child.condition[i] = perception_of_last_activated_classifier[i]
             # Passthrough operation on child effect
             passthrough(child.effect, last_activated_classifier.effect, cl.effect, cl.cfg.classifier_length,cl.cfg.classifier_wildcard)
+            # Refining effect
             for idx, effect_item in enumerate(child.effect):
                 if effect_item != cl.cfg.classifier_wildcard and effect_item == child.condition[idx]:
                     child.effect[idx] = cl.cfg.classifier_wildcard
@@ -112,15 +110,13 @@ def create_behavioral_classifier(
     return None
 
 def expected_case(
-        perception_of_last_activated_classifier: Perception,
         last_activated_classifier: Classifier,
         cl: Classifier,
         p0: Perception,
         time: int) -> Optional[Classifier]:
     """
-    Controls the expected case of a classifier. If the classifier
-    is too specific it tries to add some randomness to it by
-    generalizing some attributes.
+    Controls the expected case of a classifier with the help of 
+    Specification of Unchanging Components.
     Controls also the case when the specification of unchanging
     components failed by creating classifiers with action chunks.
 
@@ -132,7 +128,7 @@ def expected_case(
     """
 
     if not specification_of_unchanging_components_status(cl.condition, cl.mark, p0):
-        child = create_behavioral_classifier(perception_of_last_activated_classifier, last_activated_classifier, cl)
+        child = create_behavioral_classifier(last_activated_classifier, cl)
         if child:
             child.intermediate_perceptions.append(p0)
             return child

@@ -4,8 +4,6 @@ from bacs import Perception
 from bacs.agents.bacs import Classifier
 from bacs.agents.bacs.ClassifiersList import ClassifiersList
 
-# TODO update with behavioral sequence
-
 class GoalSequenceSearcher:
 
     def __init__(self):
