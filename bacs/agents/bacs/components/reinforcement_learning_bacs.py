@@ -19,8 +19,11 @@ def update_classifier(cl, step_reward: int, max_fitness: float,
     beta: float
     gamma: float
     """
-
-    _reward = step_reward + gamma * max_fitness
+    
+    if cl.behavioral_sequence:
+        _reward = step_reward + (gamma - 0.01) * max_fitness
+    else :
+        _reward = step_reward + gamma * max_fitness
 
     # Update classifier properties
     cl.r += beta * (_reward - cl.r)
