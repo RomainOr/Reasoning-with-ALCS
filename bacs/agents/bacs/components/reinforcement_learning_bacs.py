@@ -19,9 +19,10 @@ def update_classifier(cl, step_reward: int, max_fitness: float,
     beta: float
     gamma: float
     """
-    delta_gamma_bs = 0.001
-    bs_ratio = len(cl.behavioral_sequence)/cl.cfg.bs_max
+
     if cl.behavioral_sequence:
+        delta_gamma_bs = 0.001
+        bs_ratio = len(cl.behavioral_sequence)/cl.cfg.bs_max
         _reward = step_reward + (gamma - delta_gamma_bs * bs_ratio ) * max_fitness
     else :
         _reward = step_reward + gamma * max_fitness
