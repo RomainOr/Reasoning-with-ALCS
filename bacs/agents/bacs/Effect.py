@@ -46,37 +46,6 @@ class Effect(PerceptionString):
 
         return True
 
-    def get_best_anticipation(self, perception: Perception) -> Perception:
-        """
-        Returns the most probable anticipation of the effect part.
-        This is usually the normal anticipation. However, if PEEs are
-        activated, the most probable value of each attribute is
-        taken as the anticipation.
-        :param perception: Perception
-        :return:
-        """
-        ant = list(perception)
-        for idx, item in enumerate(self):
-            if item != self.wildcard:
-                ant[idx] = item
-        return Perception(ant)
-
-    def does_specify_only_changes_backwards(self,
-                                            back_anticipation: Perception,
-                                            situation: Perception) -> bool:
-        """
-        Returns if the effect part specifies at least one of the percepts.
-        :param back_anticipation: Perception
-        :param situation: Perception
-        :return:
-        """
-        for item, back_ant, sit in zip(self, back_anticipation, situation):
-            if item == self.wildcard and back_ant != sit:
-                return False
-            if item != self.wildcard and item == back_ant:
-                return False
-        return True
-
     def does_match(self,
                    perception: Perception,
                    other_perception: Perception) -> bool:

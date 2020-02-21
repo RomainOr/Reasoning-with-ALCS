@@ -12,8 +12,6 @@ class Configuration:
                  metrics_trial_frequency: int = 5,
                  do_ga: bool=False,
                  do_subsumption: bool=True,
-                 do_action_planning: bool=False,
-                 action_planning_frequency: int=50,
                  beta: float=0.05,
                  gamma: float=0.95,
                  theta_i: float=0.1,
@@ -37,8 +35,6 @@ class Configuration:
             to interact with the environment
         :param do_ga: switch *Genetic Generalization* module
         :param do_subsumption:
-        :param do_action_planning: switch on/off Action Planning
-        :param action_planning_frequency:
         :param beta:
         :param gamma:
         :param theta_i: inadequacy threshold
@@ -60,8 +56,6 @@ class Configuration:
         self.user_metrics_collector_fcn = user_metrics_collector_fcn
         self.do_ga = do_ga
         self.do_subsumption = do_subsumption
-        self.do_action_planning = do_action_planning
-        self.action_planning_frequency = action_planning_frequency
         self.theta_exp = theta_exp
         self.beta = beta
         self.gamma = gamma
@@ -83,7 +77,6 @@ class Configuration:
                "\n\t- Environment adapter function: [{}]" \
                "\n\t- Do GA: [{}]" \
                "\n\t- Do subsumption: [{}]" \
-               "\n\t- Do Action Planning: [{}]" \
                "\n\t- Beta: [{}]" \
                "\n\t- ..." \
                "\n\t- epsilon: [{}]" \
@@ -94,7 +87,6 @@ class Configuration:
                     self.environment_adapter,
                     self.do_ga,
                     self.do_subsumption,
-                    self.do_action_planning,
                     self.beta,
                     self.epsilon,
                     self.bs_max)

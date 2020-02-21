@@ -24,10 +24,6 @@ class ClassifiersList(TypedList):
         matching = [cl for cl in self if cl.condition.does_match(situation)]
         return ClassifiersList(*matching)
 
-    def form_match_set_backwards(self, situation: Perception) -> ClassifiersList:
-        matching = [cl for cl in self if cl.does_match_backwards(situation)]
-        return ClassifiersList(*matching)
-
     def form_action_set(self, action: int) -> ClassifiersList:
         matching = [cl for cl in self if cl.action == action and cl.behavioral_sequence is None]
         return ClassifiersList(*matching)
@@ -103,7 +99,6 @@ class ClassifiersList(TypedList):
         new_list = ClassifiersList()
         new_cl: Optional[Classifier] = None
         was_expected_case = False
-        delete_count = 0
 
         for cl in action_set:
             cl.increase_experience()
@@ -118,7 +113,6 @@ class ClassifiersList(TypedList):
                 if cl.is_inadequate():
                     # Removes classifier from population, match set
                     # and current list
-                    delete_count += 1
                     lists = [x for x in [population, match_set, action_set]
                              if x]
                     for lst in lists:
@@ -176,7 +170,6 @@ class ClassifiersList(TypedList):
         """
         new_list = ClassifiersList()
         new_cl: Optional[Classifier] = None
-        delete_count = 0
 
         for cl in action_set:
             cl.increase_experience()
@@ -200,7 +193,6 @@ class ClassifiersList(TypedList):
             if cl.is_inadequate():
                 # Removes classifier from population, match set
                 # and current list
-                delete_count += 1
                 lists = [x for x in [population, match_set, action_set]
                             if x]
                 for lst in lists:
@@ -214,6 +206,37 @@ class ClassifiersList(TypedList):
             new_matching = [cl for cl in new_list if
                             cl.condition.does_match(p1)]
             match_set.extend(new_matching)
+        
+        #if ga.should_apply(match_set, time, 25):
+        #    behavioral_classifier_in_match_set = [cl for cl in match_set if cl.behavioral_sequence]
+        #    while len(behavioral_classifier_in_match_set) > cfg.number_of_possible_actions ** (cfg.bs_max + 1):
+        #        cl_del = None
+        #        while cl_del is None:  # We must delete at least one
+        #            set_to_iterate = [cl for cl in behavioral_classifier_in_match_set]
+        #            for cl in set_to_iterate:
+        #                if random.random() < .3:
+        #                    if cl_del is None:
+        #                        cl_del = cl
+        #                    else:
+        #                        if cl.q - cl_del.q < -0.1:
+        #                            cl_del = cl
+        #                        if abs(cl.q - cl_del.q) <= 0.1:
+        #                            if cl.is_marked() and not cl_del.is_marked():
+        #                                cl_del = cl
+        #                            elif cl.is_marked() or not cl_del.is_marked():
+        #                                if cl.tav > cl_del.tav:
+        #                                    cl_del = cl
+        #        if cl_del is not None:
+        #            if cl_del.num > 1:
+        #                cl_del.num -= 1
+        #            else:
+        #                #
+        #                print("remove")
+        #                # Removes classifier from population, match set and current list
+        #                lists = [x for x in [population, match_set, action_set] if x]
+        #                for lst in lists:
+        #                    lst.safe_remove(cl_del)
+        #                behavioral_classifier_in_match_set.remove(cl_del)
 
 
     @staticmethod
