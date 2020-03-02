@@ -77,7 +77,7 @@ def roulette_wheel_selection(population, fitnessfunc: Callable):
     tuple
         two classifiers selected as parents
     """
-    choices = {cl: fitnessfunc(cl) for cl in population if cl.behavioral_sequence is not None}
+    choices = {cl: fitnessfunc(cl) for cl in population}
 
     parent1 = _weighted_random_choice(choices)
     parent2 = _weighted_random_choice(choices)

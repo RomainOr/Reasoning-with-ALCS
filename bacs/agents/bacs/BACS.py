@@ -68,7 +68,7 @@ class BACS(Agent):
         while not done:
             
             # Creation of the matching set
-            match_set = self.population.form_match_set(state)
+            match_set, _, best_fitness = self.population.form_match_set(state)
 
             if steps > 0:
                 # Apply learning in the last action set
@@ -98,7 +98,7 @@ class BACS(Agent):
                 ClassifiersList.apply_reinforcement_learning(
                     action_set,
                     last_reward,
-                    match_set.get_maximum_fitness(),
+                    best_fitness,
                     self.cfg.beta,
                     self.cfg.gamma
                 )
@@ -115,15 +115,15 @@ class BACS(Agent):
                         self.cfg.theta_as,
                         self.cfg.do_subsumption,
                         self.cfg.theta_exp)
-            
-            action_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
 
             is_behavioral_sequence = False
-            action = action_classifier.action
-            # Use environment adapter and create action set
-            iaction = self.cfg.environment_adapter.to_lcs_action(action)
-            logger.debug("\tExecuting action: [%d]", action)
-            action_set = match_set.form_action_set(action)
+            
+            action_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
+            # Create action set
+            action_set = match_set.form_action_set(action_classifier)
+            # Use environment adapter
+            iaction = self.cfg.environment_adapter.to_lcs_action(action_classifier.action)
+            logger.debug("\tExecuting action: [%d]", action_classifier.action)
             # Do the action
             prev_state = state
             raw_state, last_reward, done, _ = env.step(iaction)
@@ -131,8 +131,6 @@ class BACS(Agent):
 
             # Enter the if condition only if we have chosen a behavioral classifier
             if action_classifier.behavioral_sequence :
-                # Constitute the behavioral learning set
-                behavioral_set = match_set.form_behavioral_sequence_set(action_classifier)
                 is_behavioral_sequence = True
                 # Initialize the message list usefull to decrease quality of classifiers containing looping sequences
                 message_list = [state]
@@ -144,15 +142,13 @@ class BACS(Agent):
                     raw_state, last_reward, done, _ = env.step(iaction)
                     state = self.cfg.environment_adapter.to_genotype(raw_state)
                     if state in message_list:
-                        for cl in behavioral_set:    
+                        for cl in action_set:    
                             cl.decrease_quality()
                     else:
                         message_list.append(state)
                     if done:
                         break
                     steps += 1
-                # Create action set from the learning set
-                action_set = behavioral_set
 
             #Record last activated classifier
             t_2_activated_classifier = t_1_activated_classifier
@@ -214,38 +210,35 @@ class BACS(Agent):
         steps = 0
         raw_state = env.reset()
         state = self.cfg.environment_adapter.to_genotype(raw_state)
-        
         last_reward = 0
         action_set = ClassifiersList()
         done = False
 
         while not done:
 
-            match_set = self.population.form_match_set(state)
+            # Compute in one run the matching set, the best classifier and the best fitness
+            match_set, best_classifier, best_fitness = self.population.form_match_set(state)
 
             if steps > 0:
                 ClassifiersList.apply_reinforcement_learning(
                     action_set,
                     last_reward,
-                    match_set.get_maximum_fitness(),
+                    best_fitness,
                     self.cfg.beta,
                     self.cfg.gamma)
 
-            action_classifier = choose_fittest_classifier(match_set, self.cfg)
-            action = action_classifier.action
-            # Use environment adapter and create action set
-            iaction = self.cfg.environment_adapter.to_lcs_action(action)
-            logger.debug("\tExecuting action: [%d]", action)
-            action_set = match_set.form_action_set(action)
+            # Create action set
+            action_set = match_set.form_action_set(best_classifier)
+            # Use environment adapter
+            iaction = self.cfg.environment_adapter.to_lcs_action(best_classifier.action)
+            logger.debug("\tExecuting action: [%d]", best_classifier.action)
             # Do the action
             raw_state, last_reward, done, _ = env.step(iaction)
             state = self.cfg.environment_adapter.to_genotype(raw_state)
 
             # Enter the if condition only if we have chosen a behavioral classifier
-            if action_classifier.behavioral_sequence :
-                # Constitute the behavioral learning set
-                action_set = match_set.form_behavioral_sequence_set(action_classifier)
-                for act in action_classifier.behavioral_sequence:
+            if best_classifier.behavioral_sequence :
+                for act in best_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(act)
                     logger.debug("\tExecuting action from behavioral sequence: [%d]", act)

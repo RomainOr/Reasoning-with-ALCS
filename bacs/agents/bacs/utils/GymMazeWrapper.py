@@ -29,9 +29,6 @@ def _maze_metrics(pop, env):
             if any([True for cl in reliable_classifiers
                     if cl.predicts_successfully(p0, action, p1)]):
                 nr_correct += 1
-            elif any([True for cl in reliable_classifiers
-                    if cl.behavioral_sequence and cl.predicts_successfully_bs(p0, action, p1) ]):
-                nr_correct += 1
         return nr_correct / len(transitions) * 100.0
 
     metrics = {
@@ -70,11 +67,8 @@ def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metric
     return df
 
 def find_best_classifier(population, situation, cfg):
-    match_set = population.form_match_set(situation)
-    anticipated_change_cls = [cl for cl in match_set if cl.does_anticipate_change()]
-    if (len(anticipated_change_cls) > 0):
-        return max(anticipated_change_cls, key=lambda cl: cl.fitness * cl.num)
-    return None
+    match_set, best_classifier, best_fitness = population.form_match_set(situation)
+    return best_classifier
 
 def update_matrix_index(original, tmp_x, tmp_y, action):
     if action == 0 and original[(tmp_x, tmp_y)]== 0:

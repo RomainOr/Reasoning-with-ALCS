@@ -17,11 +17,13 @@ def update_classifier(cl, step_reward: int, max_fitness: float,
         maximum fitness - back-propagated reinforcement. Maximum fitness
         from the match set
     beta: float
+        learning rate
     gamma: float
+        reinforcement rate
     """
 
     #if cl.behavioral_sequence:
-    #    delta_gamma_bs = 0.01
+    #    delta_gamma_bs = 0.001
     #    bs_ratio = len(cl.behavioral_sequence)/cl.cfg.bs_max
     #    _reward = step_reward + (gamma - delta_gamma_bs * bs_ratio ) * max_fitness
     #else :
