@@ -1,2 +1,1 @@
-include:
-  - remote: 'https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/License-Scanning.gitlab-ci.yml'
+include: 'License-Scanning.gitlab-ci.yml'
