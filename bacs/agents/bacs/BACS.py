@@ -88,7 +88,7 @@ class BACS(Agent):
                         match_set,
                         action_set,
                         prev_state,
-                        action,
+                        t_1_activated_classifier.action,
                         state,
                         t_2_activated_classifier,
                         time + steps,

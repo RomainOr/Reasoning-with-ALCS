@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class Classifier:
 
     __slots__ = ['condition', 'action','behavioral_sequence' ,'effect', 'mark', 'q', 'r',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'cfg', 'intermediate_perceptions']
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'cfg']
 
     def __init__(self,
                  condition: Union[Condition, str, None] = None,
@@ -29,8 +29,7 @@ class Classifier:
                  talp: int=0,
                  tga: int=0,
                  tav: float=0.0,
-                 cfg: Optional[Configuration] = None,
-                 intermediate_perceptions: Optional[List[Perception]] = None) -> None:
+                 cfg: Optional[Configuration] = None) -> None:
 
         if cfg is None:
             raise TypeError("Configuration should be passed to Classifier")
@@ -74,9 +73,6 @@ class Classifier:
         # Application average
         self.tav = tav
 
-        # Useful for metrics compuation
-        self.intermediate_perceptions = intermediate_perceptions
-
     def __eq__(self, other):
         if self.condition == other.condition and \
                 self.action == other.action and \
@@ -96,7 +92,6 @@ class Classifier:
         return f"{self.condition} " \
                f"{self.action} " \
                f"{str(self.behavioral_sequence)} " \
-               f"{str(self.intermediate_perceptions)} " \
                f"{str(self.effect):16} " \
                f"{'(' + str(self.mark) + ')':21} q: {self.q:<5.3} " \
                f"r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
@@ -131,8 +126,7 @@ class Classifier:
             quality=old_cls.q,
             reward=old_cls.r,
             immediate_reward=old_cls.ir,
-            cfg=old_cls.cfg,
-            intermediate_perceptions=old_cls.intermediate_perceptions)
+            cfg=old_cls.cfg)
 
         new_cls.tga = time
         new_cls.talp = time
