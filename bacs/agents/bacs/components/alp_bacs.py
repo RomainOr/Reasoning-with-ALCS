@@ -95,9 +95,9 @@ def updated_passthrough(percept, A, B, L, wildcard, condition):
         else:
             percept[i] = B[i]
     # Refining effect
-    for idx, effect_item in enumerate(percept):
-        if effect_item != wildcard and effect_item == condition[idx]:
-            percept[idx] = wildcard
+    #for idx, effect_item in enumerate(percept):
+    #    if effect_item != wildcard and effect_item == condition[idx]:
+    #        percept[idx] = wildcard
 
 def create_behavioral_classifier(
         last_activated_classifier: Classifier,
@@ -127,9 +127,9 @@ def create_behavioral_classifier(
             # Passthrough operation on child effect
             updated_passthrough(child.effect, last_activated_classifier.effect, cl.effect, cl.cfg.classifier_length,cl.cfg.classifier_wildcard, child.condition)
             # Refining effect
-            #for idx, effect_item in enumerate(child.effect):
-            #    if effect_item != cl.cfg.classifier_wildcard and effect_item == child.condition[idx]:
-            #        child.effect[idx] = cl.cfg.classifier_wildcard
+            for idx, effect_item in enumerate(child.effect):
+                if effect_item != cl.cfg.classifier_wildcard and effect_item == child.condition[idx]:
+                    child.effect[idx] = cl.cfg.classifier_wildcard
             return child
     return None
 

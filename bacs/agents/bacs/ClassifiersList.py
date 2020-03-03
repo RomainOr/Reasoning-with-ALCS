@@ -151,7 +151,6 @@ class ClassifiersList(TypedList):
                   match_set: ClassifiersList,
                   action_set: ClassifiersList,
                   p0: Perception,
-                  action: int,
                   p1: Perception,
                   time: int,
                   theta_exp: int,
@@ -165,7 +164,6 @@ class ClassifiersList(TypedList):
         match_set
         action_set
         p0: Perception
-        action: int
         p1: Perception
         time: int
         theta_exp

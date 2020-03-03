@@ -78,7 +78,6 @@ class BACS(Agent):
                         match_set,
                         action_set,
                         prev_state,
-                        action,
                         state,
                         time + steps,
                         self.cfg.theta_exp,
@@ -117,8 +116,11 @@ class BACS(Agent):
                         self.cfg.theta_exp)
 
             is_behavioral_sequence = False
-            
+            # Choose classifier
             action_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
+            #Record last activated classifier
+            t_2_activated_classifier = t_1_activated_classifier
+            t_1_activated_classifier = action_classifier
             # Create action set
             action_set = match_set.form_action_set(action_classifier)
             # Use environment adapter
@@ -135,7 +137,6 @@ class BACS(Agent):
                 # Initialize the message list usefull to decrease quality of classifiers containing looping sequences
                 message_list = [state]
                 for act in action_classifier.behavioral_sequence:
-                    action = act
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(act)
                     logger.debug("\tExecuting action from behavioral sequence: [%d]", act)
@@ -150,10 +151,6 @@ class BACS(Agent):
                         break
                     steps += 1
 
-            #Record last activated classifier
-            t_2_activated_classifier = t_1_activated_classifier
-            t_1_activated_classifier = action_classifier
-
             if done:
                 # Apply algorithms
                 if is_behavioral_sequence:
@@ -162,7 +159,6 @@ class BACS(Agent):
                         ClassifiersList(),
                         action_set,
                         prev_state,
-                        action,
                         state,
                         time + steps,
                         self.cfg.theta_exp,
@@ -216,7 +212,7 @@ class BACS(Agent):
 
         while not done:
 
-            # Compute in one run the matching set, the best classifier and the best fitness
+            # Compute in one run the matching set, the best matching classifier and the best matching fitness associated to the previous classifier
             match_set, best_classifier, best_fitness = self.population.form_match_set(state)
 
             if steps > 0:

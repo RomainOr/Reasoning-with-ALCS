@@ -207,15 +207,15 @@ def plot_steps(df, metrics_trial_frequency_explore, number_of_exploit_steps, ax=
         ax = plt.gca()
     explore_df = df.query("phase == 'explore'")
     exploit_df = df.query("phase == 'exploit'")
-    explore_df['steps'].plot(ax=ax, c='blue', linewidth=.5)
+    #explore_df['steps'].plot(ax=ax, c='blue', linewidth=.5)
     exploit_df['steps'].plot(ax=ax, c='red', linewidth=0.5)
-    ax.axvline(x=len(explore_df)*metrics_trial_frequency_explore, c='black', linestyle='dashed')
-    ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0], ymin=-5, ymax=110, colors='black', linestyle='dashed')
-    ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0]+number_of_exploit_steps[1], ymin=-5, ymax=110, colors='black', linestyle='dashed')
+    #ax.axvline(x=len(explore_df)*metrics_trial_frequency_explore, c='black', linestyle='dashed')
+    ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0], ymin=0, ymax=max(exploit_df['steps'])+1, colors='black', linestyle='dashed')
+    ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0]+number_of_exploit_steps[1], ymin=0, ymax=max(exploit_df['steps'])+1, colors='black', linestyle='dashed')
     ax.set_title("Steps", fontsize=TITLE_TEXT_SIZE)
     ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylabel("Steps", fontsize=AXIS_TEXT_SIZE)
-    ax.set_ylim([-5, 110])
+    #ax.set_ylim([-5, 110])
 
 def plot_classifiers(df, metrics_trial_frequency_explore, number_of_exploit_steps, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12, LEGEND_TEXT_SIZE=14):
     if ax is None:
