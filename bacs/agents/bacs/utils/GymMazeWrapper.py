@@ -1,3 +1,9 @@
+"""
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+"""
+
 # General
 from __future__ import unicode_literals
 
@@ -67,7 +73,7 @@ def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metric
     return df
 
 def find_best_classifier(population, situation, cfg):
-    match_set, best_classifier, best_fitness = population.form_match_set(situation)
+    unused_match_set, best_classifier, unused_best_fitness = population.form_match_set(situation)
     return best_classifier
 
 def update_matrix_index(original, tmp_x, tmp_y, action):
@@ -157,7 +163,7 @@ def build_action_matrix(env, population, cfg, fitness_matrix):
                 action[index] = '?'
         # Wall - fitness = 0
         if x == 1:
-            action[index] = '\#'
+            action[index] = '#'
         # Reward - inf fitness
         if x == 9:
             action[index] = 'R'
