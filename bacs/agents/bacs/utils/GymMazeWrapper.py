@@ -187,7 +187,7 @@ def plot_knowledge(df, metrics_trial_frequency_explore, number_of_exploit_steps,
     if ax is None:
         ax = plt.gca()
     explore_df = df.query("phase == 'explore'")
-    explore_df.plot(y='knowledge', ax=ax, c='blue')
+    explore_df.plot(y='knowledge', ax=ax, c='blue', legend=False)
     ax.set_title("Achieved knowledge", fontsize=TITLE_TEXT_SIZE)
     ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylabel("Knowledge [%]", fontsize=AXIS_TEXT_SIZE)
