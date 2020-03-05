@@ -104,21 +104,19 @@ class Agent:
         tuple
             population of classifiers and metrics
         """
-        current_trial = 0
+        current_trial = 1
         steps = 0
 
         metrics: List = []
-        while current_trial < max_trials:
+        while current_trial <= max_trials:
             steps_in_trial, reward = func(env, steps, current_trial)
             steps += steps_in_trial
 
             if current_trial % self.get_cfg().metrics_trial_frequency == 0:
                 m = basic_metrics(current_trial, steps_in_trial, reward)
-
                 user_metrics = self.get_cfg().user_metrics_collector_fcn
                 if user_metrics is not None:
                     m.update(user_metrics(self.get_population(), env))
-
                 metrics.append(m)
 
             # Print last metric
