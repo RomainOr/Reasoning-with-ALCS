@@ -10,10 +10,10 @@ import random
 from typing import Callable, Union
 
 from bacs import Perception
-from .. import PerceptionString
+from bacs.agents import AbstractPerception
 
 
-class Condition(PerceptionString):
+class Condition(AbstractPerception):
     """
     Specifies the set of situations (perceptions) in which the classifier
     can be applied.

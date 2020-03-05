@@ -16,6 +16,7 @@ class Configuration:
                  environment_adapter=EnvironmentAdapter,
                  user_metrics_collector_fcn: Callable = None,
                  metrics_trial_frequency: int = 5,
+                 do_pee: bool = False, # TODO
                  do_ga: bool=False,
                  do_subsumption: bool=True,
                  beta: float=0.05,
@@ -60,6 +61,7 @@ class Configuration:
         self.environment_adapter = environment_adapter
         self.metrics_trial_frequency = metrics_trial_frequency
         self.user_metrics_collector_fcn = user_metrics_collector_fcn
+        self.do_pee = do_pee
         self.do_ga = do_ga
         self.do_subsumption = do_subsumption
         self.theta_exp = theta_exp
@@ -81,6 +83,7 @@ class Configuration:
                "\n\t- Number of possible actions: [{}]" \
                "\n\t- Classifier wildcard: [{}]" \
                "\n\t- Environment adapter function: [{}]" \
+               "\n\t- Do Pee: [{}]" \
                "\n\t- Do GA: [{}]" \
                "\n\t- Do subsumption: [{}]" \
                "\n\t- Beta: [{}]" \
@@ -91,6 +94,7 @@ class Configuration:
                     self.number_of_possible_actions,
                     self.classifier_wildcard,
                     self.environment_adapter,
+                    self.do_pee,
                     self.do_ga,
                     self.do_subsumption,
                     self.beta,
