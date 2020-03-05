@@ -90,13 +90,6 @@ register(
 )
 
 register(
-    id='Maze6-v0',
-    entry_point='my_mazes.envs:Maze6',
-    max_episode_steps=100,
-    nondeterministic=False
-)
-
-register(
     id='Maze7-v0',
     entry_point='my_mazes.envs:Maze7',
     max_episode_steps=100,

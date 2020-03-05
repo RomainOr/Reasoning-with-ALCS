@@ -49,24 +49,14 @@ def _maze_metrics(pop, env):
 # Provide a wrapper for plotting
 
 def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metrics_exploit, number_of_exploit_steps):
-    def extract_details(row):
-        row['trial'] = row['trial']
-        row['steps'] = row['steps_in_trial']
-        row['numerosity'] = row['numerosity']
-        row['reliable'] = row['reliable']
-        row['knowledge'] = row['knowledge']
-        return row
     # Load both metrics into data frame
     explore_df = pd.DataFrame(metrics_explore)
     exploit_df = pd.DataFrame(metrics_exploit)
     # Mark them with specific phase
     explore_df['phase'] = 'explore'
     exploit_df['phase'] = 'exploit'
-    # Extract details
-    explore_df = explore_df.apply(extract_details, axis=1)
-    exploit_df = exploit_df.apply(extract_details, axis=1)
-    # Adjuts exploit trial counter
-    exploit_df['trial'] = exploit_df.apply(lambda r: r['trial']+len(explore_df)*metrics_trial_frequency_explore, axis=1)
+    # Adjust exploit trial counter
+    exploit_df['trial'] = exploit_df.apply(lambda r : r['trial']+len(explore_df)*metrics_trial_frequency_explore, axis=1)
     # Concatenate both dataframes
     df = pd.concat([explore_df, exploit_df])
     df.set_index('trial', inplace=True)
@@ -183,12 +173,12 @@ def plot_policy(env, agent, cfg, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12)
            extent=[0, max_x, max_y, 0])
     # Add labels to each cell
     for (y,x), val in np.ndenumerate(action_matrix):
-        plt.text(x+0.4, y+0.5, "${}$".format(val))
+        plt.text(x+0.4, y+0.5, val)
     ax.set_title("Policy", fontsize=TITLE_TEXT_SIZE)
     ax.set_xlabel('x', fontsize=AXIS_TEXT_SIZE)
     ax.set_ylabel('y', fontsize=AXIS_TEXT_SIZE)
     ax.set_xlim(0, max_x)
-    ax.set_ylim(1+max_y, 0)
+    ax.set_ylim(max_y, 0)
     ax.set_xticks(range(0, max_x+1))
     ax.set_yticks(range(0, max_y+1))
     ax.grid(True)
@@ -197,12 +187,7 @@ def plot_knowledge(df, metrics_trial_frequency_explore, number_of_exploit_steps,
     if ax is None:
         ax = plt.gca()
     explore_df = df.query("phase == 'explore'")
-    exploit_df = df.query("phase == 'exploit'")
-    explore_df['knowledge'].plot(ax=ax, c='blue')
-    exploit_df['knowledge'].plot(ax=ax, c='red')
-    ax.axvline(x=len(explore_df)*metrics_trial_frequency_explore, c='black', linestyle='dashed')
-    ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0], ymin=-5, ymax=110, colors='black', linestyle='dashed')
-    ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0]+number_of_exploit_steps[1], ymin=-5, ymax=110, colors='black', linestyle='dashed')
+    explore_df.plot(y='knowledge', ax=ax, c='blue')
     ax.set_title("Achieved knowledge", fontsize=TITLE_TEXT_SIZE)
     ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylabel("Knowledge [%]", fontsize=AXIS_TEXT_SIZE)
@@ -213,23 +198,19 @@ def plot_steps(df, metrics_trial_frequency_explore, number_of_exploit_steps, ax=
         ax = plt.gca()
     explore_df = df.query("phase == 'explore'")
     exploit_df = df.query("phase == 'exploit'")
-    #explore_df['steps'].plot(ax=ax, c='blue', linewidth=.5)
-    exploit_df['steps'].plot(ax=ax, c='red', linewidth=0.5)
-    #ax.axvline(x=len(explore_df)*metrics_trial_frequency_explore, c='black', linestyle='dashed')
-    ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0], ymin=0, ymax=max(exploit_df['steps'])+1, colors='black', linestyle='dashed')
-    ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0]+number_of_exploit_steps[1], ymin=0, ymax=max(exploit_df['steps'])+1, colors='black', linestyle='dashed')
+    exploit_df.plot(y='steps_in_trial', ax=ax, c='red', linewidth=0.5, legend=False)
+    ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0], ymin=0, ymax=max(exploit_df['steps_in_trial'])+1, colors='black', linestyle='dashed')
+    ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0]+number_of_exploit_steps[1], ymin=0, ymax=max(exploit_df['steps_in_trial'])+1, colors='black', linestyle='dashed')
     ax.set_title("Steps", fontsize=TITLE_TEXT_SIZE)
     ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylabel("Steps", fontsize=AXIS_TEXT_SIZE)
-    #ax.set_ylim([-5, 110])
 
 def plot_classifiers(df, metrics_trial_frequency_explore, number_of_exploit_steps, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12, LEGEND_TEXT_SIZE=14):
     if ax is None:
         ax = plt.gca()
     explore_df = df.query("phase == 'explore'")
-    df['numerosity'].plot(ax=ax, c='blue')
-    df['reliable'].plot(ax=ax, c='red')
-    ax.axvline(x=len(explore_df)*metrics_trial_frequency_explore, c='black', linestyle='dashed')
+    explore_df.plot(y='numerosity', ax=ax, c='blue')
+    explore_df.plot(y='reliable', ax=ax, c='red')
     ax.set_title("Classifiers", fontsize=TITLE_TEXT_SIZE)
     ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylabel("Classifiers", fontsize=AXIS_TEXT_SIZE)

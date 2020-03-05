@@ -15,7 +15,6 @@ from ..envs.MazeF3 import MazeF3
 from ..envs.MazeF4 import MazeF4
 from ..envs.Maze4 import Maze4
 from ..envs.Maze5 import Maze5
-from ..envs.Maze6 import Maze6
 from ..envs.Maze7 import Maze7
 from ..envs.Maze10 import Maze10
 from ..envs.MiyazakiA import MiyazakiA
