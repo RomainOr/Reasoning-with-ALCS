@@ -91,18 +91,6 @@ class Effect(AbstractPerception):
         return any(isinstance(elem, ProbabilityEnhancedAttribute)
                    for elem in self)
 
-    def reduced_to_non_enhanced(self):
-        if not self.is_enhanced():
-            return self
-
-        result = Effect(self)
-
-        for i, elem in enumerate(result):
-            if isinstance(elem, ProbabilityEnhancedAttribute):
-                result[i] = self[i].get_best_symbol()
-
-        return result
-
     def update_enhanced_effect_probs(self,
                                      perception: Perception,
                                      update_rate: float):

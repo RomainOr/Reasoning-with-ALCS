@@ -3,14 +3,11 @@ class ProbabilityEnhancedAttribute(dict):
     def __init__(self, attr):
         assert isinstance(attr, str) or isinstance(attr, dict)
         super().__init__()
-
         if isinstance(attr, str):
             self[attr] = 1.0
-
         if isinstance(attr, dict):
             for symbol in attr:
                 self[symbol] = attr[symbol]
-
         self.adjust_probabilities()
 
     @classmethod
@@ -22,41 +19,28 @@ class ProbabilityEnhancedAttribute(dict):
         """
         Create a new enhanced effect part.
         """
-
         result = attr1.copy() \
             if isinstance(attr1, ProbabilityEnhancedAttribute) \
             else ProbabilityEnhancedAttribute(attr1)
-
         result.insert(attr2, q1, q2)
         return result
-
-    def sum_of_probabilities(self):
-        return sum(self.get(symbol, 0.0) for symbol in self)
 
     def adjust_probabilities(self, prev_sum=None):
         """
         Adjust the probabilities to sum to one
         """
         if prev_sum is None:
-            prev_sum = self.sum_of_probabilities()
-
+            prev_sum = sum(self.get(symbol, 0.0) for symbol in self)
         for symbol in self:
             self[symbol] /= prev_sum
 
     def increase_probability(self, effect_symbol, update_rate):
         if effect_symbol not in self:
             return False
-
         update_delta = update_rate * (1 - self[effect_symbol])
         self[effect_symbol] += update_delta
         self.adjust_probabilities(1.0 + update_delta)
         return True
-
-    def get_best_symbol(self):
-        """
-        Equivalent to ProbCharList::getBestChar() in C++ code.
-        """
-        return max(self.items(), key=lambda x: x[1])[0]
 
     def does_contain(self, symbol):
         """
@@ -71,11 +55,6 @@ class ProbabilityEnhancedAttribute(dict):
         """
         return sum(1 for k, v in self.items() if v > 0.0) > 1
 
-    def the_only_symbol(self):
-        assert not self.is_enhanced()
-        # In case of non enhanced attribute, the only symbol is the best symbol
-        return self.get_best_symbol()
-
     def symbols_specified(self):
         return {k for k, v in self.items() if v > 0.0}
 
@@ -88,9 +67,6 @@ class ProbabilityEnhancedAttribute(dict):
             return self.symbols_specified() == other.symbols_specified()
         else:
             return self.symbols_specified() == {other}
-
-    def is_compact(self):
-        return not any(prob == 0.0 for symbol, prob in self.items())
 
     def make_compact(self):
         for symbol, prob in list(self.items()):
@@ -118,22 +94,6 @@ class ProbabilityEnhancedAttribute(dict):
             self.insert_attribute(symbol_or_attr, q1, q2)
         else:
             self.insert_symbol(symbol_or_attr, q1, q2)
-
-    def remove_symbol(self, symbol):
-        if symbol in self:
-            symbols = self.symbols_specified()
-            symbols.remove(symbol)
-            if len(symbols) == 0:
-                # Refuse to remove the last symbol
-                return False
-            del self[symbol]
-            self.adjust_probabilities()
-            return True
-        else:
-            return False
-
-    def copy(self):
-        return ProbabilityEnhancedAttribute(self)
 
     def sorted_items(self):
         return sorted(self.items(), key=lambda x: x[1], reverse=True)
