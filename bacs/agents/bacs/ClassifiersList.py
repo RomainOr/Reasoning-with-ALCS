@@ -57,24 +57,29 @@ class ClassifiersList(TypedList):
         list2d = [[cl] * cl.num for cl in self]
         return list(chain.from_iterable(list2d))
 
-    def get_maximum_fitness(self) -> float:
-        """
-        Returns the maximum fitness value amongst those classifiers
-        that anticipated a change in environment.
+    @staticmethod
+    def apply_enhanced_effect_part_check(action_set: ClassifiersList,
+                                         new_list: ClassifiersList,
+                                         previous_situation: Perception,
+                                         time: int,
+                                         cfg: Configuration):
+        # Create a list of candidates.
+        # Every enhanceable classifier is a candidate.
+        candidates = [classifier for classifier in action_set if classifier.is_enhanceable()]
+        # If there are less than 2 candidates, don't do it
+        if len(candidates) < 2:
+            return
 
-        Returns
-        -------
-        float
-            fitness value
-        """
-        anticipated_change_cls = [cl for cl in self
-                                  if cl.does_anticipate_change()]
+        for candidate in candidates:
+            candidates2 = [classifier for classifier in candidates if candidate != classifier]
+            if len(candidates2) > 0:
+                merger = random.choice(candidates2)
+                new_classifier = candidate.merge_with(merger, previous_situation, time)
+                if new_classifier is not None:
+                    candidate.reverse_increase_quality()
+                    alp.add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
 
-        if len(anticipated_change_cls) > 0:
-            best_cl = max(anticipated_change_cls, key=lambda cl: cl.fitness)
-            return best_cl.fitness
-
-        return 0.0
+        return new_list
 
     @staticmethod
     def apply_alp(population: ClassifiersList,
@@ -137,6 +142,9 @@ class ClassifiersList(TypedList):
                     alp.add_classifier(new_cl, population, new_list, theta_exp)
                 else:
                     alp.add_classifier(new_cl, action_set, new_list, theta_exp)
+
+        if cfg.do_pee:
+            ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
 
         # No classifier anticipated correctly - generate new one
         if not was_expected_case:
@@ -208,6 +216,9 @@ class ClassifiersList(TypedList):
                             if x]
                 for lst in lists:
                     lst.safe_remove(cl)
+
+        if cfg.do_pee:
+            ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
 
         # Merge classifiers from new_list into action_set and population
         action_set.extend(new_list)

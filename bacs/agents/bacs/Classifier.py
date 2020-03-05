@@ -6,21 +6,18 @@
 
 from __future__ import annotations
 
-import logging
 import random
+from copy import deepcopy
 from typing import Optional, Union, Callable, List
 
 from bacs import Perception
-from bacs.agents.bacs import Configuration, Condition, Effect, PMark
-
-
-logger = logging.getLogger(__name__)
+from bacs.agents.bacs import Configuration, Condition, Effect, PMark, ProbabilityEnhancedAttribute
 
 
 class Classifier:
 
     __slots__ = ['condition', 'action','behavioral_sequence' ,'effect', 'mark', 'q', 'r',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'cfg']
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'cfg', 'ee']
 
     def __init__(self,
                  condition: Union[Condition, str, None] = None,
@@ -52,32 +49,16 @@ class Classifier:
         self.action = action
         self.behavioral_sequence = behavioral_sequence
         self.effect = build_perception_string(Effect, effect)
-
         self.mark = PMark(cfg=self.cfg)
-
-        # Quality - measures the accuracy of the anticipations
         self.q = quality
-
-        # The reward prediction - predicts the reward expected after
-        # the execution of action A given condition C
         self.r = reward
-
-        # Immediate reward
         self.ir = immediate_reward
-
-        # Numerosity
         self.num = numerosity
-
-        # Experience
         self.exp = experience
-
-        # When ALP learning was triggered
         self.talp = talp
-
         self.tga = tga
-
-        # Application average
         self.tav = tav
+        self.ee = False
 
     def __eq__(self, other):
         if self.condition == other.condition and \
@@ -159,9 +140,14 @@ class Classifier:
         indices = []
 
         for idx, (cpi, epi) in enumerate(zip(self.condition, self.effect)):
-            if cpi != self.cfg.classifier_wildcard and \
-                    epi == self.cfg.classifier_wildcard:
-                indices.append(idx)
+            if isinstance(epi, ProbabilityEnhancedAttribute):
+                if cpi != self.cfg.classifier_wildcard and \
+                        epi.does_contain(cpi):
+                    indices.append(idx)
+            else:
+                if cpi != self.cfg.classifier_wildcard and \
+                        epi == self.cfg.classifier_wildcard:
+                    indices.append(idx)
 
         return indices
 
@@ -180,6 +166,9 @@ class Classifier:
         """
         return self.effect.specify_change
 
+    def is_enhanceable(self):
+        return self.ee
+
     def is_reliable(self) -> bool:
         return self.q > self.cfg.theta_r
 
@@ -197,6 +186,9 @@ class Classifier:
     def decrease_quality(self) -> float:
         self.q -= self.cfg.beta * self.q
         return self.q
+
+    def reverse_increase_quality(self):
+        self.q = (self.q - self.cfg.beta) / (1.0 - self.cfg.beta)
 
     def specialize(self,
                    previous_situation: Perception,
@@ -221,7 +213,12 @@ class Classifier:
                     continue
 
             if previous_situation[idx] != situation[idx]:
-                self.effect[idx] = situation[idx]
+                if self.effect[idx] == self.cfg.classifier_wildcard:
+                    self.effect[idx] = situation[idx]
+                elif self.cfg.do_pee:
+                    if not isinstance(self.effect[idx], ProbabilityEnhancedAttribute):
+                        self.effect[idx] = ProbabilityEnhancedAttribute(self.effect[idx])
+                    self.effect[idx].insert_symbol(situation[idx])
                 self.condition[idx] = previous_situation[idx]
 
     def predicts_successfully(self,
@@ -277,24 +274,7 @@ class Classifier:
             True if classifier's effect pat anticipates correctly,
             False otherwise
         """
-        def effect_item_is_correct(effect_item, p0_item, p1_item):
-            if effect_item == self.cfg.classifier_wildcard:
-                if p0_item != p1_item:
-                    return False
-            else:
-                if p0_item == p1_item:
-                    return False
-
-                if effect_item != p1_item:
-                    return False
-
-            # All checks passed
-            return True
-
-        return all(effect_item_is_correct(eitem,
-                                          previous_situation[idx],
-                                          situation[idx])
-                   for idx, eitem in enumerate(self.effect))
+        return self.effect.anticipates_correctly(previous_situation, situation)
 
     def set_mark(self, perception: Perception) -> None:
         """
@@ -305,7 +285,10 @@ class Classifier:
         perception: Perception
             current situation
         """
+        tmp = deepcopy(self.mark)
         self.mark.set_mark(perception)
+        if tmp != self.mark:
+            self.ee = False
 
     def set_alp_timestamp(self, time: int) -> None:
         """
@@ -374,3 +357,27 @@ class Classifier:
         :return:
         """
         return self.condition.does_match(situation)
+
+    def merge_with(self, other_classifier, perception, time):
+        assert self.cfg.do_pee
+        result = Classifier(cfg=self.cfg)
+        result.condition = Condition(self.condition)
+        result.condition.specialize_with_condition(other_classifier.condition)
+        # action is an int, so we can assign directly
+        result.action = self.action
+        result.effect = Effect.enhanced_effect(
+            self.effect, other_classifier.effect,
+            self.q, other_classifier.q,
+            perception)
+        result.mark = PMark(cfg=self.cfg)
+        result.r = (self.r + other_classifier.r) / 2.0
+        result.q = (self.q + other_classifier.q) / 2.0
+        # This 0.5 is Q_INI constant in the original C++ code
+        if result.q < 0.5: result.q = 0.5
+        result.num = 1
+        result.tga = time
+        result.talp = time
+        result.tav = 0
+        result.exp = 1
+        result.ee = False
+        return result

@@ -16,7 +16,7 @@ class Configuration:
                  environment_adapter=EnvironmentAdapter,
                  user_metrics_collector_fcn: Callable = None,
                  metrics_trial_frequency: int = 5,
-                 do_pee: bool = False, # TODO
+                 do_pee: bool = True, # TODO
                  do_ga: bool=False,
                  do_subsumption: bool=True,
                  beta: float=0.05,
