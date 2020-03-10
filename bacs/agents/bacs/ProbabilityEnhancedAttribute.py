@@ -1,3 +1,8 @@
+"""
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+"""
 
 class ProbabilityEnhancedAttribute(dict):
     def __init__(self, attr):
@@ -55,6 +60,12 @@ class ProbabilityEnhancedAttribute(dict):
         with probability 100%.
         """
         return sum(1 for k, v in self.items() if v > 0.0) > 1
+
+    def subsumes(self, other):
+        """
+        Check if one Pee subsumes another one
+        """
+        return self.keys() <= other.keys()
 
     def symbols_specified(self):
         return {k for k, v in self.items() if v > 0.0}

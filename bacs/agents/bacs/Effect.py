@@ -81,7 +81,21 @@ class Effect(AbstractPerception):
 
     def subsumes(self, other: Effect) -> bool:
         if self.is_enhanced() == other.is_enhanced():
-            return self == other
+            if self.is_enhanced():
+                for si, oi in zip(self, other):
+                    if isinstance(si, ProbabilityEnhancedAttribute):
+                        if isinstance(oi, ProbabilityEnhancedAttribute):
+                            if not si.subsumes(oi): return False
+                        else:
+                            if not si.does_contain(oi): return False
+                    else:
+                        if isinstance(oi, ProbabilityEnhancedAttribute):
+                            return False
+                        else:
+                            if si != oi: return False
+                return True
+            else:
+                return self == other
         else:
             if self.specify_change and other.specify_change:
                 for si, oi in zip(self, other):

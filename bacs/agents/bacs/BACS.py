@@ -33,7 +33,7 @@ class BACS(Agent):
     def get_cfg(self):
         return self.cfg
 
-    def clean_population(self, does_anticipate_change:bool = True, is_reliable:bool=False):
+    def zip_population(self, does_anticipate_change:bool = True, is_reliable:bool=False):
         # Remove multiple occurence of same classifiers
         self.population = ClassifiersList(*list(dict.fromkeys(self.population)))
         # Keep or not classifiers that anticipate changes
@@ -47,22 +47,30 @@ class BACS(Agent):
         # Clean enhanced effect if necessary
         for cl in self.population:
             cl.effect.clean()
-        # Compression
+        # Remove all classifier subsumed by another one that is strictly more general
         compact_pop = []
         for cl in self.population:
             to_keep = True
             for other in self.population:
                 if cl != other:
                     if does_subsume(other, cl, self.cfg.theta_exp):
-                        if (other.condition.specificity < cl.condition.specificity) or (other.condition.specificity == cl.condition.specificity and other.effect.is_enhanced()):
+                        if other.condition.specificity < cl.condition.specificity :
                             to_keep = False
                             break
-                        else:
-                            if find_subsumers(cl, compact_pop, self.cfg.theta_exp):
-                                to_keep = False
-                                break
             if to_keep:
                 compact_pop.append(cl)
+        self.population = ClassifiersList(*compact_pop)
+        # Remove all classifier subsumed by another one that is exactly as general as it
+        to_delete = []
+        for cl in self.population:
+            subsumers = find_subsumers(cl, self.population, self.cfg.theta_exp)
+            print(subsumers)
+            print('\n')
+            if len(subsumers) > 1:
+                for i in range(1, len(subsumers)):
+                    if subsumers[i] not in to_delete:
+                        to_delete.append(subsumers[i])
+        compact_pop = [cl for cl in self.population if cl not in to_delete]
         self.population = ClassifiersList(*compact_pop)
 
     def _run_trial_explore(self, env, time, current_trial=None) \
