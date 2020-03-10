@@ -19,11 +19,12 @@ class ProbabilityEnhancedAttribute(dict):
         """
         Create a new enhanced effect part.
         """
-        result = attr1.copy() \
-            if isinstance(attr1, ProbabilityEnhancedAttribute) \
-            else ProbabilityEnhancedAttribute(attr1)
+        result = attr1.copy() if isinstance(attr1, ProbabilityEnhancedAttribute) else ProbabilityEnhancedAttribute(attr1)
         result.insert(attr2, q1, q2)
         return result
+
+    def copy(self):
+        return ProbabilityEnhancedAttribute(self)
 
     def adjust_probabilities(self, prev_sum=None):
         """
@@ -58,6 +59,7 @@ class ProbabilityEnhancedAttribute(dict):
     def symbols_specified(self):
         return {k for k, v in self.items() if v > 0.0}
 
+# TODO
     def is_similar(self, other):
         """
         Determines if the two lists specify the same characters.

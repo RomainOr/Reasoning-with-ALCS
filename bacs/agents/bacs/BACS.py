@@ -36,6 +36,8 @@ class BACS(Agent):
     def clean_population(self, does_anticipate_change:bool = True):
         compact_pop = []
         for cl in self.population:
+            cl.effect.clean()
+        for cl in self.population:
             to_keep = True
             for other in self.population:
                 if does_subsume(other, cl, self.cfg.theta_exp):

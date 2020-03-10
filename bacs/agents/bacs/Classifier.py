@@ -83,7 +83,7 @@ class Classifier:
                f"{'(' + str(self.mark) + ')':21} q: {self.q:<5.3} " \
                f"r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
                f"exp: {self.exp:<3} tga: {self.tga:<5} talp: {self.talp:<5} " \
-               f"tav: {self.tav:<6.3} num: {self.num}"
+               f"tav: {self.tav:<6.3} num: {self.num} ee: {self.ee}"
 
     @classmethod
     def copy_from(cls, old_cls: Classifier, time: int):
@@ -322,6 +322,9 @@ class Classifier:
         bool
             True if classifier is more general than other
         """
+# TODO
+        if self.effect.is_enhanced() and not other.effect.is_enhanced():
+            return self.condition.specificity <= other.condition.specificity
         return self.condition.specificity < other.condition.specificity
 
     def generalize_unchanging_condition_attribute(

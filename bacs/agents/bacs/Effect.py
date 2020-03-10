@@ -73,8 +73,24 @@ class Effect(AbstractPerception):
             return True
         return all(item_anticipate_change(eitem, p0[idx], p1[idx], self.wildcard) for idx, eitem in enumerate(self))
     
+# TODO
     def subsumes(self, other: Effect) -> bool:
-        return self == other
+        if self.is_enhanced() == other.is_enhanced():
+            return self == other
+        else:
+            tmp = self.specify_change
+            for si, oi in zip(self, other):
+                if si == self.wildcard or oi == other.wildcard:
+                    continue
+                if isinstance(si, ProbabilityEnhancedAttribute) and not si.does_contain(oi):
+                    tmp = False
+            return tmp
+
+    def clean(self):
+        for idx, ei in enumerate(self):
+            if isinstance(ei, ProbabilityEnhancedAttribute):
+                if len(ei) == 1:
+                    self[idx] = next(iter(ei))
 
     def is_enhanced(self) -> bool:
         """
@@ -91,9 +107,7 @@ class Effect(AbstractPerception):
         return any(isinstance(elem, ProbabilityEnhancedAttribute)
                    for elem in self)
 
-    def update_enhanced_effect_probs(self,
-                                     perception: Perception,
-                                     update_rate: float):
+    def update_enhanced_effect_probs(self, perception: Perception, update_rate: float):
         for i, elem in enumerate(self):
             if isinstance(elem, ProbabilityEnhancedAttribute):
                 elem.make_compact()
@@ -101,9 +115,7 @@ class Effect(AbstractPerception):
                 elem.increase_probability(effect_symbol, update_rate)
 
     @classmethod
-    def enhanced_effect(cls, effect1, effect2,
-                        q1: float = 0.5, q2: float = 0.5,
-                        perception: AbstractPerception = None):
+    def enhanced_effect(cls, effect1, effect2, q1: float = 0.5, q2: float = 0.5, perception: AbstractPerception = None):
         """
         Create a new enhanced effect part.
         """
@@ -112,16 +124,10 @@ class Effect(AbstractPerception):
         wildcard = effect1.wildcard
         for i, attr2 in enumerate(effect2):
             attr1 = effect1[i]
-            if attr1 == wildcard and attr2 == wildcard:
-                continue
-            if attr1 == wildcard:
-                attr1 = perception[i]
-            if attr2 == wildcard:
-                attr2 = perception[i]
-
-            result[i] = ProbabilityEnhancedAttribute.merged_attributes(
-                attr1, attr2, q1, q2)
-
+            if attr1 == wildcard and attr2 == wildcard: continue
+            if attr1 == wildcard: attr1 = perception[i]
+            if attr2 == wildcard: attr2 = perception[i]
+            result[i] = ProbabilityEnhancedAttribute.merged_attributes(attr1, attr2, q1, q2)
         return result
 
     def __str__(self):

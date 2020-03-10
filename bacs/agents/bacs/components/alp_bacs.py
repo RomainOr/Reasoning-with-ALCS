@@ -115,22 +115,27 @@ def create_behavioral_classifier(
     :return: new behavioral classifier or None
     """
     if last_activated_classifier and last_activated_classifier.does_anticipate_change() and cl.does_anticipate_change():
-        child = Classifier(
-            action=last_activated_classifier.action, 
-            behavioral_sequence=[],
-            cfg=cl.cfg,
-            quality=max(last_activated_classifier.q, 0.5))
-        if last_activated_classifier.behavioral_sequence:
-            child.behavioral_sequence.extend(last_activated_classifier.behavioral_sequence)
-        child.behavioral_sequence.append(cl.action)
-        if cl.behavioral_sequence:
-            child.behavioral_sequence.extend(cl.behavioral_sequence)
-        if len(child.behavioral_sequence) <= child.cfg.bs_max:
+        nb_of_action = 1
+        if last_activated_classifier.behavioral_sequence: 
+            nb_of_action += len(last_activated_classifier.behavioral_sequence)
+        if cl.behavioral_sequence: 
+            nb_of_action += len(cl.behavioral_sequence)
+        if  nb_of_action <= cl.cfg.bs_max:
+            child = Classifier(
+                action=last_activated_classifier.action, 
+                behavioral_sequence=[],
+                cfg=cl.cfg,
+                quality=max(last_activated_classifier.q, 0.5))
+            if last_activated_classifier.behavioral_sequence:
+                child.behavioral_sequence.extend(last_activated_classifier.behavioral_sequence)
+            child.behavioral_sequence.append(cl.action)
+            if cl.behavioral_sequence:
+                child.behavioral_sequence.extend(cl.behavioral_sequence)
             # Passthrough operation on child condition was not used because it can create not relevant classifiers. We prefer setting up the child condition the same as the last activated classifier.
             # Thus, we garantee the creation of a classifier that can be used within the environment.
             child.condition = last_activated_classifier.condition
             # Passthrough operation on child effect
-            updated_passthrough(child.effect, last_activated_classifier.effect, cl.effect, cl.cfg.classifier_length,cl.cfg.classifier_wildcard, child.condition)
+            updated_passthrough(child.effect, last_activated_classifier.effect, cl.effect, cl.cfg.  classifier_length,cl.cfg.classifier_wildcard, child.condition)
             return child
     return None
 

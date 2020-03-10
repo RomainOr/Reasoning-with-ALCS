@@ -10,9 +10,6 @@ class AbstractPerception:
         self._items = obs
         self.wildcard = wildcard
 
-    #def wildcard(self):
-    #    return self._wildcard
-
     @classmethod
     def empty(cls, length: int, wildcard='#', oktypes=(str, dict)):
         """
