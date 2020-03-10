@@ -1,3 +1,9 @@
+"""
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+"""
+
 from __future__ import annotations
 
 from bacs import Perception
@@ -72,19 +78,28 @@ class Effect(AbstractPerception):
             # All checks passed
             return True
         return all(item_anticipate_change(eitem, p0[idx], p1[idx], self.wildcard) for idx, eitem in enumerate(self))
-    
-# TODO
+
     def subsumes(self, other: Effect) -> bool:
         if self.is_enhanced() == other.is_enhanced():
             return self == other
         else:
-            tmp = self.specify_change
-            for si, oi in zip(self, other):
-                if si == self.wildcard or oi == other.wildcard:
-                    continue
-                if isinstance(si, ProbabilityEnhancedAttribute) and not si.does_contain(oi):
-                    tmp = False
-            return tmp
+            if self.specify_change and other.specify_change:
+                for si, oi in zip(self, other):
+                    if isinstance(oi, ProbabilityEnhancedAttribute):
+                        if oi.does_contain(si):
+                            return False
+                        else:
+                            continue
+                    if isinstance(si, ProbabilityEnhancedAttribute):
+                        if not si.does_contain(oi):
+                            return False
+                        else: 
+                            continue
+                    if si != oi:
+                        return False
+                return True
+            else:
+                return False
 
     def clean(self):
         for idx, ei in enumerate(self):

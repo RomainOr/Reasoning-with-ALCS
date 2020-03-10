@@ -247,7 +247,6 @@ class Classifier:
             if self.action == action:
                 if self.does_anticipate_correctly(p0, p1):
                     return True
-
         return False
 
     def does_anticipate_correctly(self,
@@ -322,10 +321,7 @@ class Classifier:
         bool
             True if classifier is more general than other
         """
-# TODO
-        if self.effect.is_enhanced() and not other.effect.is_enhanced():
-            return self.condition.specificity <= other.condition.specificity
-        return self.condition.specificity < other.condition.specificity
+        return self.condition.specificity <= other.condition.specificity
 
     def generalize_unchanging_condition_attribute(
             self, randomfunc: Callable=random.choice) -> bool:

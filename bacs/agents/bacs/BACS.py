@@ -33,23 +33,31 @@ class BACS(Agent):
     def get_cfg(self):
         return self.cfg
 
-    def clean_population(self, does_anticipate_change:bool = True):
-        compact_pop = []
-        for cl in self.population:
-            cl.effect.clean()
-        for cl in self.population:
-            to_keep = True
-            for other in self.population:
-                if does_subsume(other, cl, self.cfg.theta_exp):
-                    to_keep = False
-                    break
-            if to_keep:
-                compact_pop.append(cl)
-        self.population = ClassifiersList(*compact_pop)
-
+    def clean_population(self, does_anticipate_change:bool = True, is_reliable:bool=False):
+        # Keep or not classifiers that anticipate changes
         if does_anticipate_change:
             pop = [cl for cl in self.population if cl.does_anticipate_change()]
             self.population = ClassifiersList(*pop)
+        # Keep all classifiers or only reliable classifiers
+        if is_reliable:
+            pop = [cl for cl in self.population if cl.is_reliable()]
+            self.population = ClassifiersList(*pop)
+        # Clean enhanced effect if necessary
+        compact_pop = []
+        for cl in self.population:
+            cl.effect.clean()
+        # Compression
+        for cl in self.population:
+            to_keep = True
+            for other in self.population:
+                if cl != other:
+                    if does_subsume(other, cl, self.cfg.theta_exp):
+                       if cl.fitness < other.fitness:
+                           to_keep = False
+                           break
+            if to_keep:
+                compact_pop.append(cl)
+        self.population = ClassifiersList(*compact_pop)
 
     def _run_trial_explore(self, env, time, current_trial=None) \
             -> TrialMetrics:

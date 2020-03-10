@@ -59,7 +59,6 @@ class ProbabilityEnhancedAttribute(dict):
     def symbols_specified(self):
         return {k for k, v in self.items() if v > 0.0}
 
-# TODO
     def is_similar(self, other):
         """
         Determines if the two lists specify the same characters.
