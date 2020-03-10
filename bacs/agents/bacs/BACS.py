@@ -64,8 +64,6 @@ class BACS(Agent):
         to_delete = []
         for cl in self.population:
             subsumers = find_subsumers(cl, self.population, self.cfg.theta_exp)
-            print(subsumers)
-            print('\n')
             if len(subsumers) > 1:
                 for i in range(1, len(subsumers)):
                     if subsumers[i] not in to_delete:

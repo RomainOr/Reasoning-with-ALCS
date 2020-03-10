@@ -114,7 +114,7 @@ def create_behavioral_classifier(
     :param cl:
     :return: new behavioral classifier or None
     """
-    if last_activated_classifier and last_activated_classifier.does_anticipate_change() and cl.does_anticipate_change():
+    if last_activated_classifier and last_activated_classifier.does_anticipate_change() and cl.does_anticipate_change() and not cl.effect.is_enhanced():
         nb_of_action = 1
         if last_activated_classifier.behavioral_sequence: 
             nb_of_action += len(last_activated_classifier.behavioral_sequence)
