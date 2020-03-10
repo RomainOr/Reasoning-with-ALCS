@@ -12,7 +12,7 @@ from bacs.agents.Agent import Agent, TrialMetrics
 from bacs.agents.bacs import Classifier, ClassifiersList, Configuration
 from bacs.agents.bacs.Condition import Condition
 from bacs.agents.bacs.Effect import Effect
-from bacs.agents.bacs.components.subsumption_bacs import does_subsume
+from bacs.agents.bacs.components.subsumption_bacs import does_subsume, find_subsumers
 from bacs.agents.bacs.components.action_selection_bacs import choose_classifier, choose_fittest_classifier
 
 import numpy as np
@@ -34,6 +34,8 @@ class BACS(Agent):
         return self.cfg
 
     def clean_population(self, does_anticipate_change:bool = True, is_reliable:bool=False):
+        # Remove multiple occurence of same classifiers
+        self.population = ClassifiersList(*list(dict.fromkeys(self.population)))
         # Keep or not classifiers that anticipate changes
         if does_anticipate_change:
             pop = [cl for cl in self.population if cl.does_anticipate_change()]
@@ -43,18 +45,22 @@ class BACS(Agent):
             pop = [cl for cl in self.population if cl.is_reliable()]
             self.population = ClassifiersList(*pop)
         # Clean enhanced effect if necessary
-        compact_pop = []
         for cl in self.population:
             cl.effect.clean()
         # Compression
+        compact_pop = []
         for cl in self.population:
             to_keep = True
             for other in self.population:
                 if cl != other:
                     if does_subsume(other, cl, self.cfg.theta_exp):
-                       if cl.fitness < other.fitness:
-                           to_keep = False
-                           break
+                        if (other.condition.specificity < cl.condition.specificity) or (other.condition.specificity == cl.condition.specificity and other.effect.is_enhanced()):
+                            to_keep = False
+                            break
+                        else:
+                            if find_subsumers(cl, compact_pop, self.cfg.theta_exp):
+                                to_keep = False
+                                break
             if to_keep:
                 compact_pop.append(cl)
         self.population = ClassifiersList(*compact_pop)
