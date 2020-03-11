@@ -7,7 +7,6 @@
 from __future__ import annotations
 
 import random
-from copy import deepcopy
 from typing import Optional, Union, Callable, List
 
 from bacs import Perception
@@ -284,10 +283,7 @@ class Classifier:
         perception: Perception
             current situation
         """
-        tmp = deepcopy(self.mark)
-        self.mark.set_mark(perception)
-        if tmp != self.mark:
-            self.ee = False
+        self.ee = self.mark.set_mark(perception, self.ee)
 
     def set_alp_timestamp(self, time: int) -> None:
         """

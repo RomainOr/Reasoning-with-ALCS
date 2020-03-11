@@ -20,7 +20,7 @@ class PMark(TypedList):
         """
         return any(len(attrib) != 0 for attrib in self)
 
-    def set_mark(self, perception: Perception):
+    def set_mark(self, perception: Perception, is_ee: bool) -> bool:
         """
         Specializes the mark in all attributes
 
@@ -29,9 +29,12 @@ class PMark(TypedList):
         perception: Perception
             current situation
         """
+        set_ee = is_ee
         for idx, item in enumerate(perception):
             if item not in self[idx]:
                 self[idx].add(perception[idx])
+                set_ee = False
+        return set_ee
 
     def get_differences(self, p0: Perception) -> Condition:
         """
