@@ -170,12 +170,12 @@ def expected_case(
     :param time:
     :return: new classifier or None
     """
-    if cl.cfg.do_pee:
+    if cl.ee:
         cl.effect.update_enhanced_effect_probs(p0, cl.cfg.beta)
 
     if not specification_of_unchanging_components_status(cl.condition, cl.mark, p0):
         if last_activated_classifier is not None:
-            if cl.cfg.do_pee and cl.is_marked(): cl.ee = True
+            if cl.cfg.do_pee: cl.ee = True
             child = create_behavioral_classifier(last_activated_classifier, cl)
             if child:
                 return child
@@ -232,16 +232,16 @@ def unexpected_case(
     """
     cl.decrease_quality()
     cl.set_mark(p0)
-    # Return if the effect is not specializable
-    if not cl.effect.is_specializable(p0, p1):
-        return None
     child = cl.copy_from(cl, time)
-    if cl.cfg.do_pee:
+    if cl.ee:
         # Probability-Enhanced attributes cannot appear in the effect part
         # if we leave already specialized attributes unchanged.
         # Therefore don't leave specialized.
         child.specialize(p0, p1, leave_specialized=False)
     else:
+        # Return if the effect is not specializable
+        if not cl.effect.is_specializable(p0, p1):
+            return None
         child.specialize(p0, p1, leave_specialized=True)
     if child.q < 0.5:
         child.q = 0.5

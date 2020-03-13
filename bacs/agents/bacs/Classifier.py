@@ -169,6 +169,9 @@ class Classifier:
     def is_enhanceable(self):
         return self.ee
 
+    def is_enhanced(self):
+        return self.effect.is_enhanced()
+
     def is_reliable(self) -> bool:
         return self.q > self.cfg.theta_r
 
@@ -217,7 +220,7 @@ class Classifier:
             if previous_situation[idx] != situation[idx]:
                 if self.effect[idx] == self.cfg.classifier_wildcard:
                     self.effect[idx] = situation[idx]
-                elif self.cfg.do_pee:
+                elif self.ee:
                     if not isinstance(self.effect[idx], ProbabilityEnhancedAttribute):
                         self.effect[idx] = ProbabilityEnhancedAttribute(self.effect[idx])
                     self.effect[idx].insert_symbol(situation[idx])
@@ -363,7 +366,6 @@ class Classifier:
         return self.condition.does_match(situation)
 
     def merge_with(self, other_classifier, perception, time):
-        assert self.cfg.do_pee
         result = Classifier(cfg=self.cfg)
         result.condition = Condition(self.condition)
         result.condition.specialize_with_condition(other_classifier.condition)

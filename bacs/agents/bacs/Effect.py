@@ -163,9 +163,7 @@ class Effect(AbstractPerception):
         result = cls(observation=effect1)
         wildcard = effect1.wildcard
         for i, attr2 in enumerate(effect2):
-        #for i, e2i in enumerate(effect2):
             attr1 = effect1[i]
-            #attr2 = e2i
             if attr1 == wildcard and attr2 == wildcard: continue
             if attr1 == wildcard: attr1 = perception[i]
             if attr2 == wildcard: attr2 = perception[i]
