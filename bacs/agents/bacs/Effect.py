@@ -136,7 +136,11 @@ class Effect(AbstractPerception):
         return any(isinstance(elem, ProbabilityEnhancedAttribute)
                    for elem in self)
 
-    def update_enhanced_effect_probs(self, perception: Perception, update_rate: float):
+    def update_enhanced_effect_probs(
+            self, 
+            perception: Perception, 
+            update_rate: float
+        ):
         for i, elem in enumerate(self):
             if isinstance(elem, ProbabilityEnhancedAttribute):
                 elem.make_compact()
@@ -144,7 +148,14 @@ class Effect(AbstractPerception):
                 elem.increase_probability(effect_symbol, update_rate)
 
     @classmethod
-    def enhanced_effect(cls, effect1, effect2, q1: float = 0.5, q2: float = 0.5, perception: AbstractPerception = None):
+    def enhanced_effect(
+            cls, 
+            effect1, 
+            effect2, 
+            q1: float = 0.5, 
+            q2: float = 0.5, 
+            perception: AbstractPerception = None
+        ):
         """
         Create a new enhanced effect part.
         """
@@ -152,7 +163,9 @@ class Effect(AbstractPerception):
         result = cls(observation=effect1)
         wildcard = effect1.wildcard
         for i, attr2 in enumerate(effect2):
+        #for i, e2i in enumerate(effect2):
             attr1 = effect1[i]
+            #attr2 = e2i
             if attr1 == wildcard and attr2 == wildcard: continue
             if attr1 == wildcard: attr1 = perception[i]
             if attr2 == wildcard: attr2 = perception[i]

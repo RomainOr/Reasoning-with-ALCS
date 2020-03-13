@@ -18,28 +18,32 @@ class Classifier:
     __slots__ = ['condition', 'action','behavioral_sequence' ,'effect', 'mark', 'q', 'r',
                  'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'cfg', 'ee']
 
-    def __init__(self,
-                 condition: Union[Condition, str, None] = None,
-                 action: Optional[int] = None,
-                 behavioral_sequence: Optional[List[int]] = None,
-                 effect: Union[Effect, str, None] = None,
-                 quality: float=0.5,
-                 reward: float=0.5,
-                 immediate_reward: float=0.0,
-                 numerosity: int=1,
-                 experience: int=1,
-                 talp: int=0,
-                 tga: int=0,
-                 tav: float=0.0,
-                 cfg: Optional[Configuration] = None) -> None:
-
+    def __init__(
+            self,
+            condition: Union[Condition, str, None] = None,
+            action: Optional[int] = None,
+            behavioral_sequence: Optional[List[int]] = None,
+            effect: Union[Effect, str, None] = None,
+            quality: float=0.5,
+            reward: float=0.5,
+            immediate_reward: float=0.0,
+            numerosity: int=1,
+            experience: int=1,
+            talp: int=0,
+            tga: int=0,
+            tav: float=0.0,
+            cfg: Optional[Configuration] = None
+        ) -> None:
         if cfg is None:
             raise TypeError("Configuration should be passed to Classifier")
         self.cfg = cfg
 
-        def build_perception_string(cls, initial,
-                                    length=self.cfg.classifier_length,
-                                    wildcard=self.cfg.classifier_wildcard):
+        def build_perception_string(
+                cls,
+                initial,
+                length=self.cfg.classifier_length,
+                wildcard=self.cfg.classifier_wildcard
+            ):
             if initial:
                 return cls(initial, wildcard=wildcard)
             return cls.empty(wildcard=wildcard, length=length)
@@ -104,8 +108,7 @@ class Classifier:
             copied classifier
         """
         new_cls = cls(
-            condition=Condition(old_cls.condition,
-                                old_cls.cfg.classifier_wildcard),
+            condition=Condition(old_cls.condition, old_cls.cfg.classifier_wildcard),
             action=old_cls.action,
             behavioral_sequence=old_cls.behavioral_sequence,
             effect=old_cls.effect,
@@ -113,11 +116,9 @@ class Classifier:
             reward=old_cls.r,
             immediate_reward=old_cls.ir,
             cfg=old_cls.cfg)
-
         new_cls.tga = time
         new_cls.talp = time
         new_cls.tav = old_cls.tav
-
         return new_cls
 
     @property
@@ -189,10 +190,12 @@ class Classifier:
     def reverse_increase_quality(self):
         self.q = (self.q - self.cfg.beta) / (1.0 - self.cfg.beta)
 
-    def specialize(self,
-                   previous_situation: Perception,
-                   situation: Perception,
-                   leave_specialized=False) -> None:
+    def specialize(
+            self,
+            previous_situation: Perception,
+            situation: Perception,
+            leave_specialized=False
+        ) -> None:
         """
         Specializes the effect part where necessary to correctly anticipate
         the changes from p0 to p1.
@@ -220,10 +223,12 @@ class Classifier:
                     self.effect[idx].insert_symbol(situation[idx])
                 self.condition[idx] = previous_situation[idx]
 
-    def predicts_successfully(self,
-                              p0: Perception,
-                              action: int,
-                              p1: Perception) -> bool:
+    def predicts_successfully(
+            self,
+            p0: Perception,
+            action: int,
+            p1: Perception
+        ) -> bool:
         """
         Check if classifier matches previous situation `p0`,
         has action `action` and predicts the effect `p1`
@@ -248,9 +253,11 @@ class Classifier:
                     return True
         return False
 
-    def does_anticipate_correctly(self,
-                                  previous_situation: Perception,
-                                  situation: Perception) -> bool:
+    def does_anticipate_correctly(
+            self,
+            previous_situation: Perception,
+            situation: Perception
+        ) -> bool:
         """
         Checks anticipation. While the pass-through symbols in the effect part
         of a classifier directly anticipate that these attributes stay the same
@@ -320,7 +327,9 @@ class Classifier:
         return self.condition.specificity <= other.condition.specificity
 
     def generalize_unchanging_condition_attribute(
-            self, randomfunc: Callable=random.choice) -> bool:
+                self,
+                randomfunc: Callable=random.choice
+            ) -> bool:
         """
         Generalizes one randomly unchanging attribute in the condition.
         An unchanging attribute is one that is anticipated not to change

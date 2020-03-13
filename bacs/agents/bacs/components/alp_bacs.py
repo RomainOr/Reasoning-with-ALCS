@@ -10,11 +10,13 @@ from typing import Optional
 from bacs import Perception
 from bacs.agents.bacs import Classifier, ClassifiersList, Condition, Configuration, PMark
 
-def cover(p0: Perception,
-          action: int,
-          p1: Perception,
-          time: int,
-          cfg: Configuration) -> Classifier:
+def cover(
+        p0: Perception,
+        action: int,
+        p1: Perception,
+        time: int,
+        cfg: Configuration
+    ) -> Classifier:
     """
     Covering - creates a classifier that anticipates a change correctly.
     The reward of the new classifier is set to 0 to prevent *reward bubbles*
@@ -48,9 +50,11 @@ def cover(p0: Perception,
     return new_cl
 
 
-def specification_of_unchanging_components_status(condition: Condition,
-                  mark: PMark,
-                  p0: Perception) -> bool:
+def specification_of_unchanging_components_status(
+        condition: Condition,
+        mark: PMark,
+        p0: Perception
+    ) -> bool:
     """
     Check if the specification of unchanging components succeed or failed.
     Help to detect aliased states in POMDPs.
@@ -73,7 +77,14 @@ def specification_of_unchanging_components_status(condition: Condition,
         return not situation.does_match(p0)
     return True
 
-def updated_passthrough(percept, A, B, L, wildcard, condition):
+def updated_passthrough(
+        percept, 
+        A, 
+        B, 
+        L, 
+        wildcard, 
+        condition
+    ):
     """
     Passthrough operator defined by Stolzmann that we have refined.
     It is only used on the effect component of classifiers.
@@ -106,7 +117,8 @@ def updated_passthrough(percept, A, B, L, wildcard, condition):
 
 def create_behavioral_classifier(
         last_activated_classifier: Classifier,
-        cl: Classifier) -> Optional[Classifier]:
+        cl: Classifier
+    ) -> Optional[Classifier]:
     """
     Build a behavioral classifier.
 
@@ -143,7 +155,8 @@ def expected_case(
         last_activated_classifier: Classifier,
         cl: Classifier,
         p0: Perception,
-        time: int) -> Optional[Classifier]:
+        time: int
+    ) -> Optional[Classifier]:
     """
     Controls the expected case of a classifier with the help of 
     Specification of Unchanging Components.
@@ -201,10 +214,12 @@ def expected_case(
 
     return child
 
-def unexpected_case(cl: Classifier,
-                    p0: Perception,
-                    p1: Perception,
-                    time: int) -> Optional[Classifier]:
+def unexpected_case(
+        cl: Classifier,
+        p0: Perception,
+        p1: Perception,
+        time: int
+    ) -> Optional[Classifier]:
     """
     Controls the unexpected case of the classifier.
 
@@ -217,13 +232,10 @@ def unexpected_case(cl: Classifier,
     """
     cl.decrease_quality()
     cl.set_mark(p0)
-
     # Return if the effect is not specializable
     if not cl.effect.is_specializable(p0, p1):
         return None
-
     child = cl.copy_from(cl, time)
-
     if cl.cfg.do_pee:
         # Probability-Enhanced attributes cannot appear in the effect part
         # if we leave already specialized attributes unchanged.
@@ -231,8 +243,6 @@ def unexpected_case(cl: Classifier,
         child.specialize(p0, p1, leave_specialized=False)
     else:
         child.specialize(p0, p1, leave_specialized=True)
-
     if child.q < 0.5:
         child.q = 0.5
-
     return child

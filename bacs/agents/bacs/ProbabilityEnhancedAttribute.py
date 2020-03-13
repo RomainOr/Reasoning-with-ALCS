@@ -16,11 +16,13 @@ class ProbabilityEnhancedAttribute(dict):
         self.adjust_probabilities()
 
     @classmethod
-    def merged_attributes(cls,
-                          attr1,
-                          attr2,
-                          q1: float = 0.5,
-                          q2: float = 0.5):
+    def merged_attributes(
+            cls,
+            attr1,
+            attr2,
+            q1: float = 0.5,
+            q2: float = 0.5
+        ):
         """
         Create a new enhanced effect part.
         """
