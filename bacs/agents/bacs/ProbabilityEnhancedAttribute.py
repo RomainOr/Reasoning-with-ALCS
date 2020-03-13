@@ -33,23 +33,6 @@ class ProbabilityEnhancedAttribute(dict):
     def copy(self):
         return ProbabilityEnhancedAttribute(self)
 
-    def adjust_probabilities(self, prev_sum=None):
-        """
-        Adjust the probabilities to sum to one
-        """
-        if prev_sum is None:
-            prev_sum = sum(self.get(symbol, 0.0) for symbol in self)
-        for symbol in self:
-            self[symbol] /= prev_sum
-
-    def increase_probability(self, effect_symbol, update_rate):
-        if effect_symbol not in self:
-            return False
-        update_delta = update_rate * (1 - self[effect_symbol])
-        self[effect_symbol] += update_delta
-        self.adjust_probabilities(1.0 + update_delta)
-        return True
-
     def does_contain(self, symbol):
         """
         Checks whether the specified symbol occurs in the attribute.
@@ -67,7 +50,7 @@ class ProbabilityEnhancedAttribute(dict):
         """
         Check if one Pee subsumes another one
         """
-        return self.keys() <= other.keys()
+        return self.keys() >= other.keys()
 
     def symbols_specified(self):
         return {k for k, v in self.items() if v > 0.0}
@@ -86,6 +69,23 @@ class ProbabilityEnhancedAttribute(dict):
         for symbol, prob in list(self.items()):
             if prob == 0.0:
                 del self[symbol]
+
+    def adjust_probabilities(self, prev_sum=None):
+        """
+        Adjust the probabilities to sum to one
+        """
+        if prev_sum is None:
+            prev_sum = sum(self.get(symbol, 0.0) for symbol in self)
+        for symbol in self:
+            self[symbol] /= prev_sum
+
+    def increase_probability(self, effect_symbol, update_rate):
+        if effect_symbol not in self:
+            return False
+        update_delta = update_rate * (1 - self[effect_symbol])
+        self[effect_symbol] += update_delta
+        self.adjust_probabilities(1.0 + update_delta)
+        return True
 
     def insert_symbol(self, symbol, q1=1.0, q2=None):
         if q2 is None:

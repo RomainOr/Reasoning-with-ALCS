@@ -183,6 +183,8 @@ def expected_case(
             if cl.cfg.do_pee: cl.ee = True
             child = create_behavioral_classifier(last_activated_classifier, cl, p1)
             if child:
+                child.tga = time
+                child.talp = time
                 return child
 
     diff = cl.mark.get_differences(p0)

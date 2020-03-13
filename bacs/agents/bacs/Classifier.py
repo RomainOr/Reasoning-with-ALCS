@@ -115,7 +115,8 @@ class Classifier:
             quality=old_cls.q,
             reward=old_cls.r,
             immediate_reward=old_cls.ir,
-            cfg=old_cls.cfg)
+            cfg=old_cls.cfg
+        )
         new_cls.tga = time
         new_cls.talp = time
         new_cls.tav = old_cls.tav
@@ -366,26 +367,25 @@ class Classifier:
         return self.condition.does_match(situation)
 
     def merge_with(self, other_classifier, perception, time):
-        result = Classifier(cfg=self.cfg)
-        if self.condition.specificity <= other_classifier.condition.specificity:
-            result.condition = Condition(self.condition)
-        else:
-            result.condition = Condition(other_classifier.condition)
-        # action is an int, so we can assign directly
-        result.action = self.action
+        result = Classifier(
+            action = self.action,
+            behavioral_sequence = self.behavioral_sequence,
+            quality = max((self.q + other_classifier.q) / 2.0, 0.5),
+            reward = (self.r + other_classifier.r) / 2.0,
+            talp = time,
+            tga = time,
+            cfg = self.cfg
+        )
+        # Vérifier que je n'ai pas la création de ce genre de truc:
+        # 00000009 7 None {0:65%, 9:35%}#####{9:58%, 0:42%}0 (empty)
+        result.condition = Condition(self.condition)
+        result.condition.specialize_with_condition(other_classifier.condition)
+        #if self.condition.specificity <= other_classifier.condition.specificity:
+        #    result.condition = Condition(self.condition)
+        #else:
+        #    result.condition = Condition(other_classifier.condition)
         result.effect = Effect.enhanced_effect(
             self.effect, other_classifier.effect,
             self.q, other_classifier.q,
             perception)
-        result.mark = PMark(cfg=self.cfg)
-        result.r = (self.r + other_classifier.r) / 2.0
-        result.q = (self.q + other_classifier.q) / 2.0
-        # This 0.5 is Q_INI constant in the original C++ code
-        if result.q < 0.5: result.q = 0.5
-        result.num = 1
-        result.tga = time
-        result.talp = time
-        result.tav = 0
-        result.exp = 1
-        result.ee = False
         return result
