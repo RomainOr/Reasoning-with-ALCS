@@ -9,6 +9,7 @@ from typing import Optional
 
 from bacs import Perception
 from bacs.agents.bacs import Classifier, ClassifiersList, Condition, Configuration, PMark
+from bacs.agents.bacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
 
 def cover(
         p0: Perception,
@@ -78,12 +79,11 @@ def specification_of_unchanging_components_status(
     return True
 
 def updated_passthrough(
-        percept, 
-        A, 
-        B, 
-        L, 
-        wildcard, 
-        condition
+        child_effect, 
+        penultimate_effect, 
+        last_effect, 
+        perception,
+        child_condition
     ):
     """
     Passthrough operator defined by Stolzmann that we have refined.
@@ -91,13 +91,11 @@ def updated_passthrough(
 
     Parameters
     ----------
-    :param percept: 
+    :param result: 
         The effect component to compute
-    :param A: 
-    :param B:
-    :param L: 
-        Length of the classifier
-    :param wildcard:
+    :param penultimate_classifier: 
+    :param last_effect:
+    :param perception:
     :param condition: 
         Condition component to remove unnecessary specification of effect attributes
 
@@ -105,28 +103,33 @@ def updated_passthrough(
     -------
     :return: bool
     """
-    for i in range(L):
-        if B[i] == wildcard:
-            percept[i] = A[i]
+    for i in range(len(child_effect)):
+        if last_effect[i] == child_effect.wildcard:
+            child_effect[i] = penultimate_effect[i]
         else:
-            percept[i] = B[i]
+            if isinstance(last_effect[i], ProbabilityEnhancedAttribute):
+                child_effect[i] = perception[i]
+            else:
+                child_effect[i] = last_effect[i]
     # Refining effect
-    for idx, effect_item in enumerate(percept):
-        if effect_item != wildcard and effect_item == condition[idx]:
-            percept[idx] = wildcard
+    for idx, effect_item in enumerate(child_effect):
+        if effect_item != child_effect.wildcard and effect_item == child_condition[idx]:
+            child_effect[idx] = child_effect.wildcard
 
 def create_behavioral_classifier(
         last_activated_classifier: Classifier,
-        cl: Classifier
+        cl: Classifier,
+        p1: Perception
     ) -> Optional[Classifier]:
     """
     Build a behavioral classifier.
 
     :param last_activated_classifier:
     :param cl:
+    :param p1:
     :return: new behavioral classifier or None
     """
-    if last_activated_classifier and last_activated_classifier.does_anticipate_change() and cl.does_anticipate_change() and not cl.effect.is_enhanced():
+    if last_activated_classifier and last_activated_classifier.does_anticipate_change() and cl.does_anticipate_change():
         nb_of_action = 1
         if last_activated_classifier.behavioral_sequence: 
             nb_of_action += len(last_activated_classifier.behavioral_sequence)
@@ -147,7 +150,7 @@ def create_behavioral_classifier(
             # Thus, we garantee the creation of a classifier that can be used within the environment.
             child.condition = last_activated_classifier.condition
             # Passthrough operation on child effect
-            updated_passthrough(child.effect, last_activated_classifier.effect, cl.effect, cl.cfg.  classifier_length,cl.cfg.classifier_wildcard, child.condition)
+            updated_passthrough(child.effect, last_activated_classifier.effect, cl.effect, p1, child.condition)
             return child
     return None
 
@@ -155,6 +158,7 @@ def expected_case(
         last_activated_classifier: Classifier,
         cl: Classifier,
         p0: Perception,
+        p1: Perception,
         time: int
     ) -> Optional[Classifier]:
     """
@@ -167,6 +171,7 @@ def expected_case(
     :param last_activated_classifier:
     :param cl:
     :param p0:
+    :param p1:
     :param time:
     :return: new classifier or None
     """
@@ -176,7 +181,7 @@ def expected_case(
     if not specification_of_unchanging_components_status(cl.condition, cl.mark, p0):
         if last_activated_classifier is not None:
             if cl.cfg.do_pee: cl.ee = True
-            child = create_behavioral_classifier(last_activated_classifier, cl)
+            child = create_behavioral_classifier(last_activated_classifier, cl, p1)
             if child:
                 return child
 

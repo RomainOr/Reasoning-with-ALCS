@@ -123,7 +123,7 @@ class ClassifiersList(TypedList):
             cl.set_alp_timestamp(time)
 
             if cl.does_anticipate_correctly(p0, p1):
-                new_cl = alp_bacs.expected_case(last_activated_classifier, cl, p0, time)
+                new_cl = alp_bacs.expected_case(last_activated_classifier, cl, p0, p1, time)
                 was_expected_case = True
             else:
                 new_cl = alp_bacs.unexpected_case(cl, p0, p1, time)
@@ -199,7 +199,7 @@ class ClassifiersList(TypedList):
                 cl.decrease_quality()
             # Expected case
             elif cl.does_anticipate_correctly(p0, p1):
-                new_cl = alp_bacs.expected_case(None, cl, p0, time)
+                new_cl = alp_bacs.expected_case(None, cl, p0, p1, time)
             # Unexpected case
             else:
                 new_cl = alp_bacs.unexpected_case(cl, p0, p1, time)
