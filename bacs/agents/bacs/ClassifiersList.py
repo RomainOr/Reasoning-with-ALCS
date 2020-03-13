@@ -58,20 +58,21 @@ class ClassifiersList(TypedList):
         return list(chain.from_iterable(list2d))
 
     @staticmethod
-    def apply_enhanced_effect_part_check(action_set: ClassifiersList,
-                                         new_list: ClassifiersList,
-                                         previous_situation: Perception,
-                                         time: int,
-                                         cfg: Configuration):
+    def apply_enhanced_effect_part_check(
+            action_set: ClassifiersList,
+            new_list: ClassifiersList,
+            previous_situation: Perception,
+            time: int,
+            cfg: Configuration
+        ):
         # Create a list of candidates.
         # Every enhanceable classifier is a candidate.
         candidates = [classifier for classifier in action_set if classifier.is_enhanceable()]
         # If there are less than 2 candidates, don't do it
         if len(candidates) < 2:
             return
-
         for candidate in candidates:
-            candidates2 = [classifier for classifier in candidates if candidate != classifier]
+            candidates2 = [cl for cl in candidates if candidate != cl and cl.mark == candidate.mark]
             if len(candidates2) > 0:
                 merger = random.choice(candidates2)
                 new_classifier = candidate.merge_with(merger, previous_situation, time)
@@ -82,16 +83,18 @@ class ClassifiersList(TypedList):
         return new_list
 
     @staticmethod
-    def apply_alp(population: ClassifiersList,
-                  match_set: ClassifiersList,
-                  action_set: ClassifiersList,
-                  p0: Perception,
-                  action: int,
-                  p1: Perception,
-                  last_activated_classifier: Classifier,
-                  time: int,
-                  theta_exp: int,
-                  cfg: Configuration) -> None:
+    def apply_alp(
+            population: ClassifiersList,
+            match_set: ClassifiersList,
+            action_set: ClassifiersList,
+            p0: Perception,
+            action: int,
+            p1: Perception,
+            last_activated_classifier: Classifier,
+            time: int,
+            theta_exp: int,
+            cfg: Configuration
+        ) -> None:
         """
         The Anticipatory Learning Process. Handles all updates by the ALP,
         insertion of new classifiers in pop and possibly matchSet, and
@@ -161,14 +164,16 @@ class ClassifiersList(TypedList):
             match_set.extend(new_matching)
 
     @staticmethod
-    def apply_alp_behavioral_sequence(population: ClassifiersList,
-                  match_set: ClassifiersList,
-                  action_set: ClassifiersList,
-                  p0: Perception,
-                  p1: Perception,
-                  time: int,
-                  theta_exp: int,
-                  cfg: Configuration) -> None:
+    def apply_alp_behavioral_sequence(
+            population: ClassifiersList,
+            match_set: ClassifiersList,
+            action_set: ClassifiersList,
+            p0: Perception,
+            p1: Perception,
+            time: int,
+            theta_exp: int,
+            cfg: Configuration
+        ) -> None:
         """
         The Anticipatory Learning Process when a behavioral sequence has been executed
 
@@ -230,26 +235,30 @@ class ClassifiersList(TypedList):
             match_set.extend(new_matching)
 
     @staticmethod
-    def apply_reinforcement_learning(action_set: ClassifiersList,
-                                     reward: int,
-                                     p: float,
-                                     beta: float,
-                                     gamma: float) -> None:
+    def apply_reinforcement_learning(
+            action_set: ClassifiersList,
+            reward: int,
+            p: float,
+            beta: float,
+            gamma: float
+        ) -> None:
         for cl in action_set:
             rl.update_classifier(cl, reward, p, beta, gamma)
 
     @staticmethod
-    def apply_ga(time: int,
-                 population: ClassifiersList,
-                 match_set: ClassifiersList,
-                 action_set: ClassifiersList,
-                 p: Perception,
-                 theta_ga: int,
-                 mu: float,
-                 chi: float,
-                 theta_as: int,
-                 do_subsumption: bool,
-                 theta_exp: int) -> None:
+    def apply_ga(
+            time: int,
+            population: ClassifiersList,
+            match_set: ClassifiersList,
+            action_set: ClassifiersList,
+            p: Perception,
+            theta_ga: int,
+            mu: float,
+            chi: float,
+            theta_as: int,
+            do_subsumption: bool,
+            theta_exp: int
+        ) -> None:
 
         if len(action_set) < 2 or action_set[0].behavioral_sequence :
             return

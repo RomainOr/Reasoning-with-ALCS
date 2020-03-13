@@ -367,8 +367,10 @@ class Classifier:
 
     def merge_with(self, other_classifier, perception, time):
         result = Classifier(cfg=self.cfg)
-        result.condition = Condition(self.condition)
-        result.condition.specialize_with_condition(other_classifier.condition)
+        if self.condition.specificity <= other_classifier.condition.specificity:
+            result.condition = Condition(self.condition)
+        else:
+            result.condition = Condition(other_classifier.condition)
         # action is an int, so we can assign directly
         result.action = self.action
         result.effect = Effect.enhanced_effect(
