@@ -121,7 +121,12 @@ class ClassifiersList(TypedList):
         new_cl: Optional[Classifier] = None
         was_expected_case = False
 
-        for cl in action_set:
+        idx = 0
+        action_set_length = 0
+        if action_set: action_set_length = len(action_set)
+
+        while(idx < action_set_length):
+            cl = action_set[idx]
             cl.increase_experience()
             cl.set_alp_timestamp(time)
 
@@ -131,12 +136,15 @@ class ClassifiersList(TypedList):
             else:
                 new_cl = alp_bacs.unexpected_case(cl, p0, p1, time)
 
-                if cl.is_inadequate():
-                    # Removes classifier from population, match set
-                    # and current list
-                    lists = [x for x in [population, match_set, action_set] if x]
-                    for lst in lists:
-                        lst.safe_remove(cl)
+            if cl.is_inadequate():
+                # Removes classifier from population, match set
+                # and current list
+                lists = [x for x in [population, match_set, action_set] if x]
+                for lst in lists:
+                    lst.safe_remove(cl)
+                idx -= 1
+                action_set_length -= 1
+            idx += 1
 
             if new_cl is not None:
                 new_cl.tga = time
@@ -144,11 +152,6 @@ class ClassifiersList(TypedList):
                     alp.add_classifier(new_cl, population, new_list, theta_exp)
                 else:
                     alp.add_classifier(new_cl, action_set, new_list, theta_exp)
-
-        for cl in action_set:
-            if cl.is_inadequate():
-                print(cl)
-                print('\n')
 
         if cfg.do_pee:
             ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
@@ -163,8 +166,7 @@ class ClassifiersList(TypedList):
         population.extend(new_list)
 
         if match_set is not None:
-            new_matching = [cl for cl in new_list if
-                            cl.condition.does_match(p1)]
+            new_matching = [cl for cl in new_list if cl.condition.does_match(p1)]
             match_set.extend(new_matching)
 
     @staticmethod
@@ -199,7 +201,12 @@ class ClassifiersList(TypedList):
         new_list = ClassifiersList()
         new_cl: Optional[Classifier] = None
 
-        for cl in action_set:
+        idx = 0
+        action_set_length = 0
+        if action_set: action_set_length = len(action_set)
+
+        while(idx < action_set_length):
+            cl = action_set[idx]
             cl.increase_experience()
             cl.set_alp_timestamp(time)
 
@@ -224,6 +231,9 @@ class ClassifiersList(TypedList):
                 lists = [x for x in [population, match_set, action_set] if x]
                 for lst in lists:
                     lst.safe_remove(cl)
+                idx -= 1
+                action_set_length -= 1
+            idx += 1
 
         if cfg.do_pee:
             ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
@@ -233,8 +243,7 @@ class ClassifiersList(TypedList):
         population.extend(new_list)
 
         if match_set is not None:
-            new_matching = [cl for cl in new_list if
-                            cl.condition.does_match(p1)]
+            new_matching = [cl for cl in new_list if cl.condition.does_match(p1)]
             match_set.extend(new_matching)
 
     @staticmethod
