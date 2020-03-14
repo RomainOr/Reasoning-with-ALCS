@@ -19,15 +19,13 @@ class ProbabilityEnhancedAttribute(dict):
     def merged_attributes(
             cls,
             attr1,
-            attr2,
-            q1: float = 0.5,
-            q2: float = 0.5
+            attr2
         ):
         """
         Create a new enhanced effect part.
         """
         result = attr1.copy() if isinstance(attr1, ProbabilityEnhancedAttribute) else ProbabilityEnhancedAttribute(attr1)
-        result.insert(attr2, q1, q2)
+        result.insert(attr2)
         return result
 
     def copy(self):
@@ -82,32 +80,27 @@ class ProbabilityEnhancedAttribute(dict):
     def increase_probability(self, effect_symbol, update_rate):
         if effect_symbol not in self:
             return False
-        update_delta = update_rate * (1 - self[effect_symbol])
+        update_delta = update_rate * (1.0 - self[effect_symbol])
         self[effect_symbol] += update_delta
         self.adjust_probabilities(1.0 + update_delta)
         return True
 
-    def insert_symbol(self, symbol, q1=1.0, q2=None):
-        if q2 is None:
-            q2 = 1.0 / len(self)
-
-        for sym in self:
-            self[sym] *= q1
-        self[symbol] = self.get(symbol, 0.0) + q2
+    def insert_symbol(self, symbol):
+        self[symbol] = self.get(symbol, 0.0) + 1.0 / len(self)
         self.adjust_probabilities()
 
-    def insert_attribute(self, o, q1, q2):
+    def insert_attribute(self, o):
         assert isinstance(o, ProbabilityEnhancedAttribute)
 
         for symbol in self.symbols_specified().union(o.symbols_specified()):
-            self[symbol] = self.get(symbol, 0.0) * q1 + o.get(symbol, 0.0) * q2
+            self[symbol] = self.get(symbol, 0.0) + o.get(symbol, 0.0)
             self.adjust_probabilities()
 
-    def insert(self, symbol_or_attr, q1, q2):
+    def insert(self, symbol_or_attr):
         if isinstance(symbol_or_attr, ProbabilityEnhancedAttribute):
-            self.insert_attribute(symbol_or_attr, q1, q2)
+            self.insert_attribute(symbol_or_attr)
         else:
-            self.insert_symbol(symbol_or_attr, q1, q2)
+            self.insert_symbol(symbol_or_attr)
 
     def sorted_items(self):
         return sorted(self.items(), key=lambda x: x[1], reverse=True)

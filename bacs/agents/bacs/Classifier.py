@@ -385,7 +385,7 @@ class Classifier:
         #else:
         #    result.condition = Condition(other_classifier.condition)
         result.effect = Effect.enhanced_effect(
-            self.effect, other_classifier.effect,
-            self.q, other_classifier.q,
+            self.effect, 
+            other_classifier.effect,
             perception)
         return result

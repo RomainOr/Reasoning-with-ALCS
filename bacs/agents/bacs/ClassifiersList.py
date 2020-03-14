@@ -134,8 +134,7 @@ class ClassifiersList(TypedList):
                 if cl.is_inadequate():
                     # Removes classifier from population, match set
                     # and current list
-                    lists = [x for x in [population, match_set, action_set]
-                             if x]
+                    lists = [x for x in [population, match_set, action_set] if x]
                     for lst in lists:
                         lst.safe_remove(cl)
 
@@ -145,6 +144,11 @@ class ClassifiersList(TypedList):
                     alp.add_classifier(new_cl, population, new_list, theta_exp)
                 else:
                     alp.add_classifier(new_cl, action_set, new_list, theta_exp)
+
+        for cl in action_set:
+            if cl.is_inadequate():
+                print(cl)
+                print('\n')
 
         if cfg.do_pee:
             ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
@@ -217,8 +221,7 @@ class ClassifiersList(TypedList):
             if cl.is_inadequate():
                 # Removes classifier from population, match set
                 # and current list
-                lists = [x for x in [population, match_set, action_set]
-                            if x]
+                lists = [x for x in [population, match_set, action_set] if x]
                 for lst in lists:
                     lst.safe_remove(cl)
 
