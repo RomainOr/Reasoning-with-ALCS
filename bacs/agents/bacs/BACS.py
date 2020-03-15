@@ -57,6 +57,9 @@ class BACS(Agent):
                         if other.condition.specificity < cl.condition.specificity :
                             to_keep = False
                             break
+                        elif other.is_enhanced() :
+                            to_keep = False
+                            break
             if to_keep:
                 compact_pop.append(cl)
         self.population = ClassifiersList(*compact_pop)

@@ -105,7 +105,10 @@ def updated_passthrough(
     """
     for i in range(len(child_effect)):
         if last_effect[i] == child_effect.wildcard:
-            child_effect[i] = penultimate_effect[i]
+            if isinstance(penultimate_effect[i], ProbabilityEnhancedAttribute):
+                child_effect[i] = perception[i]
+            else:
+                child_effect[i] = penultimate_effect[i]
         else:
             if isinstance(last_effect[i], ProbabilityEnhancedAttribute):
                 child_effect[i] = perception[i]
@@ -129,7 +132,10 @@ def create_behavioral_classifier(
     :param p1:
     :return: new behavioral classifier or None
     """
-    if last_activated_classifier and last_activated_classifier.does_anticipate_change() and cl.does_anticipate_change():
+    if last_activated_classifier \
+        and last_activated_classifier.does_anticipate_change() \
+        and not last_activated_classifier.is_marked() \
+        and cl.does_anticipate_change():
         nb_of_action = 1
         if last_activated_classifier.behavioral_sequence: 
             nb_of_action += len(last_activated_classifier.behavioral_sequence)

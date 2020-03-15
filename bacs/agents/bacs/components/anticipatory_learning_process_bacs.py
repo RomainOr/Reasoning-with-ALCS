@@ -26,18 +26,23 @@ def add_classifier(child, population, new_list, theta_exp: int) -> None:
         if does_subsume(cl, child, theta_exp):
             if old_cl is None or cl.is_more_general(old_cl):
                 old_cl = cl
+                break
 
     # Check if any similar classifier was in this ALP run
     if old_cl is None:
         for cl in new_list:
             if cl == child:
                 old_cl = cl
+                break
 
     # Check if there is similar classifier already
     if old_cl is None:
         for cl in population:
             if cl == child:
                 old_cl = cl
+                break
+
+    # Add PEE 
 
     if old_cl is None:
         new_list.append(child)
