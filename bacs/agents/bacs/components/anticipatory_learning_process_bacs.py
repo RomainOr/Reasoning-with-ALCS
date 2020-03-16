@@ -42,8 +42,6 @@ def add_classifier(child, population, new_list, theta_exp: int) -> None:
                 old_cl = cl
                 break
 
-    # Add PEE 
-
     if old_cl is None:
         new_list.append(child)
     else:

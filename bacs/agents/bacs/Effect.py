@@ -80,40 +80,18 @@ class Effect(AbstractPerception):
         return all(item_anticipate_change(eitem, p0[idx], p1[idx], self.wildcard) for idx, eitem in enumerate(self))
 
     def subsumes(self, other: Effect) -> bool:
-        if self.is_enhanced() == other.is_enhanced():
-            if self.is_enhanced():
-                for si, oi in zip(self, other):
-                    if isinstance(si, ProbabilityEnhancedAttribute):
-                        if isinstance(oi, ProbabilityEnhancedAttribute):
-                            if not si.subsumes(oi): return False
-                        else:
-                            if not si.does_contain(oi): return False
-                    else:
-                        if isinstance(oi, ProbabilityEnhancedAttribute):
-                            return False
-                        else:
-                            if si != oi: return False
-                return True
+        for si, oi in zip(self, other):
+            if isinstance(si, ProbabilityEnhancedAttribute):
+                if isinstance(oi, ProbabilityEnhancedAttribute):
+                    if not si.subsumes(oi): return False
+                else:
+                    if not si.does_contain(oi): return False
             else:
-                return self == other
-        else:
-            if self.specify_change and other.specify_change:
-                for si, oi in zip(self, other):
-                    if isinstance(oi, ProbabilityEnhancedAttribute):
-                        if oi.does_contain(si):
-                            return False
-                        else:
-                            continue
-                    if isinstance(si, ProbabilityEnhancedAttribute):
-                        if not si.does_contain(oi):
-                            return False
-                        else: 
-                            continue
-                    if si != oi:
-                        return False
-                return True
-            else:
-                return False
+                if isinstance(oi, ProbabilityEnhancedAttribute):
+                    return False
+                else:
+                    if si != oi: return False
+        return True
 
     def clean(self):
         for idx, ei in enumerate(self):

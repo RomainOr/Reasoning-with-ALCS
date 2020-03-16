@@ -57,7 +57,7 @@ class BACS(Agent):
                         if other.condition.specificity < cl.condition.specificity :
                             to_keep = False
                             break
-                        elif other.is_enhanced() :
+                        elif not cl.is_enhanced() and other.is_enhanced() :
                             to_keep = False
                             break
             if to_keep:
