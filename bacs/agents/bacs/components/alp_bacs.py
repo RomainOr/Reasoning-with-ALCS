@@ -185,8 +185,8 @@ def expected_case(
         cl.effect.update_enhanced_effect_probs(p0, cl.cfg.beta)
 
     if not specification_of_unchanging_components_status(cl.condition, cl.mark, p0):
+        if cl.cfg.do_pee: cl.ee = True
         if last_activated_classifier is not None:
-            if cl.cfg.do_pee: cl.ee = True
             child = create_behavioral_classifier(last_activated_classifier, cl, p1)
             if child:
                 child.tga = time
