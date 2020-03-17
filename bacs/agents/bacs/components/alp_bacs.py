@@ -246,16 +246,9 @@ def unexpected_case(
     cl.decrease_quality()
     cl.set_mark(p0)
     child = cl.copy_from(cl, time)
-    if cl.ee:
-        # Probability-Enhanced attributes cannot appear in the effect part
-        # if we leave already specialized attributes unchanged.
-        # Therefore don't leave specialized.
-        child.specialize(p0, p1, leave_specialized=False)
-    else:
-        # Return if the effect is not specializable
-        if not cl.effect.is_specializable(p0, p1):
-            return None
-        child.specialize(p0, p1, leave_specialized=True)
+    if not cl.effect.is_specializable(p0, p1):
+        return None
+    child.specialize(p0, p1)
     if child.q < 0.5:
         child.q = 0.5
     return child

@@ -11,12 +11,11 @@ from itertools import chain
 from typing import Optional, List
 
 import bacs.agents.bacs.components.alp_bacs as alp_bacs
-import bacs.agents.bacs.components.anticipatory_learning_process_bacs as alp
 import bacs.agents.bacs.components.genetic_algorithms_bacs as ga
 import bacs.agents.bacs.components.reinforcement_learning_bacs as rl
 from bacs import Perception, TypedList
 from bacs.agents.bacs import Classifier, Configuration
-
+from bacs.agents.bacs.components.add_classifier_bacs import add_classifier
 
 class ClassifiersList(TypedList):
     """
@@ -67,7 +66,7 @@ class ClassifiersList(TypedList):
         ):
         # Create a list of candidates.
         # Every enhanceable classifier is a candidate.
-        candidates = [classifier for classifier in action_set if classifier.is_enhanceable()]
+        candidates = [classifier for classifier in action_set if classifier.ee]
         # If there are less than 2 candidates, don't do it
         if len(candidates) < 2:
             return
@@ -78,7 +77,7 @@ class ClassifiersList(TypedList):
                 new_classifier = candidate.merge_with(merger, previous_situation, time)
                 if new_classifier is not None:
                     candidate.reverse_increase_quality()
-                    alp.add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
+                    add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
 
         return new_list
 
@@ -149,9 +148,9 @@ class ClassifiersList(TypedList):
             if new_cl is not None:
                 new_cl.tga = time
                 if new_cl.behavioral_sequence:
-                    alp.add_classifier(new_cl, population, new_list, theta_exp)
+                    add_classifier(new_cl, population, new_list, theta_exp)
                 else:
-                    alp.add_classifier(new_cl, action_set, new_list, theta_exp)
+                    add_classifier(new_cl, action_set, new_list, theta_exp)
 
         if cfg.do_pee:
             ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
@@ -159,7 +158,7 @@ class ClassifiersList(TypedList):
         # No classifier anticipated correctly - generate new one
         if not was_expected_case:
             new_cl = alp_bacs.cover(p0, action, p1, time, cfg)
-            alp.add_classifier(new_cl, action_set, new_list, theta_exp)
+            add_classifier(new_cl, action_set, new_list, theta_exp)
 
         # Merge classifiers from new_list into self and population
         action_set.extend(new_list)
@@ -222,7 +221,7 @@ class ClassifiersList(TypedList):
 
             if new_cl is not None:
                 new_cl.tga = time
-                alp.add_classifier(new_cl, action_set, new_list, theta_exp)
+                add_classifier(new_cl, action_set, new_list, theta_exp)
 
             # Quality Anticipation check
             if cl.is_inadequate():

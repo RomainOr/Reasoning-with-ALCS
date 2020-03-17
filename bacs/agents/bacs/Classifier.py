@@ -167,9 +167,6 @@ class Classifier:
         """
         return self.effect.specify_change
 
-    def is_enhanceable(self):
-        return self.ee
-
     def is_enhanced(self):
         return self.effect.is_enhanced()
 
@@ -197,8 +194,7 @@ class Classifier:
     def specialize(
             self,
             previous_situation: Perception,
-            situation: Perception,
-            leave_specialized=False
+            situation: Perception
         ) -> None:
         """
         Specializes the effect part where necessary to correctly anticipate
@@ -208,15 +204,11 @@ class Classifier:
         ----------
         previous_situation: Perception
         situation: Perception
-        leave_specialized: bool
-            Requires the effect attribute to be a wildcard to specialize it.
-            By default false
         """
         for idx, _ in enumerate(situation):
-            if leave_specialized:
-                if self.effect[idx] != self.cfg.classifier_wildcard:
-                    # If we have a specialized attribute don't change it.
-                    continue
+            if self.effect[idx] != self.cfg.classifier_wildcard:
+                # If we have a specialized attribute don't change it.
+                continue
 
             if previous_situation[idx] != situation[idx]:
                 if self.effect[idx] == self.cfg.classifier_wildcard:
@@ -380,10 +372,9 @@ class Classifier:
         # 00000009 7 None {0:65%, 9:35%}#####{9:58%, 0:42%}0 (empty)
         result.condition = Condition(self.condition)
         result.condition.specialize_with_condition(other_classifier.condition)
-        #if self.condition.specificity <= other_classifier.condition.specificity:
-        #    result.condition = Condition(self.condition)
-        #else:
-        #    result.condition = Condition(other_classifier.condition)
+        #for idx, ci in enumerate(result.condition):
+        #    if ci == result.condition.wildcard:
+        #        result.condition[idx] = next(iter(self.mark[idx]))
         result.effect = Effect.enhanced_effect(
             self.effect, 
             other_classifier.effect,
