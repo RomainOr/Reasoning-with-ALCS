@@ -245,9 +245,13 @@ def unexpected_case(
     """
     cl.decrease_quality()
     cl.set_mark(p0)
-    child = cl.copy_from(cl, time)
     if not cl.effect.is_specializable(p0, p1):
         return None
+    child = cl.copy_from(cl, time)
+    if cl.is_enhanced():
+        for idx, ei in enumerate(child.effect):
+            if isinstance(ei, ProbabilityEnhancedAttribute):
+                child.effect[idx] = p1[idx]
     child.specialize(p0, p1)
     if child.q < 0.5:
         child.q = 0.5

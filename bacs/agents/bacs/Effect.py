@@ -104,7 +104,7 @@ class Effect(AbstractPerception):
         Checks whether any element of the Effect is Probability-Enhanced.
         str elements of the Effect are not Enhanced,
         ProbabilityEnhancedAttribute elements are Enhanced.
-        :return: True if this is a Probability-Enhanced Effect, False otherwise
+        :return: True if there is a Probability-Enhanced Effect, False otherwise
         """
         # Sanity check
         assert not any(isinstance(elem, dict) and

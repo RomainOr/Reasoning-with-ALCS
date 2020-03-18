@@ -115,11 +115,11 @@ class Classifier:
             quality=old_cls.q,
             reward=old_cls.r,
             immediate_reward=old_cls.ir,
-            cfg=old_cls.cfg
+            cfg=old_cls.cfg,
+            tga=time,
+            talp=time,
+            tav=old_cls.tav
         )
-        new_cls.tga = time
-        new_cls.talp = time
-        new_cls.tav = old_cls.tav
         return new_cls
 
     @property
