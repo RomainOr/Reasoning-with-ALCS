@@ -186,7 +186,7 @@ def expected_case(
 
     if not specification_of_unchanging_components_status(cl.condition, cl.mark, p0):
         if cl.cfg.do_pee: cl.ee = True
-        if last_activated_classifier is not None:
+        if cl.cfg.bs_max != 0 and last_activated_classifier is not None:
             child = create_behavioral_classifier(last_activated_classifier, cl, p1)
             if child:
                 child.tga = time
@@ -198,7 +198,7 @@ def expected_case(
         cl.increase_quality()
         return None
 
-    child = cl.copy_from(cl, time)
+    child = cl.copy_from(cl, p1, time)
 
     no_spec = len(cl.specified_unchanging_attributes)
     no_spec_new = diff.specificity
@@ -247,11 +247,7 @@ def unexpected_case(
     cl.set_mark(p0)
     if not cl.effect.is_specializable(p0, p1):
         return None
-    child = cl.copy_from(cl, time)
-    if cl.is_enhanced():
-        for idx, ei in enumerate(child.effect):
-            if isinstance(ei, ProbabilityEnhancedAttribute):
-                child.effect[idx] = p1[idx]
+    child = cl.copy_from(cl, p1, time)
     child.specialize(p0, p1)
     if child.q < 0.5:
         child.q = 0.5

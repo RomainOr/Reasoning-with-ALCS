@@ -18,7 +18,6 @@ class Configuration:
                  metrics_trial_frequency: int = 5,
                  do_pee: bool = True,
                  do_ga: bool=False,
-                 do_subsumption: bool=True,
                  beta: float=0.05,
                  gamma: float=0.95,
                  theta_i: float=0.1,
@@ -41,7 +40,6 @@ class Configuration:
         :param environment_adapter: EnvironmentAdapter class BACS needs to use
             to interact with the environment
         :param do_ga: switch *Genetic Generalization* module
-        :param do_subsumption:
         :param beta:
         :param gamma:
         :param theta_i: inadequacy threshold
@@ -63,7 +61,6 @@ class Configuration:
         self.user_metrics_collector_fcn = user_metrics_collector_fcn
         self.do_pee = do_pee
         self.do_ga = do_ga
-        self.do_subsumption = do_subsumption
         self.theta_exp = theta_exp
         self.beta = beta
         self.gamma = gamma
@@ -90,13 +87,14 @@ class Configuration:
                "\n\t- ..." \
                "\n\t- epsilon: [{}]" \
                "\n\t- bs_max: [{}]" \
-            .format(self.classifier_length,
-                    self.number_of_possible_actions,
-                    self.classifier_wildcard,
-                    self.environment_adapter,
-                    self.do_pee,
-                    self.do_ga,
-                    self.do_subsumption,
-                    self.beta,
-                    self.epsilon,
-                    self.bs_max)
+            .format(
+                self.classifier_length,
+                self.number_of_possible_actions,
+                self.classifier_wildcard,
+                self.environment_adapter,
+                self.do_pee,
+                self.do_ga,
+                self.beta,
+                self.epsilon,
+                self.bs_max
+            )

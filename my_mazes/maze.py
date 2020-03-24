@@ -3,7 +3,7 @@ import random
 PATH_MAPPING = 0
 WALL_MAPPING = 1
 REWARD_MAPPING = 9
-
+ALIASING_MAPPING = -1 # Can be then enhanced according to the aliasing type
 
 class Maze:
     """
@@ -15,8 +15,9 @@ class Maze:
     9 - reward
     """
 
-    def __init__(self, matrix):
+    def __init__(self, matrix, aliasing_matrix):
         self.matrix = matrix
+        self.aliasing_matrix = aliasing_matrix
         self.max_x = self.matrix.shape[1]
         self.max_y = self.matrix.shape[0]
 
@@ -101,6 +102,12 @@ class Maze:
 
     def is_reward(self, pos_x, pos_y):
         return self.matrix[pos_y, pos_x] == REWARD_MAPPING
+
+    def is_aliased(self, pos_x, pos_y):
+        return self.aliasing_matrix[pos_y, pos_x] == ALIASING_MAPPING
+
+    def is_path_in_aliasing_matrix(self, pos_x, pos_y):
+        return self.aliasing_matrix[pos_y, pos_x] == PATH_MAPPING
 
     def _within_x_range(self, x):
         return 0 <= x < self.max_x

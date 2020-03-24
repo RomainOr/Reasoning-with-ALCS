@@ -12,7 +12,11 @@ import numpy as np
 from bacs import Perception
 from bacs.agents.bacs.components.subsumption_bacs import find_subsumers
 
-def should_apply(action_set, time: int, theta_ga: int) -> bool:
+def should_apply(
+        action_set, 
+        time: int, 
+        theta_ga: int
+    ) -> bool:
     """
     Checks the average last GA application to determine if a GA
     should be applied.
@@ -129,10 +133,14 @@ def two_point_crossover(parent, donor) -> None:
         donor.condition[el] = chromosome1[idx]
 
 
-def add_classifier(cl, p: Perception,
-                   population, match_set, action_set,
-                   do_subsumption: bool,
-                   theta_exp: int) -> None:
+def add_classifier(
+        cl, 
+        p: Perception,
+        population, 
+        match_set, 
+        action_set,
+        theta_exp: int
+    )-> None:
     """
     Find subsumer/similar classifier, if present - increase its numerosity,
     else add this new classifier
@@ -149,19 +157,19 @@ def add_classifier(cl, p: Perception,
         match set
     action_set:
         action set
-    do_subsumption: bool
-        Use subsumption mechanizm when finding existing classifiers
     theta_exp: int
         subsumption experience threshold
     """
-    old_cl = _find_old_classifier(action_set, cl, do_subsumption, theta_exp)
-
-    if old_cl is None:
+    # Find_subsumers computes subsumer or classifier that are equal
+    subsumers = find_subsumers(cl, population, theta_exp)
+    # Check if subsumers exist, meaning that old_cl is mandatory not None
+    if len(subsumers) == 0:
         population.append(cl)
         action_set.append(cl)
         if match_set is not None and cl.condition.does_match(p):
             match_set.append(cl)
     else:
+        old_cl = subsumers[0]
         if not old_cl.is_marked():
             old_cl.num += 1
 
@@ -232,48 +240,6 @@ def _is_preferred_to_delete(cl_del, cl) -> bool:
                 return True
 
     return False
-
-
-def _find_old_classifier(population,
-                         cl,
-                         use_subsumption: bool,
-                         theta_exp: int):
-
-    old_cl = None
-
-    if use_subsumption:
-        subsumers = find_subsumers(cl, population, theta_exp)
-
-        # Try to find most general subsumer
-        try:
-            old_cl = subsumers[0]
-        except IndexError:
-            pass
-
-    # If there is no subsumer - look for similar classifiers
-    if old_cl is None:
-        old_cl = _find_similar(cl, population)
-
-    return old_cl
-
-
-def _find_similar(other_cl, population):
-    """
-    Searches for the first similar classifier `other` and returns it.
-    Similarity is distinguished when both C-A-E triple is the same.
-
-    Parameters
-    ----------
-    other_cl:
-        classifier to compare
-
-    Returns
-    -------
-    Optional[Classifier]
-        classifier (with the same condition, action, effect),
-        None otherwise
-    """
-    return next(filter(lambda cl: cl == other_cl, population), None)
 
 
 def _weighted_random_choice(choices: Dict):

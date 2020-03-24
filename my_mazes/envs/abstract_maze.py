@@ -1,15 +1,22 @@
+"""
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+"""
+
 import io
 import logging
 import random
 import sys
-
 import gym
+import networkx as nx
 import numpy as np
 from gym import spaces, utils
 
+from .. import find_action_by_direction
 from .. import ACTION_LOOKUP
-from ..maze import Maze, WALL_MAPPING
-from ..utils import get_all_possible_transitions
+from ..maze import Maze, WALL_MAPPING, PATH_MAPPING, ALIASING_MAPPING, REWARD_MAPPING
+from ..utils import create_graph
 
 ANIMAT_MARKER = 5
 
@@ -21,10 +28,10 @@ class MazeObservationSpace(gym.Space):
         gym.Space.__init__(self, (self.n,), str)
 
     def sample(self):
-        return tuple(random.choice(['0', '1', '9']) for _ in range(self.n))
+        return tuple(random.choice([str(PATH_MAPPING), str(WALL_MAPPING), str(REWARD_MAPPING)]) for _ in range(self.n))
 
     def contains(self, x):
-        return all(elem in ('0', '1', '9', str(ANIMAT_MARKER)) for elem in x)
+        return all(elem in (str(PATH_MAPPING), str(WALL_MAPPING), str(REWARD_MAPPING), str(ANIMAT_MARKER)) for elem in x)
 
     def to_jsonable(self, sample_n):
         return list(sample_n)
@@ -34,13 +41,12 @@ class MazeObservationSpace(gym.Space):
 
 
 class AbstractMaze(gym.Env):
-    metadata = {'render.modes': ['human', 'ansi']}
+    metadata = {'render.modes': ['human', 'ansi', 'aliasing_human']}
 
-    def __init__(self, matrix):
-        self.maze = Maze(matrix)
+    def __init__(self, matrix, aliasing_matrix):
+        self.maze = Maze(matrix,aliasing_matrix)
         self.pos_x = None
         self.pos_y = None
-
         self.action_space = spaces.Discrete(8)
         self.observation_space = MazeObservationSpace(8)
 
@@ -59,15 +65,49 @@ class AbstractMaze(gym.Env):
         self._insert_animat()
         return self._observe()
 
-    def render(self, mode='human'):
-        if mode == 'human':
-            self._render_to_file(sys.stdout)
+    def render(self, mode='aliasing_human'):
+        if mode == 'aliasing_human':
+            self._render_to_file(sys.stdout, aliasing_mode=True)
+        elif mode == 'human':
+            self._render_to_file(sys.stdout, aliasing_mode=False)
         elif mode == 'ansi':
             output = io.StringIO()
-            self._render_to_file(output)
+            self._render_to_file(output, aliasing_mode=False)
             return output.getvalue()
         else:
             super(AbstractMaze, self).render(mode=mode)
+
+    def get_all_possible_transitions(self):
+        transitions = []
+        g = create_graph(self)
+        path_nodes = (node for node, data
+            in g.nodes(data=True) if data['type'] == 'path')
+        for node in path_nodes:
+            for neighbour in nx.all_neighbors(g, node):
+                direction = Maze.distinguish_direction(node, neighbour)
+                action = find_action_by_direction(direction)
+                transitions.append((node, action, neighbour))
+        return transitions
+
+    def get_all_aliased_states(self):
+        all_aliased_states = []
+        for y in range(0, self.maze.max_y):
+            for x in range(0, self.maze.max_x):
+                if self.maze.is_aliased(x,y):
+                    all_aliased_states.append(self.maze.perception(x, y))
+        return list(dict.fromkeys(all_aliased_states))
+
+    def get_all_non_aliased_states(self):
+        all_non_aliased_states = []
+        for y in range(0, self.maze.max_y):
+            for x in range(0, self.maze.max_x):
+                if self.maze.is_path_in_aliasing_matrix(x,y):
+                    all_non_aliased_states.append(self.maze.perception(x, y))
+        assert len(all_non_aliased_states) == len(set(all_non_aliased_states))
+        return all_non_aliased_states
+
+    def get_goal_state(self):
+        return self.maze.get_goal_state(self.pos_x, self.pos_y)
 
     def _observe(self):
         return self.maze.perception(self.pos_x, self.pos_y)
@@ -80,14 +120,6 @@ class AbstractMaze(gym.Env):
 
     def _is_over(self):
         return self.maze.is_reward(self.pos_x, self.pos_y)
-
-    def get_all_possible_transitions(self):
-        """
-        Debugging only
-
-        :return:
-        """
-        return get_all_possible_transitions(self)
 
     def _take_action(self, action, observation):
         """Executes the action inside the maze"""
@@ -134,17 +166,17 @@ class AbstractMaze(gym.Env):
 
     def _insert_animat(self):
         possible_coords = self.maze.get_possible_insertion_coordinates()
-
         starting_position = random.choice(possible_coords)
         self.pos_x = starting_position[0]
         self.pos_y = starting_position[1]
 
-    def _render_to_file(self, outfile):
+    def _render_to_file(self, outfile, aliasing_mode):
         outfile.write("\n")
-
-        situation = np.copy(self.maze.matrix)
+        if aliasing_mode:
+            situation = np.copy(self.maze.aliasing_matrix)
+        else:
+            situation = np.copy(self.maze.matrix)
         situation[self.pos_y, self.pos_x] = ANIMAT_MARKER
-
         for row in situation:
             outfile.write(" ".join(self._render_element(el) for el in row))
             outfile.write("\n")
@@ -155,16 +187,15 @@ class AbstractMaze(gym.Env):
 
     @staticmethod
     def _render_element(el):
-        if el == 1:
+        if el == WALL_MAPPING:
             return utils.colorize('■', 'gray')
-        elif el == 0:
+        elif el == PATH_MAPPING:
             return utils.colorize('□', 'white')
-        elif el == 9:
+        elif el == REWARD_MAPPING:
             return utils.colorize('$', 'yellow')
         elif el == ANIMAT_MARKER:
             return utils.colorize('A', 'red')
+        elif el == ALIASING_MAPPING:
+            return utils.colorize('■', 'cyan')
         else:
             return utils.colorize(el, 'cyan')
-
-    def get_goal_state(self):
-        return self.maze.get_goal_state(self.pos_x, self.pos_y)

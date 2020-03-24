@@ -142,7 +142,6 @@ class BACS(Agent):
                         self.cfg.mu,
                         self.cfg.chi,
                         self.cfg.theta_as,
-                        self.cfg.do_subsumption,
                         self.cfg.theta_exp)
 
             is_behavioral_sequence = False
@@ -222,7 +221,6 @@ class BACS(Agent):
                     self.cfg.mu,
                     self.cfg.chi,
                     self.cfg.theta_as,
-                    self.cfg.do_subsumption,
                     self.cfg.theta_exp)
 
             steps += 1

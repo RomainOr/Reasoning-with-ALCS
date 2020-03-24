@@ -89,7 +89,7 @@ class Classifier:
                f"tav: {self.tav:<6.3} num: {self.num} ee: {self.ee}"
 
     @classmethod
-    def copy_from(cls, old_cls: Classifier, time: int):
+    def copy_from(cls, old_cls: Classifier, p: Perception, time: int):
         """
         Copies old classifier with given time (tga, talp).
         Old tav gets replaced with new value.
@@ -120,6 +120,10 @@ class Classifier:
             talp=time,
             tav=old_cls.tav
         )
+        if new_cls.is_enhanced():
+            for idx, ei in enumerate(new_cls.effect):
+                if isinstance(ei, ProbabilityEnhancedAttribute):
+                    new_cls.effect[idx] = p[idx]
         return new_cls
 
     @property

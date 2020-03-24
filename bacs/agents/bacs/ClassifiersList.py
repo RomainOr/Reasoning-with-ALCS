@@ -16,6 +16,7 @@ import bacs.agents.bacs.components.reinforcement_learning_bacs as rl
 from bacs import Perception, TypedList
 from bacs.agents.bacs import Classifier, Configuration
 from bacs.agents.bacs.components.add_classifier_bacs import add_classifier
+from bacs.agents.bacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
 
 class ClassifiersList(TypedList):
     """
@@ -267,7 +268,6 @@ class ClassifiersList(TypedList):
             mu: float,
             chi: float,
             theta_as: int,
-            do_subsumption: bool,
             theta_exp: int
         ) -> None:
 
@@ -279,10 +279,12 @@ class ClassifiersList(TypedList):
 
             # Select parents
             parent1, parent2 = ga.roulette_wheel_selection(
-                action_set, lambda cl: pow(cl.q, 3) * cl.num)
+                action_set, 
+                lambda cl: pow(cl.q, 3) * cl.num
+            )
 
-            child1 = Classifier.copy_from(parent1, time)
-            child2 = Classifier.copy_from(parent2, time)
+            child1 = Classifier.copy_from(parent1, p, time)
+            child2 = Classifier.copy_from(parent2, p, time)
 
             # Execute mutation
             ga.generalizing_mutation(child1, mu)
@@ -305,14 +307,23 @@ class ClassifiersList(TypedList):
                                if cl.condition.specificity > 0}
 
             ga.delete_classifiers(
-                population, match_set, action_set,
-                len(unique_children), theta_as)
+                population,
+                match_set,
+                action_set,
+                len(unique_children),
+                theta_as
+            )
 
             # check for subsumers / similar classifiers
             for child in unique_children:
-                ga.add_classifier(child, p,
-                                  population, match_set, action_set,
-                                  do_subsumption, theta_exp)
+                ga.add_classifier(
+                    child,
+                    p,
+                    population,
+                    match_set,
+                    action_set,
+                    theta_exp
+                )
 
     def __str__(self):
         return "\n".join(str(classifier)

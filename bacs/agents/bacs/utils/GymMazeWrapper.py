@@ -18,7 +18,7 @@ matplotlib.rcParams['ps.fonttype'] = 42
 
 from bacs.metrics import population_metrics
 
-### Provide a helper method for calculating obtained knowledge
+### Provide a helper method for calculating obtained knowledge and other metrics
 
 def _maze_metrics(pop, env):
 
@@ -45,6 +45,17 @@ def _maze_metrics(pop, env):
     metrics.update(population_metrics(pop, env))
 
     return metrics
+
+def _does_pees_match_non_aliased_states(pop, env) -> int:
+    counter = 0
+    non_aliased_perceptions = env.env.get_all_non_aliased_states()
+    enhanced_classifiers = [c for c in pop if c.is_enhanced()]
+    for percept in non_aliased_perceptions:
+        #p = env.env.maze.perception(*percept)
+        for cl in enhanced_classifiers:
+            if cl.does_match(percept):
+                counter += 1
+    return counter
 
 # Provide a wrapper for plotting
 
@@ -138,17 +149,8 @@ def build_action_matrix(env, population, cfg, fitness_matrix):
                 if action[index].find(ACTION_LOOKUP[best_cl.action]) == -1:
                     action[index] += ACTION_LOOKUP[best_cl.action]
                 if best_cl.behavioral_sequence:
-                    tmp_x, tmp_y = update_matrix_index(original, index[0], index[1], best_cl.action)
-                    if int(best_cl.fitness) == fitness_matrix[(tmp_x, tmp_y)]:
-                            if action[(tmp_x, tmp_y)].find(ACTION_LOOKUP[best_cl.behavioral_sequence[0]]) == -1:
-                                action[(tmp_x, tmp_y)] += ACTION_LOOKUP[best_cl.behavioral_sequence[0]]
-                    if len(best_cl.behavioral_sequence) > 1:
-                        for idx, seq in enumerate(best_cl.behavioral_sequence):
-                            if idx != len(best_cl.behavioral_sequence) -1:
-                                tmp_x, tmp_y = update_matrix_index(original, tmp_x, tmp_y, seq)
-                                if int(best_cl.fitness) == fitness_matrix[(tmp_x, tmp_y)]:
-                                    if action[(tmp_x, tmp_y)].find(ACTION_LOOKUP[best_cl.behavioral_sequence[idx+1]]) == -1:
-                                        action[(tmp_x, tmp_y)] += ACTION_LOOKUP[best_cl.behavioral_sequence[idx+1]]
+                    for act in best_cl.behavioral_sequence:
+                        action[index] += ACTION_LOOKUP[act]
             else:
                 action[index] = '?'
         # Wall - fitness = 0
@@ -199,8 +201,9 @@ def plot_steps(df, metrics_trial_frequency_explore, number_of_exploit_steps, ax=
     explore_df = df.query("phase == 'explore'")
     exploit_df = df.query("phase == 'exploit'")
     exploit_df.plot(y='steps_in_trial', ax=ax, c='red', linewidth=0.5, legend=False)
-    ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0], ymin=0, ymax=max(exploit_df['steps_in_trial'])+1, colors='black', linestyle='dashed')
-    ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0]+number_of_exploit_steps[1], ymin=0, ymax=max(exploit_df['steps_in_trial'])+1, colors='black', linestyle='dashed')
+    if number_of_exploit_steps:
+        ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0], ymin=0, ymax=max(exploit_df['steps_in_trial'])+1, colors='black', linestyle='dashed')
+        ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0]+number_of_exploit_steps[1], ymin=0, ymax=max(exploit_df['steps_in_trial'])+1, colors='black', linestyle='dashed')
     ax.set_title("Steps", fontsize=TITLE_TEXT_SIZE)
     ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylabel("Steps", fontsize=AXIS_TEXT_SIZE)
@@ -210,6 +213,7 @@ def plot_classifiers(df, metrics_trial_frequency_explore, number_of_exploit_step
         ax = plt.gca()
     explore_df = df.query("phase == 'explore'")
     explore_df.plot(y='numerosity', ax=ax, c='blue')
+    explore_df.plot(y='population', ax=ax, c='green')
     explore_df.plot(y='reliable', ax=ax, c='red')
     ax.set_title("Classifiers", fontsize=TITLE_TEXT_SIZE)
     ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)

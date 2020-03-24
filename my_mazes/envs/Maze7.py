@@ -16,7 +16,8 @@ import numpy as np
 
 class Maze7(AbstractMaze):
     def __init__(self):
-        super().__init__(np.matrix([
+        super().__init__(
+            np.matrix([
             [1, 1, 1, 1, 1],
             [1, 0, 0, 0, 1],
             [1, 0, 1, 0, 1],
@@ -24,4 +25,14 @@ class Maze7(AbstractMaze):
             [1, 0, 1, 0, 1],
             [1, 9, 1, 1, 1],
             [1, 1, 1, 1, 1],
-        ]))
+            ]),
+            np.matrix([
+            [1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 1],
+            [1, 0, 1, 0, 1],
+            [1, -1, 1, -1, 1],
+            [1, 0, 1, 0, 1],
+            [1, 9, 1, 1, 1],
+            [1, 1, 1, 1, 1],
+            ])
+        )
