@@ -6,6 +6,7 @@
 
 from typing import List
 
+
 def find_subsumers(cl, population, theta_exp: int) -> List:
     """
     Looks for subsumers of `cl` inside `population`.

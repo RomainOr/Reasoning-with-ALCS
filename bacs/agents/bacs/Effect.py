@@ -25,6 +25,7 @@ class Effect(AbstractPerception):
                            for attr in observation)
         super().__init__(observation, wildcard, oktypes)
 
+
     @property
     def specify_change(self) -> bool:
         """
@@ -40,6 +41,7 @@ class Effect(AbstractPerception):
             return True
         else:
             return any(True for e in self if e != self.wildcard)
+
 
     def is_specializable(self, p0: Perception, p1: Perception) -> bool:
         """
@@ -64,6 +66,7 @@ class Effect(AbstractPerception):
                     return False
         return True
 
+
     def anticipates_correctly(self, p0: Perception, p1: Perception) -> bool:
         def item_anticipate_change(item, p0_item, p1_item, wildcard) -> bool:
             if not isinstance(item, ProbabilityEnhancedAttribute):
@@ -79,6 +82,7 @@ class Effect(AbstractPerception):
             return True
         return all(item_anticipate_change(eitem, p0[idx], p1[idx], self.wildcard) for idx, eitem in enumerate(self))
 
+
     def subsumes(self, other: Effect) -> bool:
         for si, oi in zip(self, other):
             if isinstance(si, ProbabilityEnhancedAttribute):
@@ -93,26 +97,32 @@ class Effect(AbstractPerception):
                     if si != oi: return False
         return True
 
+
     def clean(self):
         for idx, ei in enumerate(self):
             if isinstance(ei, ProbabilityEnhancedAttribute):
                 if len(ei) == 1:
                     self[idx] = next(iter(ei))
 
+
     def is_enhanced(self) -> bool:
         """
         Checks whether any element of the Effect is Probability-Enhanced.
         str elements of the Effect are not Enhanced,
         ProbabilityEnhancedAttribute elements are Enhanced.
-        :return: True if there is a Probability-Enhanced Effect, False otherwise
+
+        Returns
+        -------
+        bool
+            True if there is a Probability-Enhanced Effect, False otherwise
         """
         # Sanity check
         assert not any(isinstance(elem, dict) and
                        not isinstance(elem, ProbabilityEnhancedAttribute)
                        for elem in self)
-
         return any(isinstance(elem, ProbabilityEnhancedAttribute)
                    for elem in self)
+
 
     def update_enhanced_effect_probs(
             self, 
@@ -124,6 +134,7 @@ class Effect(AbstractPerception):
                 elem.make_compact()
                 effect_symbol = perception[i]
                 elem.increase_probability(effect_symbol, update_rate)
+
 
     @classmethod
     def enhanced_effect(
@@ -145,6 +156,7 @@ class Effect(AbstractPerception):
             if attr2 == wildcard: attr2 = perception[i]
             result[i] = ProbabilityEnhancedAttribute.merged_attributes(attr1, attr2)
         return result
+
 
     def __str__(self):
         return ''.join(str(attr) for attr in self)

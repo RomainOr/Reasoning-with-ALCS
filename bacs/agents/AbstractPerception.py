@@ -10,6 +10,7 @@ class AbstractPerception:
         self._items = obs
         self.wildcard = wildcard
 
+
     @classmethod
     def empty(cls, length: int, wildcard='#', oktypes=(str, dict)):
         """
@@ -34,6 +35,7 @@ class AbstractPerception:
         ps_str = [copy(wildcard) for _ in range(length)]
         return cls(ps_str)
 
+
     def subsumes(self, other) -> bool:
         """
         Checks if given perception string subsumes other one.
@@ -47,6 +49,7 @@ class AbstractPerception:
             True if `other` is subsumed by `self`, False otherwise
         """
         raise NotImplementedError()
+
 
     def __iter__(self):
         return iter(self._items)

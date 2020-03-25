@@ -9,6 +9,7 @@ from itertools import groupby
 
 from bacs.agents.bacs import Classifier
 
+
 def choose_classifier(cll, cfg, epsilon: float) -> Classifier:
     """
     Chooses which classifier to use given matching set
@@ -30,6 +31,7 @@ def choose_classifier(cll, cfg, epsilon: float) -> Classifier:
         return explore(cll, cfg)
 
     return choose_fittest_classifier(cll, cfg)
+
 
 def explore(cll, cfg, pb: float = 0.5) -> Classifier:
     """
@@ -57,6 +59,7 @@ def explore(cll, cfg, pb: float = 0.5) -> Classifier:
             return choose_action_from_knowledge_array(cll, cfg)
 
     return choose_random_classifiers(cll, cfg)
+
 
 def choose_latest_action(cll, cfg) -> Classifier:
     """
@@ -87,6 +90,7 @@ def choose_latest_action(cll, cfg) -> Classifier:
                 return Classifier(action=action, cfg=cfg)
         return last_executed_cls
     return choose_random_classifiers(cll, cfg)
+
 
 def choose_action_from_knowledge_array(cll, cfg) -> Classifier:
     """

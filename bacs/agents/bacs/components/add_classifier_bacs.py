@@ -1,5 +1,6 @@
 from bacs.agents.bacs.components.subsumption_bacs import does_subsume
 
+
 def add_classifier(child, population, new_list, theta_exp: int) -> None:
     """
     Looks for subsuming / similar classifiers in the population of classifiers

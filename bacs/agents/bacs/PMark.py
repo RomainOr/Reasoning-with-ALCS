@@ -6,10 +6,12 @@ from . import Configuration, Condition
 
 
 class PMark(TypedList):
+
     def __init__(self, cfg: Configuration) -> None:
         self.cfg = cfg
         initial: List = [set() for _ in range(self.cfg.classifier_length)]
         super().__init__((set,), *initial)
+
 
     def is_marked(self) -> bool:
         """
@@ -19,6 +21,7 @@ class PMark(TypedList):
             If mark is specified at any attribute
         """
         return any(len(attrib) != 0 for attrib in self)
+
 
     def set_mark(self, perception: Perception, is_ee: bool) -> bool:
         """
@@ -36,27 +39,31 @@ class PMark(TypedList):
                 set_ee = False
         return set_ee
 
+
     def get_differences(self, p0: Perception) -> Condition:
         """
         Determines the strongest differences in between the mark
         and current perception.
 
-        :param: perception
-        :return: condition that specifies all the differences.
+        Parameters
+        ----------
+        p0
+
+        Returns
+        ----------
+        Condition that specifies all the differences.
         """
         diff = Condition.empty(
             wildcard=self.cfg.classifier_wildcard,
-            length=self.cfg.classifier_length)
-
-        nr1, nr2 = 0, 0
-
+            length=self.cfg.classifier_length
+        )
         # Count difference types
+        nr1, nr2 = 0, 0
         for idx, item in enumerate(self):
             if len(item) > 0 and p0[idx] not in item:
                 nr1 += 1
             elif len(item) > 1:
                 nr2 += 1
-
         if nr1 > 0:
             possible_idx = [pi for pi, p in enumerate(p0) if
                             p not in self[pi] and len(self[pi]) > 0]
@@ -66,8 +73,8 @@ class PMark(TypedList):
             for idx, item in enumerate(self):
                 if len(item) > 1:
                     diff[idx] = p0[idx]
-
         return diff
+
 
     def one_situation_in_mark(self) -> bool:
         """
@@ -76,7 +83,7 @@ class PMark(TypedList):
         
         Returns
         -------
-        :return: bool
+        bool
         """
         if not self.is_marked():
             return False
@@ -84,6 +91,7 @@ class PMark(TypedList):
             if len(item) > 1:
                 return False
         return True
+
 
     def __repr__(self):
         def compact_set_str(s):

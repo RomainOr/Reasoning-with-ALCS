@@ -19,6 +19,7 @@ class Condition(AbstractPerception):
     can be applied.
     """
 
+
     @property
     def specificity(self) -> int:
         """
@@ -28,6 +29,7 @@ class Condition(AbstractPerception):
             Number of not generic (wildcards) attributes
         """
         return sum(1 for attr in self if attr != self.wildcard)
+
 
     @property
     def wildcard_count(self) -> int:
@@ -39,16 +41,21 @@ class Condition(AbstractPerception):
         """
         return sum(1 for attr in self if attr == self.wildcard)
 
+
     def specialize_with_condition(self, other: Condition) -> None:
         for idx, new_el in enumerate(other):
             if new_el != self.wildcard:
                 self[idx] = new_el
 
+
     def generalize(self, position=None):
         self[position] = self.wildcard
 
+
     def generalize_specific_attribute_randomly(
-            self, func: Callable = random.choice) -> None:
+            self, 
+            func: Callable = random.choice
+        ) -> None:
         """
         Generalizes one randomly selected specified attribute.
 
@@ -59,10 +66,10 @@ class Condition(AbstractPerception):
             available ones
         """
         specific_ids = [ci for ci, c in enumerate(self) if c != self.wildcard]
-
         if len(specific_ids) > 0:
             ridx = func(specific_ids)
             self.generalize(ridx)
+
 
     def does_match(self, other: Union[Perception, Condition]) -> bool:
         """
@@ -85,6 +92,7 @@ class Condition(AbstractPerception):
             if ci != self.wildcard and oi == self.wildcard:
                 return False
         return True
+
 
     def subsumes(self, other: Condition) -> bool:
         return self.does_match(other)

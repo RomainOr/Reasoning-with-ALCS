@@ -21,13 +21,14 @@ class Maze:
         self.max_x = self.matrix.shape[1]
         self.max_y = self.matrix.shape[0]
 
-        self._goal_x, self._goal_y = self._get_reward_state()
-
     def get_possible_insertion_coordinates(self):
         """
         Returns a list with coordinates in the environment where
         an agent can be placed (only on the path).
-        :return: list of tuples (X,Y) containing coordinates
+
+        Returns
+        -------
+        list of tuples (X,Y) containing coordinates
         """
         possible_cords = []
         for x in range(0, self.max_x):
@@ -44,49 +45,49 @@ class Maze:
         if not self._within_y_range(pos_y):
             raise ValueError('Y position not within allowed range')
 
-            # Position N
+        # Position N
         if pos_y == 0:
             n = None
         else:
             n = str(self.matrix[pos_y - 1, pos_x])
 
-            # Position NE
+        # Position NE
         if pos_x == self.max_x - 1 or pos_y == 0:
             ne = None
         else:
             ne = str(self.matrix[pos_y - 1, pos_x + 1])
 
-            # Position E
+        # Position E
         if pos_x == self.max_x - 1:
             e = None
         else:
             e = str(self.matrix[pos_y, pos_x + 1])
 
-            # Position SE
+        # Position SE
         if pos_x == self.max_x - 1 or pos_y == self.max_y - 1:
             se = None
         else:
             se = str(self.matrix[pos_y + 1, pos_x + 1])
 
-            # Position S
+        # Position S
         if pos_y == (self.max_y - 1):
             s = None
         else:
             s = str(self.matrix[pos_y + 1, pos_x])
 
-            # Position SW
+        # Position SW
         if pos_x == 0 or pos_y == self.max_y - 1:
             sw = None
         else:
             sw = str(self.matrix[pos_y + 1, pos_x - 1])
 
-            # Position W
+        # Position W
         if pos_x == 0:
             w = None
         else:
             w = str(self.matrix[pos_y, pos_x - 1])
 
-            # Position NW
+        # Position NW
         if pos_x == 0 or pos_y == 0:
             nw = None
         else:
@@ -118,55 +119,82 @@ class Maze:
     @staticmethod
     def moved_north(start, destination) -> bool:
         """
-        :param start: start (X, Y) coordinates tuple
-        :param destination: destination (X, Y) coordinates tuple
-        :return: true if it was north move
+        Parameters
+        -------
+        start 
+            (X, Y) coordinates tuple
+        destination
+            (X, Y) coordinates tuple
+
+        Returns
+        -------
+        bool
+            true if it was north move
         """
         return destination[1] + 1 == start[1]
 
     @staticmethod
     def moved_east(start, destination) -> bool:
         """
-        :param start: start (X, Y) coordinates tuple
-        :param destination: destination (X, Y) coordinates tuple
-        :return: true if it was east move
+        Parameters
+        -------
+        start 
+            (X, Y) coordinates tuple
+        destination
+            (X, Y) coordinates tuple
+
+        Returns
+        -------
+        bool
+            true if it was east move
         """
         return destination[0] - 1 == start[0]
 
     @staticmethod
     def moved_south(start, destination) -> bool:
         """
-        :param start: start (X, Y) coordinates tuple
-        :param destination: destination (X, Y) coordinates tuple
-        :return: true if it was south move
+        Parameters
+        -------
+        start 
+            (X, Y) coordinates tuple
+        destination
+            (X, Y) coordinates tuple
+
+        Returns
+        -------
+        bool
+            true if it was south move
         """
         return destination[1] - 1 == start[1]
 
     @staticmethod
     def moved_west(start, destination) -> bool:
         """
-        :param start: start (X, Y) coordinates tuple
-        :param destination: destination (X, Y) coordinates tuple
-        :return: true if it was west move
+        Parameters
+        -------
+        start 
+            (X, Y) coordinates tuple
+        destination
+            (X, Y) coordinates tuple
+
+        Returns
+        -------
+        bool
+            true if it was west move
         """
         return destination[0] + 1 == start[0]
 
     @staticmethod
     def distinguish_direction(start, end):
         direction = ''
-
         if Maze.moved_north(start, end):
             direction += 'N'
-
         if Maze.moved_south(start, end):
             direction += 'S'
-
         if Maze.moved_west(start, end):
             direction += 'W'
-
         if Maze.moved_east(start, end):
             direction += 'E'
-
         return direction
 
     @staticmethod
@@ -185,37 +213,3 @@ class Maze:
         nw = (pos_x - 1, pos_y - 1)
 
         return n, ne, e, se, s, sw, w, nw
-
-    def get_goal_state(self, current_x, current_y):
-        """
-        Goal generator function used in Action Planning.
-        :param current_x:
-        :param current_y:
-        :return:
-            perception of a goal state
-        """
-        if str(REWARD_MAPPING) in self.perception(current_x, current_y):
-            return self.perception(self._goal_x, self._goal_y)
-
-        elif current_x == self._goal_x and current_y == self._goal_y:
-            return None
-
-        else:
-            pos_x, pos_y = random.choice(self.get_possible_neighbour_cords(
-                self._goal_x, self._goal_y))
-            while not self.is_path(pos_x, pos_y):
-                pos_x, pos_y = random.choice(self.get_possible_neighbour_cords(
-                    self._goal_x, self._goal_y))
-            return self.perception(pos_x, pos_y)
-
-    def _get_reward_state(self):
-        """
-        Returns x, y for reward state.
-        :return:
-            x, y - reward state coordinates
-        """
-        for i in range(0, self.max_x):
-            for j in range(0, self.max_y):
-                if self.is_reward(i, j):
-                    return i, j
-

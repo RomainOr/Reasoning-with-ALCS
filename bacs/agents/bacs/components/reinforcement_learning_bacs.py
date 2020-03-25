@@ -4,8 +4,13 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-def update_classifier(cl, step_reward: int, max_fitness: float,
-                      beta: float, gamma: float):
+def update_classifier(
+        cl, 
+        step_reward: int, 
+        max_fitness: float,
+        beta: float, 
+        gamma: float
+    ):
     """
     Applies Reinforcement Learning according to
     current reinforcement `reward` and back-propagated reinforcement

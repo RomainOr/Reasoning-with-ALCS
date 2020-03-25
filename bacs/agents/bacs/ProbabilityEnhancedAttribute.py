@@ -5,6 +5,7 @@
 """
 
 class ProbabilityEnhancedAttribute(dict):
+
     def __init__(self, attr):
         assert isinstance(attr, str) or isinstance(attr, dict)
         super().__init__()
@@ -14,6 +15,7 @@ class ProbabilityEnhancedAttribute(dict):
             for symbol in attr:
                 self[symbol] = attr[symbol]
         self.adjust_probabilities()
+
 
     @classmethod
     def merged_attributes(
@@ -28,14 +30,17 @@ class ProbabilityEnhancedAttribute(dict):
         result.insert(attr2)
         return result
 
+
     def copy(self):
         return ProbabilityEnhancedAttribute(self)
+
 
     def does_contain(self, symbol):
         """
         Checks whether the specified symbol occurs in the attribute.
         """
         return self.get(symbol, 0.0) != 0.0
+
 
     def is_enhanced(self):
         """
@@ -44,14 +49,17 @@ class ProbabilityEnhancedAttribute(dict):
         """
         return sum(1 for k, v in self.items() if v > 0.0) > 1
 
+
     def subsumes(self, other):
         """
         Check if one Pee subsumes another one
         """
         return self.keys() >= other.keys()
 
+
     def symbols_specified(self):
         return {k for k, v in self.items() if v > 0.0}
+
 
     def is_similar(self, other):
         """
@@ -63,10 +71,12 @@ class ProbabilityEnhancedAttribute(dict):
         else:
             return self.symbols_specified() == {other}
 
+
     def make_compact(self):
         for symbol, prob in list(self.items()):
             if prob == 0.0:
                 del self[symbol]
+
 
     def adjust_probabilities(self, prev_sum=None):
         """
@@ -77,6 +87,7 @@ class ProbabilityEnhancedAttribute(dict):
         for symbol in self:
             self[symbol] /= prev_sum
 
+
     def increase_probability(self, effect_symbol, update_rate):
         if effect_symbol not in self:
             return False
@@ -85,16 +96,18 @@ class ProbabilityEnhancedAttribute(dict):
         self.adjust_probabilities(1.0 + update_delta)
         return True
 
+
     def insert_symbol(self, symbol):
         self[symbol] = self.get(symbol, 0.0) + 1.0 / len(self)
         self.adjust_probabilities()
 
+
     def insert_attribute(self, o):
         assert isinstance(o, ProbabilityEnhancedAttribute)
-
         for symbol in self.symbols_specified().union(o.symbols_specified()):
             self[symbol] = self.get(symbol, 0.0) + o.get(symbol, 0.0)
             self.adjust_probabilities()
+
 
     def insert(self, symbol_or_attr):
         if isinstance(symbol_or_attr, ProbabilityEnhancedAttribute):
@@ -102,11 +115,14 @@ class ProbabilityEnhancedAttribute(dict):
         else:
             self.insert_symbol(symbol_or_attr)
 
+
     def sorted_items(self):
         return sorted(self.items(), key=lambda x: x[1], reverse=True)
 
+
     def __eq__(self, other):
         return self.is_similar(other)
+
 
     def __str__(self):
         return "{" + ", ".join( "%s:%.0f%%" % (sym[0], sym[1] * 100) for sym in self.sorted_items()) + "}"

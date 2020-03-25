@@ -104,9 +104,6 @@ class AbstractMaze(gym.Env):
         assert len(all_non_aliased_states) == len(set(all_non_aliased_states))
         return all_non_aliased_states
 
-    def get_goal_state(self):
-        return self.maze.get_goal_state(self.pos_x, self.pos_y)
-
     def _observe(self):
         return self.maze.perception(self.pos_x, self.pos_y)
 

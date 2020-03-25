@@ -51,9 +51,11 @@ def _does_pees_match_non_aliased_states(pop, env) -> int:
     non_aliased_perceptions = env.env.get_all_non_aliased_states()
     enhanced_classifiers = [c for c in pop if c.is_enhanced()]
     for percept in non_aliased_perceptions:
-        #p = env.env.maze.perception(*percept)
         for cl in enhanced_classifiers:
             if cl.does_match(percept):
+                #print(percept)
+                #print(cl)
+                #print('\n')
                 counter += 1
     return counter
 

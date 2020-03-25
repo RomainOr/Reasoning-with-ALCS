@@ -12,6 +12,7 @@ import numpy as np
 from bacs import Perception
 from bacs.agents.bacs.components.subsumption_bacs import find_subsumers
 
+
 def should_apply(
         action_set, 
         time: int, 

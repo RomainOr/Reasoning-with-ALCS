@@ -3,7 +3,8 @@ from itertools import groupby
 
 from bacs.agents.bacs import Classifier
 
-def choose_classifier(cll, cfg, epsilon: float) -> int:
+
+def choose_action(cll, cfg, epsilon: float) -> int:
     """
     Chooses which action to use given matching set
 
@@ -25,6 +26,7 @@ def choose_classifier(cll, cfg, epsilon: float) -> int:
         return explore(cll, cfg)
 
     return choose_fittest_action(cll, cfg)
+
 
 def explore(cll, cfg, pb: float = 0.5) -> int:
     """
@@ -52,6 +54,7 @@ def explore(cll, cfg, pb: float = 0.5) -> int:
             return choose_action_from_knowledge_array(cll, cfg)
 
     return choose_random_action(cfg)
+
 
 def choose_latest_action(cll, cfg) -> int:
     """
@@ -82,6 +85,7 @@ def choose_latest_action(cll, cfg) -> int:
                 return action
         return last_executed_cls.action
     return choose_random_action(cfg)
+
 
 def choose_action_from_knowledge_array(cll, cfg) -> Classifier:
     """

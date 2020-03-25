@@ -63,6 +63,7 @@ class Classifier:
         self.tav = tav
         self.ee = False
 
+
     def __eq__(self, other):
         if self.condition == other.condition and \
                 self.action == other.action and \
@@ -72,11 +73,14 @@ class Classifier:
 
         return False
 
+
     def __ne__(self, other):
         return not self.__eq__(other)
 
+
     def __hash__(self):
         return hash((str(self.condition), self.action, str(self.effect)))
+
 
     def __repr__(self):
         return f"{self.condition} " \
@@ -88,6 +92,7 @@ class Classifier:
                f"r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
                f"exp: {self.exp:<3} tga: {self.tga:<5} talp: {self.talp:<5} " \
                f"tav: {self.tav:<6.3} num: {self.num} ee: {self.ee}"
+
 
     @classmethod
     def copy_from(cls, old_cls: Classifier, p: Perception, time: int):
@@ -127,9 +132,11 @@ class Classifier:
                     new_cls.effect[idx] = p[idx]
         return new_cls
 
+
     @property
     def fitness(self):
         return self.q * self.r
+
 
     @property
     def specified_unchanging_attributes(self) -> List[int]:
@@ -144,7 +151,6 @@ class Classifier:
             list specified unchanging attributes indices
         """
         indices = []
-
         for idx, (cpi, epi) in enumerate(zip(self.condition, self.effect)):
             if isinstance(epi, ProbabilityEnhancedAttribute):
                 if cpi != self.cfg.classifier_wildcard and \
@@ -154,12 +160,13 @@ class Classifier:
                 if cpi != self.cfg.classifier_wildcard and \
                         epi == self.cfg.classifier_wildcard:
                     indices.append(idx)
-
         return indices
+
 
     @property
     def specificity(self):
         return self.condition.specificity / len(self.condition)
+
 
     def does_anticipate_change(self) -> bool:
         """
@@ -172,26 +179,33 @@ class Classifier:
         """
         return self.effect.specify_change
 
+
     def is_enhanced(self):
         return self.effect.is_enhanced()
+
 
     def is_reliable(self) -> bool:
         return self.q > self.cfg.theta_r
 
+
     def is_inadequate(self) -> bool:
         return self.q < self.cfg.theta_i
+
 
     def increase_experience(self) -> int:
         self.exp += 1
         return self.exp
 
+
     def increase_quality(self) -> float:
         self.q += self.cfg.beta * (1 - self.q)
         return self.q
 
+
     def decrease_quality(self) -> float:
         self.q -= self.cfg.beta * self.q
         return self.q
+
 
     def specialize(
             self,
@@ -211,7 +225,6 @@ class Classifier:
             if self.effect[idx] != self.cfg.classifier_wildcard:
                 # If we have a specialized attribute don't change it.
                 continue
-
             if previous_situation[idx] != situation[idx]:
                 if self.effect[idx] == self.cfg.classifier_wildcard:
                     self.effect[idx] = situation[idx]
@@ -220,6 +233,7 @@ class Classifier:
                         self.effect[idx] = ProbabilityEnhancedAttribute(self.effect[idx])
                     self.effect[idx].insert_symbol(situation[idx])
                 self.condition[idx] = previous_situation[idx]
+
 
     def predicts_successfully(
             self,
@@ -251,6 +265,7 @@ class Classifier:
                     return True
         return False
 
+
     def does_anticipate_correctly(
             self,
             previous_situation: Perception,
@@ -279,6 +294,7 @@ class Classifier:
         """
         return self.effect.anticipates_correctly(previous_situation, situation)
 
+
     def set_mark(self, perception: Perception) -> None:
         """
         Specializes the mark in all attributes
@@ -289,6 +305,7 @@ class Classifier:
             current situation
         """
         self.ee = self.mark.set_mark(perception, self.ee)
+
 
     def set_alp_timestamp(self, time: int) -> None:
         """
@@ -304,8 +321,8 @@ class Classifier:
                 self.exp + 1)
         else:
             self.tav += self.cfg.beta * ((time - self.talp) - self.tav)
-
         self.talp = time
+
 
     def is_more_general(self, other: Classifier) -> bool:
         """
@@ -324,6 +341,7 @@ class Classifier:
         """
         return self.condition.specificity <= other.condition.specificity
 
+
     def generalize_unchanging_condition_attribute(
                 self,
                 randomfunc: Callable=random.choice
@@ -337,6 +355,7 @@ class Classifier:
         ----------
         randomfunc: Callable
             function returning attribute index to generalize
+
         Returns
         -------
         bool
@@ -346,19 +365,26 @@ class Classifier:
             ridx = randomfunc(self.specified_unchanging_attributes)
             self.condition.generalize(ridx)
             return True
-
         return False
+
 
     def is_marked(self):
         return self.mark.is_marked()
 
+
     def does_match(self, situation: Perception) -> bool:
         """
         Returns if the classifier matches the situation.
-        :param situation:
-        :return:
+        Parameters
+        -------
+        situation
+
+        Returns
+        -------
+        bool
         """
         return self.condition.does_match(situation)
+
 
     def merge_with(self, other_classifier, perception, time):
         result = Classifier(

@@ -26,6 +26,7 @@ class ClassifiersList(TypedList):
     def __init__(self, *args) -> None:
         super().__init__((Classifier, ), *args)
 
+
     def form_match_set(self, situation: Perception) -> ClassifiersList:
         best_classifier = None
         best_fitness = 0.0
@@ -38,12 +39,19 @@ class ClassifiersList(TypedList):
                     best_fitness = cl.fitness
         return ClassifiersList(*matching), best_classifier, best_fitness
 
+
     def form_action_set(self, action_classifier: Classifier) -> ClassifiersList:
         if action_classifier.behavioral_sequence is None:
             matching = [cl for cl in self if cl.action == action_classifier.action and cl.behavioral_sequence is None]
         else :
             matching = [cl for cl in self if cl.behavioral_sequence == action_classifier.behavioral_sequence and cl.action == action_classifier.action]
         return ClassifiersList(*matching)
+
+
+    def form_action_set_acs2(self, action: int) -> ClassifiersList:
+        matching = [cl for cl in self if cl.action == action]
+        return ClassifiersList(*matching)
+
 
     def expand(self) -> List[Classifier]:
         """
@@ -56,6 +64,7 @@ class ClassifiersList(TypedList):
         """
         list2d = [[cl] * cl.num for cl in self]
         return list(chain.from_iterable(list2d))
+
 
     @staticmethod
     def apply_enhanced_effect_part_check(
@@ -78,8 +87,8 @@ class ClassifiersList(TypedList):
                 new_classifier = candidate.merge_with(merger, previous_situation, time)
                 if new_classifier is not None:
                     add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
-
         return new_list
+
 
     @staticmethod
     def apply_alp(
@@ -111,10 +120,6 @@ class ClassifiersList(TypedList):
         time: int
         theta_exp
         cfg: Configuration
-
-        Returns
-        -------
-
         """
         new_list = ClassifiersList()
         new_cl: Optional[Classifier] = None
@@ -168,6 +173,7 @@ class ClassifiersList(TypedList):
             new_matching = [cl for cl in new_list if cl.condition.does_match(p1)]
             match_set.extend(new_matching)
 
+
     @staticmethod
     def apply_alp_behavioral_sequence(
             population: ClassifiersList,
@@ -192,10 +198,6 @@ class ClassifiersList(TypedList):
         time: int
         theta_exp
         cfg: Configuration
-
-        Returns
-        -------
-
         """
         new_list = ClassifiersList()
         new_cl: Optional[Classifier] = None
@@ -245,6 +247,7 @@ class ClassifiersList(TypedList):
             new_matching = [cl for cl in new_list if cl.condition.does_match(p1)]
             match_set.extend(new_matching)
 
+
     @staticmethod
     def apply_reinforcement_learning(
             action_set: ClassifiersList,
@@ -255,6 +258,7 @@ class ClassifiersList(TypedList):
         ) -> None:
         for cl in action_set:
             rl.update_classifier(cl, reward, p, beta, gamma)
+
 
     @staticmethod
     def apply_ga(
@@ -324,7 +328,8 @@ class ClassifiersList(TypedList):
                     theta_exp
                 )
 
+
     def __str__(self):
         return "\n".join(str(classifier)
-                         for classifier
-                         in sorted(self, key=lambda cl: -cl.fitness))
+            for classifier
+            in sorted(self, key=lambda cl: -cl.fitness))
