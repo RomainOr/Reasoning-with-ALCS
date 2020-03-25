@@ -83,7 +83,8 @@ class Classifier:
                f"{self.action} " \
                f"{str(self.behavioral_sequence)} " \
                f"{str(self.effect):16} " \
-               f"{'(' + str(self.mark) + ')':21} q: {self.q:<5.3} " \
+               f"{'(' + str(self.mark) + ')':21} \n" \
+               f"q: {self.q:<5.3} " \
                f"r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
                f"exp: {self.exp:<3} tga: {self.tga:<5} talp: {self.talp:<5} " \
                f"tav: {self.tav:<6.3} num: {self.num} ee: {self.ee}"
@@ -111,7 +112,7 @@ class Classifier:
             condition=Condition(old_cls.condition, old_cls.cfg.classifier_wildcard),
             action=old_cls.action,
             behavioral_sequence=old_cls.behavioral_sequence,
-            effect=old_cls.effect,
+            effect=Effect(old_cls.effect, old_cls.cfg.classifier_wildcard),
             quality=old_cls.q,
             reward=old_cls.r,
             immediate_reward=old_cls.ir,
@@ -191,9 +192,6 @@ class Classifier:
     def decrease_quality(self) -> float:
         self.q -= self.cfg.beta * self.q
         return self.q
-
-    def reverse_increase_quality(self):
-        self.q = (self.q - self.cfg.beta) / (1.0 - self.cfg.beta)
 
     def specialize(
             self,
@@ -372,13 +370,8 @@ class Classifier:
             tga = time,
             cfg = self.cfg
         )
-        # Vérifier que je n'ai pas la création de ce genre de truc:
-        # 00000009 7 None {0:65%, 9:35%}#####{9:58%, 0:42%}0 (empty)
         result.condition = Condition(self.condition)
         result.condition.specialize_with_condition(other_classifier.condition)
-        #for idx, ci in enumerate(result.condition):
-        #    if ci == result.condition.wildcard:
-        #        result.condition[idx] = next(iter(self.mark[idx]))
         result.effect = Effect.enhanced_effect(
             self.effect, 
             other_classifier.effect,

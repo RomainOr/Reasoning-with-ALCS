@@ -77,7 +77,6 @@ class ClassifiersList(TypedList):
                 merger = random.choice(candidates2)
                 new_classifier = candidate.merge_with(merger, previous_situation, time)
                 if new_classifier is not None:
-                    candidate.reverse_increase_quality()
                     add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
 
         return new_list
