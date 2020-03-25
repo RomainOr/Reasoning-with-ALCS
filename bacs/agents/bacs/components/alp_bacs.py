@@ -80,8 +80,8 @@ def expected_case(
     ----------
     New classifier or None
     """
-    if cl.ee:
-        cl.effect.update_enhanced_effect_probs(p0, cl.cfg.beta)
+    if cl.is_enhanced():
+        cl.effect.update_enhanced_effect_probs(p1, cl.cfg.beta)
 
     if is_state_aliased(cl.condition, cl.mark, p0):
         if cl.cfg.do_pee: cl.ee = True

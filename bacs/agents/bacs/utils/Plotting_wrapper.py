@@ -16,48 +16,7 @@ import matplotlib.pyplot as plt
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
 
-from bacs.metrics import population_metrics
-
 ### Provide a helper method for calculating obtained knowledge and other metrics
-
-def _maze_metrics(pop, env):
-
-    def _maze_knowledge(population, environment) -> float:
-        transitions = environment.env.get_all_possible_transitions()
-        # Take into consideration only reliable classifiers
-        reliable_classifiers = [c for c in population if c.is_reliable()]
-        # Count how many transitions are anticipated correctly
-        nr_correct = 0
-        # For all possible destinations from each path cell
-        for start, action, end in transitions:
-            p0 = environment.env.maze.perception(*start)
-            p1 = environment.env.maze.perception(*end)
-            if any([True for cl in reliable_classifiers
-                    if cl.predicts_successfully(p0, action, p1)]):
-                nr_correct += 1
-        return nr_correct / len(transitions) * 100.0
-
-    metrics = {
-        'knowledge': _maze_knowledge(pop, env)
-    }
-
-    # Add basic population metrics
-    metrics.update(population_metrics(pop, env))
-
-    return metrics
-
-def _does_pees_match_non_aliased_states(pop, env) -> int:
-    counter = 0
-    non_aliased_perceptions = env.env.get_all_non_aliased_states()
-    enhanced_classifiers = [c for c in pop if c.is_enhanced()]
-    for percept in non_aliased_perceptions:
-        for cl in enhanced_classifiers:
-            if cl.does_match(percept):
-                #print(percept)
-                #print(cl)
-                #print('\n')
-                counter += 1
-    return counter
 
 # Provide a wrapper for plotting
 

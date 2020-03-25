@@ -125,4 +125,4 @@ class ProbabilityEnhancedAttribute(dict):
 
 
     def __str__(self):
-        return "{" + ", ".join( "%s:%.0f%%" % (sym[0], sym[1] * 100) for sym in self.sorted_items()) + "}"
+        return "{" + ", ".join( "%s:%.2f%%" % (sym[0], sym[1] * 100) for sym in self.sorted_items()) + "}"

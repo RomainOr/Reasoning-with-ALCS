@@ -48,10 +48,23 @@ class AbstractMaze(gym.Env):
         self.pos_y = None
         self.action_space = spaces.Discrete(8)
         self.observation_space = MazeObservationSpace(8)
+        self.prob_slippery = 0.0
+
+    def set_prob_slippery(self, prob: float = 0.0):
+        self.prob_slippery = prob
 
     def step(self, action):
         previous_observation = self._observe()
-        self._take_action(action, previous_observation)
+        if random.random() < self.prob_slippery:
+            self._take_action(
+                random.randint(0, len(ACTION_LOOKUP)-1),
+                previous_observation
+            )
+        else:
+            self._take_action(
+                action, 
+                previous_observation
+            )
 
         observation = self._observe()
         reward = self._get_reward()
