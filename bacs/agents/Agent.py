@@ -1,12 +1,9 @@
-import logging
 from collections import namedtuple
 from typing import Callable, List, Tuple
 
 from ..metrics import basic_metrics
 
 TrialMetrics = namedtuple('TrialMetrics', ['steps', 'reward'])
-
-logger = logging.getLogger(__name__)
 
 
 class Agent:
@@ -118,10 +115,6 @@ class Agent:
                 if user_metrics is not None:
                     m.update(user_metrics(self.get_population(), env))
                 metrics.append(m)
-
-            # Print last metric
-            if current_trial % 5000 == 0:
-                logger.info(metrics[-1])
 
             current_trial += 1
 

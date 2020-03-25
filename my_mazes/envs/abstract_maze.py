@@ -5,7 +5,6 @@
 """
 
 import io
-import logging
 import random
 import sys
 import gym
@@ -61,7 +60,6 @@ class AbstractMaze(gym.Env):
         return observation, reward, episode_over, {}
 
     def reset(self):
-        logging.debug("Resetting the environment")
         self._insert_animat()
         return self._observe()
 

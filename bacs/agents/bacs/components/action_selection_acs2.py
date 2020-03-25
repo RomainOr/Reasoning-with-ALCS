@@ -1,17 +1,11 @@
-"""
-    This Source Code Form is subject to the terms of the Mozilla Public
-    License, v. 2.0. If a copy of the MPL was not distributed with this
-    file, You can obtain one at http://mozilla.org/MPL/2.0/.
-"""
-
 import random
 from itertools import groupby
 
 from bacs.agents.bacs import Classifier
 
-def choose_classifier(cll, cfg, epsilon: float) -> Classifier:
+def choose_classifier(cll, cfg, epsilon: float) -> int:
     """
-    Chooses which classifier to use given matching set
+    Chooses which action to use given matching set
 
     Parameters
     ----------
@@ -24,16 +18,17 @@ def choose_classifier(cll, cfg, epsilon: float) -> Classifier:
 
     Returns
     -------
-    Classifier
+    int 
+        Action
     """
     if random.random() < epsilon:
         return explore(cll, cfg)
 
-    return choose_fittest_classifier(cll, cfg)
+    return choose_fittest_action(cll, cfg)
 
-def explore(cll, cfg, pb: float = 0.5) -> Classifier:
+def explore(cll, cfg, pb: float = 0.5) -> int:
     """
-    Chooses classifier according to current exploration policy
+    Chooses action according to current exploration policy
 
     Parameters
     ----------
@@ -46,8 +41,8 @@ def explore(cll, cfg, pb: float = 0.5) -> Classifier:
 
     Returns
     -------
-    Classifier
-        Chosen classifier
+    int 
+        Action
     """
     if random.random() < pb:
         # We are in the biased exploration
@@ -56,12 +51,11 @@ def explore(cll, cfg, pb: float = 0.5) -> Classifier:
         else:
             return choose_action_from_knowledge_array(cll, cfg)
 
-    return choose_random_classifiers(cll, cfg)
+    return choose_random_action(cfg)
 
-def choose_latest_action(cll, cfg) -> Classifier:
+def choose_latest_action(cll, cfg) -> int:
     """
-    Computes latest executed action ("action delay bias") and return 
-    a corresponding classifier
+    Chooses latest executed action ("action delay bias")
 
     Parameters
     ----------
@@ -72,7 +66,8 @@ def choose_latest_action(cll, cfg) -> Classifier:
 
     Returns
     -------
-    Classifier
+    int 
+        Action
     """
     last_executed_cls = None
     number_of_cls_per_action = {i: 0 for i in range(cfg.number_of_possible_actions)}
@@ -84,16 +79,16 @@ def choose_latest_action(cll, cfg) -> Classifier:
             number_of_cls_per_action[_action] = sum([cl.num for cl in _clss])
         for action, nCls in number_of_cls_per_action.items():
             if nCls == 0:
-                return Classifier(action=action, cfg=cfg)
-        return last_executed_cls
-    return choose_random_classifiers(cll, cfg)
+                return action
+        return last_executed_cls.action
+    return choose_random_action(cfg)
 
 def choose_action_from_knowledge_array(cll, cfg) -> Classifier:
     """
     Creates 'knowledge array' that represents the average quality of the
     anticipation for each action in the current list. Chosen is
     the action, BACS knows least about the consequences.
-    Then a classifier that corresponds to this action is randomly returned.
+    Then this action is returned.
 
     Parameters
     ----------
@@ -104,7 +99,8 @@ def choose_action_from_knowledge_array(cll, cfg) -> Classifier:
 
     Returns
     -------
-    Classifier
+    int 
+        Action
     """
     knowledge_array = {i: 0.0 for i in range(cfg.number_of_possible_actions)}
 
@@ -118,19 +114,31 @@ def choose_action_from_knowledge_array(cll, cfg) -> Classifier:
             knowledge_array[_action] = agg_q / float(agg_num)
         by_quality = sorted(knowledge_array.items(), key=lambda el: el[1])
         action = by_quality[0][0]
+        return action
 
-        classifiers_that_match_action = [cl for cl in cll if cl.action == action]
-        if len(classifiers_that_match_action) > 0:
-            idx = random.randint(0, len(classifiers_that_match_action) -1)
-            return classifiers_that_match_action[idx]
-
-    return choose_random_classifiers(cll, cfg)
+    return choose_random_action(cfg)
 
 
-def choose_random_classifiers(cll, cfg) -> Classifier:
+def choose_random_action(cfg) -> int:
     """
-    Chooses one of the possible actions in the environment randomly 
-    and return a corresponding classifier
+    Chooses one of the possible actions in the environment randomly
+
+    Parameters
+    ----------
+    cfg: Configuration
+        Allow to retrieve the number of possible actions
+
+    Returns
+    -------
+    int
+        Action
+    """
+    return random.randint(0, cfg.number_of_possible_actions -1)
+
+
+def choose_fittest_action(cll, cfg) -> int:
+    """
+    Chooses the fittest action in the matching set
 
     Parameters
     ----------
@@ -141,33 +149,12 @@ def choose_random_classifiers(cll, cfg) -> Classifier:
 
     Returns
     -------
-    Classifier
-    """
-    nb_of_cll = len(cll)
-    rand = random.randint(0, nb_of_cll + cfg.number_of_possible_actions - 1)
-    if rand < nb_of_cll:
-        return cll[rand]
-    action = rand - nb_of_cll
-    return Classifier(action=action, cfg=cfg)
-
-
-def choose_fittest_classifier(cll, cfg) -> Classifier:
-    """
-    Chooses the fittest classifier in the matching set
-
-    Parameters
-    ----------
-    cll: ClassifierList
-        Matching set
-    cfg: Configuration
-        Allow to retrieve the number of possible actions
-
-    Returns
-    -------
-    Classifier
+    int 
+        Action
     """
     if len(cll) > 0:
         anticipated_change = [cl for cl in cll if cl.does_anticipate_change()]
         if len(anticipated_change) > 0:
-            return max(anticipated_change, key=lambda cl: cl.fitness)
-    return choose_random_classifiers(cll, cfg)
+            best_classifier = max(anticipated_change, key=lambda cl: cl.fitness)
+            return best_classifier.action
+    return choose_random_action(cfg)

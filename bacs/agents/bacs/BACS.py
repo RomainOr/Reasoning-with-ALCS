@@ -4,7 +4,6 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-import logging
 from typing import List, Tuple
 
 from bacs import Perception
@@ -14,10 +13,6 @@ from bacs.agents.bacs.Condition import Condition
 from bacs.agents.bacs.Effect import Effect
 from bacs.agents.bacs.components.subsumption_bacs import does_subsume, find_subsumers
 from bacs.agents.bacs.components.action_selection_bacs import choose_classifier, choose_fittest_classifier
-
-import numpy as np
-
-logger = logging.getLogger(__name__)
 
 class BACS(Agent):
 
@@ -77,7 +72,6 @@ class BACS(Agent):
     def _run_trial_explore(self, env, time, current_trial=None) \
             -> TrialMetrics:
 
-        logger.debug("** Running trial explore ** ")
         # Initial conditions
         steps = 0
         raw_state = env.reset()
@@ -154,7 +148,6 @@ class BACS(Agent):
             action_set = match_set.form_action_set(action_classifier)
             # Use environment adapter
             iaction = self.cfg.environment_adapter.to_lcs_action(action_classifier.action)
-            logger.debug("\tExecuting action: [%d]", action_classifier.action)
             # Do the action
             prev_state = state
             raw_state, last_reward, done, _ = env.step(iaction)
@@ -168,7 +161,6 @@ class BACS(Agent):
                 for act in action_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(act)
-                    logger.debug("\tExecuting action from behavioral sequence: [%d]", act)
                     raw_state, last_reward, done, _ = env.step(iaction)
                     state = self.cfg.environment_adapter.to_genotype(raw_state)
                     if state in message_list:
@@ -229,7 +221,6 @@ class BACS(Agent):
     def _run_trial_exploit(self, env, time=None, current_trial=None) \
             -> TrialMetrics:
 
-        logger.debug("** Running trial exploit **")
         # Initial conditions
         steps = 0
         raw_state = env.reset()
@@ -255,7 +246,6 @@ class BACS(Agent):
             action_set = match_set.form_action_set(best_classifier)
             # Use environment adapter
             iaction = self.cfg.environment_adapter.to_lcs_action(best_classifier.action)
-            logger.debug("\tExecuting action: [%d]", best_classifier.action)
             # Do the action
             raw_state, last_reward, done, _ = env.step(iaction)
             state = self.cfg.environment_adapter.to_genotype(raw_state)
@@ -265,7 +255,6 @@ class BACS(Agent):
                 for act in best_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(act)
-                    logger.debug("\tExecuting action from behavioral sequence: [%d]", act)
                     raw_state, last_reward, done, _ = env.step(iaction)
                     state = self.cfg.environment_adapter.to_genotype(raw_state)
                     if done:
