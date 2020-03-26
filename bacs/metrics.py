@@ -78,3 +78,6 @@ def _when_full_knowledge_is_achieved(metrics):
         if trial_when_full_knowledge != -1 and trial['knowledge'] != 100:
             full_knowledge_has_decreased = True
     return trial_when_full_knowledge, full_knowledge_has_decreased
+
+def _state_of_population(metrics, trial):
+    return metrics[trial -1]
