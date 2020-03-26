@@ -68,3 +68,13 @@ def _does_pees_match_non_aliased_states(pop, env) -> int:
 def _mean_reliable_classifier_specificity(pop, env) -> int:
     reliable_classifiers = [cl for cl in pop if cl.is_reliable()]
     return float(sum(cl.specificity for cl in reliable_classifiers)) / len(reliable_classifiers)
+
+def _when_full_knowledge_is_achieved(metrics):
+    trial_when_full_knowledge = -1
+    full_knowledge_has_decreased = False
+    for trial in metrics:
+        if trial_when_full_knowledge == -1 and trial['knowledge'] == 100:
+            trial_when_full_knowledge = trial['trial']
+        if trial_when_full_knowledge != -1 and trial['knowledge'] != 100:
+            full_knowledge_has_decreased = True
+    return trial_when_full_knowledge, full_knowledge_has_decreased
