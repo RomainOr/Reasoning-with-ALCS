@@ -55,7 +55,7 @@ def _maze_metrics(pop, env):
 
     return metrics
 
-def _does_pees_match_non_aliased_states(pop, env) -> int:
+def _how_many_pees_match_non_aliased_states(pop, env) -> int:
     counter = 0
     non_aliased_perceptions = env.env.get_all_non_aliased_states()
     enhanced_classifiers = [cl for cl in pop if cl.is_reliable() and cl.is_enhanced()]
@@ -70,14 +70,22 @@ def _mean_reliable_classifier_specificity(pop, env) -> int:
     return float(sum(cl.specificity for cl in reliable_classifiers)) / len(reliable_classifiers)
 
 def _when_full_knowledge_is_achieved(metrics):
-    trial_when_full_knowledge = -1
-    full_knowledge_has_decreased = False
+
+    first_trial_when_full_knowledge = -1
+    stable_trial_when_full_knowledge = -1
+
     for trial in metrics:
-        if trial_when_full_knowledge == -1 and trial['knowledge'] == 100:
-            trial_when_full_knowledge = trial['trial']
-        if trial_when_full_knowledge != -1 and trial['knowledge'] != 100:
-            full_knowledge_has_decreased = True
-    return trial_when_full_knowledge, full_knowledge_has_decreased
+
+        if first_trial_when_full_knowledge == -1 and trial['knowledge'] == 100:
+            first_trial_when_full_knowledge = trial['trial']
+
+        if stable_trial_when_full_knowledge == -1 and trial['knowledge'] == 100:
+            stable_trial_when_full_knowledge = trial['trial']
+
+        if stable_trial_when_full_knowledge != -1 and trial['knowledge'] != 100:
+            stable_trial_when_full_knowledge = -1
+
+    return first_trial_when_full_knowledge, stable_trial_when_full_knowledge
 
 def _state_of_population(metrics, trial):
     return metrics[trial -1]
