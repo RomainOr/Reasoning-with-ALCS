@@ -162,13 +162,18 @@ def add_classifier(
         subsumption experience threshold
     """
     # Find_subsumers computes subsumer or classifier that are equal
-    subsumers = find_subsumers(cl, population, theta_exp)
+    subsumers = find_subsumers(cl, action_set, theta_exp)
     # Check if subsumers exist, meaning that old_cl is mandatory not None
     if len(subsumers) == 0:
-        population.append(cl)
-        action_set.append(cl)
-        if match_set is not None and cl.condition.does_match(p):
-            match_set.append(cl)
+        old_cl = next(filter(lambda other: cl == other, action_set), None)
+        if old_cl:
+            if not old_cl.is_marked():
+                old_cl.num += 1
+        else:
+            population.append(cl)
+            action_set.append(cl)
+            if match_set is not None and cl.condition.does_match(p):
+                match_set.append(cl)
     else:
         old_cl = subsumers[0]
         if not old_cl.is_marked():
