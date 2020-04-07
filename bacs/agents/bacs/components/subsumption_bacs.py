@@ -33,6 +33,8 @@ def find_subsumers(cl, population, theta_exp: int) -> List:
 def does_subsume(cl, other_cl, theta_exp: int) -> bool:
     """
     Returns if a classifier `cl` subsumes `other_cl` classifier
+    No need to chech condition when does_subsume is only applied 
+    on the matching set or the action set
 
     Parameters
     ----------
@@ -50,7 +52,6 @@ def does_subsume(cl, other_cl, theta_exp: int) -> bool:
     """
     if is_subsumer(cl, theta_exp) and \
         cl.is_more_general(other_cl) and \
-        cl.condition.subsumes(other_cl.condition) and \
             cl.action == other_cl.action and \
             cl.behavioral_sequence == other_cl.behavioral_sequence and \
             cl.effect.subsumes(other_cl.effect):
