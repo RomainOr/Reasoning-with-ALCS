@@ -33,12 +33,12 @@ def update_classifier(
         reinforcement rate
     """
 
-    if cl.behavioral_sequence:
-        delta_gamma_bs = 0.001
-        bs_ratio = len(cl.behavioral_sequence)/cl.cfg.bs_max
-        _reward = step_reward + (gamma - delta_gamma_bs * bs_ratio ) * max_fitness
-    else :
-        _reward = step_reward + gamma * max_fitness
+    #if cl.behavioral_sequence:
+    #    delta_gamma_bs = 0.001
+    #    bs_ratio = len(cl.behavioral_sequence)/cl.cfg.bs_max
+    #    _reward = step_reward + (gamma - delta_gamma_bs * bs_ratio ) * max_fitness
+    #else :
+    _reward = step_reward + gamma * max_fitness
 
     # Update classifier properties
     cl.r += beta * (_reward - cl.r)
