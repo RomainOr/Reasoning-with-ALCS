@@ -274,9 +274,6 @@ class ClassifiersList(TypedList):
             theta_exp: int
         ) -> None:
 
-        if len(action_set) < 2 or action_set[0].behavioral_sequence :
-            return
-
         if ga.should_apply(action_set, time, theta_ga):
             ga.set_timestamps(action_set, time)
 
