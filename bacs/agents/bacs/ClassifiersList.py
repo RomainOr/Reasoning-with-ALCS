@@ -153,7 +153,7 @@ class ClassifiersList(TypedList):
             if new_cl is not None:
                 new_cl.tga = time
                 if new_cl.behavioral_sequence:
-                    add_classifier(new_cl, match_set, new_list, theta_exp)
+                    add_classifier(new_cl, population, new_list, theta_exp)
                 else:
                     add_classifier(new_cl, action_set, new_list, theta_exp)
 
