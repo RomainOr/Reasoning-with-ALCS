@@ -9,7 +9,6 @@ from typing import Optional
 
 from bacs import Perception
 from bacs.agents.bacs import Classifier, ClassifiersList, Condition, Configuration, PMark
-from bacs.agents.bacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
 from bacs.agents.bacs.components.aliasing_detection import is_state_aliased
 from bacs.agents.bacs.components.build_behavioral_sequences import create_behavioral_classifier
 
@@ -80,11 +79,8 @@ def expected_case(
     ----------
     New classifier or None
     """
-    if cl.is_enhanced():
-        cl.effect.update_enhanced_effect_probs(p1, cl.cfg.beta)
 
     if is_state_aliased(cl.condition, cl.mark, p0):
-        if cl.cfg.do_pee: cl.ee = True
         if cl.cfg.bs_max != 0 and last_activated_classifier is not None:
             child = create_behavioral_classifier(last_activated_classifier, cl, p1)
             if child:

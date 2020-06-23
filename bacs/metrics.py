@@ -55,16 +55,6 @@ def _maze_metrics(pop, env):
 
     return metrics
 
-def _how_many_pees_match_non_aliased_states(pop, env) -> int:
-    counter = 0
-    non_aliased_perceptions = env.env.get_all_non_aliased_states()
-    enhanced_classifiers = [cl for cl in pop if cl.is_reliable() and cl.is_enhanced()]
-    for percept in non_aliased_perceptions:
-        for cl in enhanced_classifiers:
-            if cl.does_match(percept):
-                counter += 1
-    return counter
-
 def _mean_reliable_classifier_specificity(pop, env) -> int:
     reliable_classifiers = [cl for cl in pop if cl.is_reliable()]
     return float(sum(cl.specificity for cl in reliable_classifiers)) / len(reliable_classifiers)

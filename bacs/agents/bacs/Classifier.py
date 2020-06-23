@@ -10,7 +10,7 @@ import random
 from typing import Optional, Union, Callable, List
 
 from bacs import Perception
-from bacs.agents.bacs import Configuration, Condition, Effect, PMark, ProbabilityEnhancedAttribute
+from bacs.agents.bacs import Configuration, Condition, Effect, PMark
 
 
 class Classifier:
@@ -126,10 +126,6 @@ class Classifier:
             talp=time,
             tav=old_cls.tav
         )
-        if new_cls.is_enhanced():
-            for idx, ei in enumerate(new_cls.effect):
-                if isinstance(ei, ProbabilityEnhancedAttribute):
-                    new_cls.effect[idx] = p[idx]
         return new_cls
 
 
@@ -152,14 +148,8 @@ class Classifier:
         """
         indices = []
         for idx, (cpi, epi) in enumerate(zip(self.condition, self.effect)):
-            if isinstance(epi, ProbabilityEnhancedAttribute):
-                if cpi != self.cfg.classifier_wildcard and \
-                        epi.does_contain(cpi):
-                    indices.append(idx)
-            else:
-                if cpi != self.cfg.classifier_wildcard and \
-                        epi == self.cfg.classifier_wildcard:
-                    indices.append(idx)
+            if cpi != self.cfg.classifier_wildcard and epi == self.cfg.classifier_wildcard:
+                indices.append(idx)
         return indices
 
 
@@ -178,10 +168,6 @@ class Classifier:
             true if the effect part contains any specified attributes
         """
         return self.effect.specify_change
-
-
-    def is_enhanced(self):
-        return self.effect.is_enhanced()
 
 
     def is_reliable(self) -> bool:
@@ -228,10 +214,6 @@ class Classifier:
             if previous_situation[idx] != situation[idx]:
                 if self.effect[idx] == self.cfg.classifier_wildcard:
                     self.effect[idx] = situation[idx]
-                elif self.ee:
-                    if not isinstance(self.effect[idx], ProbabilityEnhancedAttribute):
-                        self.effect[idx] = ProbabilityEnhancedAttribute(self.effect[idx])
-                    self.effect[idx].insert_symbol(situation[idx])
                 self.condition[idx] = previous_situation[idx]
 
 
@@ -384,22 +366,3 @@ class Classifier:
         bool
         """
         return self.condition.does_match(situation)
-
-
-    def merge_with(self, other_classifier, perception, time):
-        result = Classifier(
-            action = self.action,
-            behavioral_sequence = self.behavioral_sequence,
-            quality = max((self.q + other_classifier.q) / 2.0, 0.5),
-            reward = (self.r + other_classifier.r) / 2.0,
-            talp = time,
-            tga = time,
-            cfg = self.cfg
-        )
-        result.condition = Condition(self.condition)
-        result.condition.specialize_with_condition(other_classifier.condition)
-        result.effect = Effect.enhanced_effect(
-            self.effect, 
-            other_classifier.effect,
-            perception)
-        return result

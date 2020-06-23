@@ -8,7 +8,6 @@ from typing import Optional
 
 from bacs import Perception
 from bacs.agents.bacs import Classifier
-from bacs.agents.bacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
 
 def _updated_passthrough(
         child_effect, 
@@ -33,15 +32,9 @@ def _updated_passthrough(
     """
     for i in range(len(child_effect)):
         if last_effect[i] == child_effect.wildcard:
-            if isinstance(penultimate_effect[i], ProbabilityEnhancedAttribute):
-                child_effect[i] = perception[i]
-            else:
-                child_effect[i] = penultimate_effect[i]
+            child_effect[i] = penultimate_effect[i]
         else:
-            if isinstance(last_effect[i], ProbabilityEnhancedAttribute):
-                child_effect[i] = perception[i]
-            else:
-                child_effect[i] = last_effect[i]
+            child_effect[i] = last_effect[i]
     # Refining effect
     for idx, effect_item in enumerate(child_effect):
         if effect_item != child_effect.wildcard and effect_item == child_condition[idx]:

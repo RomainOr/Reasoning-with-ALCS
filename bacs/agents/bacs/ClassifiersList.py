@@ -16,7 +16,6 @@ import bacs.agents.bacs.components.reinforcement_learning_bacs as rl
 from bacs import Perception, TypedList
 from bacs.agents.bacs import Classifier, Configuration
 from bacs.agents.bacs.components.add_classifier_bacs import add_classifier
-from bacs.agents.bacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
 
 class ClassifiersList(TypedList):
     """
@@ -64,30 +63,6 @@ class ClassifiersList(TypedList):
         """
         list2d = [[cl] * cl.num for cl in self]
         return list(chain.from_iterable(list2d))
-
-
-    @staticmethod
-    def apply_enhanced_effect_part_check(
-            action_set: ClassifiersList,
-            new_list: ClassifiersList,
-            previous_situation: Perception,
-            time: int,
-            cfg: Configuration
-        ):
-        # Create a list of candidates.
-        # Every enhanceable classifier is a candidate.
-        candidates = [classifier for classifier in action_set if classifier.ee]
-        # If there are less than 2 candidates, don't do it
-        if len(candidates) < 2:
-            return
-        for candidate in candidates:
-            candidates2 = [cl for cl in candidates if candidate != cl and cl.mark == candidate.mark]
-            if len(candidates2) > 0:
-                merger = random.choice(candidates2)
-                new_classifier = candidate.merge_with(merger, previous_situation, time)
-                if new_classifier is not None:
-                    add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
-        return new_list
 
 
     @staticmethod
@@ -156,9 +131,6 @@ class ClassifiersList(TypedList):
                     add_classifier(new_cl, population, new_list, theta_exp)
                 else:
                     add_classifier(new_cl, action_set, new_list, theta_exp)
-
-        if cfg.do_pee:
-            ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
 
         # No classifier anticipated correctly - generate new one
         if not was_expected_case:
@@ -235,9 +207,6 @@ class ClassifiersList(TypedList):
                 idx -= 1
                 action_set_length -= 1
             idx += 1
-
-        if cfg.do_pee:
-            ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
 
         # Merge classifiers from new_list into action_set and population
         action_set.extend(new_list)

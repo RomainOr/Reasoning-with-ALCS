@@ -13,8 +13,6 @@ from bacs.agents.bacs.Condition import Condition
 from bacs.agents.bacs.Effect import Effect
 from bacs.agents.bacs.components.subsumption_bacs import does_subsume, find_subsumers
 from bacs.agents.bacs.components.action_selection_bacs import choose_classifier
-# Temporary piece of code ...
-from bacs.agents.bacs.components.action_selection_acs2 import choose_action
 
 class BACS(Agent):
 
@@ -41,35 +39,6 @@ class BACS(Agent):
         if is_reliable:
             pop = [cl for cl in self.population if cl.is_reliable()]
             self.population = ClassifiersList(*pop)
-        # Clean enhanced effect if necessary
-        for cl in self.population:
-            cl.effect.clean()
-        # Remove all classifier subsumed by another one that is strictly more general
-        #compact_pop = []
-        #for cl in self.population:
-        #    to_keep = True
-        #    for other in self.population:
-        #        if cl != other:
-        #            if does_subsume(other, cl, self.cfg.theta_exp):
-        #                if other.condition.specificity < cl.condition.specificity :
-        #                    to_keep = False
-        #                    break
-        #                elif not cl.is_enhanced() and other.is_enhanced() :
-        #                    to_keep = False
-        #                    break
-        #    if to_keep:
-        #        compact_pop.append(cl)
-        #self.population = ClassifiersList(*compact_pop)
-        # Remove all classifier subsumed by another one that is exactly as general as it
-        #to_delete = []
-        #for cl in self.population:
-        #    subsumers = find_subsumers(cl, self.population, self.cfg.theta_exp)
-        #    if len(subsumers) > 1:
-        #        for i in range(1, len(subsumers)):
-        #            if subsumers[i] not in to_delete:
-        #                to_delete.append(subsumers[i])
-        #compact_pop = [cl for cl in self.population if cl not in to_delete]
-        #self.population = ClassifiersList(*compact_pop)
 
     def _run_trial_explore(self, env, time, current_trial=None) \
             -> TrialMetrics:
@@ -84,14 +53,12 @@ class BACS(Agent):
         action_set = ClassifiersList()
         done = False
 
-        """"""
         # For action chunking
         t_2_activated_classifier = None
         t_1_activated_classifier = None
 
         # For applying alp on behavioral set
         is_behavioral_sequence = False
-        """"""
 
         while not done:
             
@@ -99,7 +66,6 @@ class BACS(Agent):
             match_set, _, best_fitness = self.population.form_match_set(state)
 
             if steps > 0:
-                """"""
                 # Apply learning in the last action set
                 if is_behavioral_sequence:
                     ClassifiersList.apply_alp_behavioral_sequence(
@@ -125,19 +91,6 @@ class BACS(Agent):
                         self.cfg.theta_exp,
                         self.cfg
                     )
-                #ClassifiersList.apply_alp(
-                #    self.population,
-                #    match_set,
-                #    action_set,
-                #    prev_state,
-                #    action,
-                #    state,
-                #    None,
-                #    time + steps,
-                #    self.cfg.theta_exp,
-                #    self.cfg
-                #)
-                """"""
                 ClassifiersList.apply_reinforcement_learning(
                     action_set,
                     last_reward,
@@ -158,8 +111,6 @@ class BACS(Agent):
                         self.cfg.theta_as,
                         self.cfg.theta_exp
                     )
-
-            """"""
             is_behavioral_sequence = False
             # Choose classifier
             action_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
@@ -167,26 +118,15 @@ class BACS(Agent):
             t_2_activated_classifier = t_1_activated_classifier
             t_1_activated_classifier = action_classifier
 
-            #action = choose_action(match_set, self.cfg, self.cfg.epsilon)
-            """"""
-
-            """"""
             # Create action set
             action_set = match_set.form_action_set(action_classifier)
-            #action_set = match_set.form_action_set_acs2(action)
-            """"""
-
-            """"""
             # Use environment adapter
             iaction = self.cfg.environment_adapter.to_lcs_action(action_classifier.action)
-            #iaction = self.cfg.environment_adapter.to_lcs_action(action)
-            """"""
             # Do the action
             prev_state = state
             raw_state, last_reward, done, _ = env.step(iaction)
             state = self.cfg.environment_adapter.to_genotype(raw_state)
 
-            """"""
             # Enter the if condition only if we have chosen a behavioral classifier
             if action_classifier.behavioral_sequence :
                 is_behavioral_sequence = True
@@ -205,10 +145,8 @@ class BACS(Agent):
                     if done:
                         break
                     steps += 1
-            """"""
 
             if done:
-                """"""
                 # Apply algorithms
                 if is_behavioral_sequence:
                     ClassifiersList.apply_alp_behavioral_sequence(
@@ -232,19 +170,6 @@ class BACS(Agent):
                         time + steps,
                         self.cfg.theta_exp,
                         self.cfg)
-                #ClassifiersList.apply_alp(
-                #    self.population,
-                #    match_set,
-                #    action_set,
-                #    prev_state,
-                #    action,
-                #    state,
-                #    None,
-                #    time + steps,
-                #    self.cfg.theta_exp,
-                #    self.cfg
-                #)
-                """"""
                 ClassifiersList.apply_reinforcement_learning(
                     action_set,
                     last_reward,
