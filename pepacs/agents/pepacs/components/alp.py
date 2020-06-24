@@ -75,10 +75,10 @@ def expected_case(
     New classifier or None
     """
     if cl.is_enhanced():
-        cl.effect.update_enhanced_effect_probs(p1, cl.cfg.beta)
+        cl.effect.update_enhanced_effect_probs(p1, cl.cfg.beta_pep)
 
     if is_state_aliased(cl.condition, cl.mark, p0):
-        if cl.cfg.do_pee: cl.ee = True
+        if cl.cfg.do_pep: cl.ee = True
 
     diff = cl.mark.get_differences(p0)
     if diff.specificity == 0:
@@ -91,8 +91,7 @@ def expected_case(
     no_spec_new = diff.specificity
     if no_spec >= cl.cfg.u_max:
         while no_spec >= cl.cfg.u_max:
-            res = cl.generalize_unchanging_condition_attribute()
-            assert res is True
+            cl.generalize_unchanging_condition_attribute()
             no_spec -= 1
 
         while no_spec + no_spec_new > cl.cfg.u_max:

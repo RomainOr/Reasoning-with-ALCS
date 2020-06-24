@@ -7,7 +7,6 @@
 class ProbabilityEnhancedAttribute(dict):
 
     def __init__(self, attr):
-        assert isinstance(attr, str) or isinstance(attr, dict)
         super().__init__()
         if isinstance(attr, str):
             self[attr] = 1.0
@@ -21,7 +20,9 @@ class ProbabilityEnhancedAttribute(dict):
     def merged_attributes(
             cls,
             attr1,
-            attr2
+            exp1,
+            attr2,
+            exp2
         ):
         """
         Create a new enhanced effect part.
@@ -52,7 +53,7 @@ class ProbabilityEnhancedAttribute(dict):
 
     def subsumes(self, other):
         """
-        Check if one Pee subsumes another one
+        Check if one Pep subsumes another one
         """
         return self.keys() >= other.keys()
 
@@ -89,12 +90,9 @@ class ProbabilityEnhancedAttribute(dict):
 
 
     def increase_probability(self, effect_symbol, update_rate):
-        if effect_symbol not in self:
-            return False
         update_delta = update_rate * (1.0 - self[effect_symbol])
         self[effect_symbol] += update_delta
         self.adjust_probabilities(1.0 + update_delta)
-        return True
 
 
     def insert_symbol(self, symbol):
@@ -103,10 +101,9 @@ class ProbabilityEnhancedAttribute(dict):
 
 
     def insert_attribute(self, o):
-        assert isinstance(o, ProbabilityEnhancedAttribute)
         for symbol in self.symbols_specified().union(o.symbols_specified()):
             self[symbol] = self.get(symbol, 0.0) + o.get(symbol, 0.0)
-            self.adjust_probabilities()
+        self.adjust_probabilities()
 
 
     def insert(self, symbol_or_attr):

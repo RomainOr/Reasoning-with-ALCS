@@ -116,10 +116,6 @@ class Effect(AbstractPerception):
         bool
             True if there is a Probability-Enhanced Effect, False otherwise
         """
-        # Sanity check
-        assert not any(isinstance(elem, dict) and
-                       not isinstance(elem, ProbabilityEnhancedAttribute)
-                       for elem in self)
         return any(isinstance(elem, ProbabilityEnhancedAttribute)
                    for elem in self)
 
@@ -140,13 +136,14 @@ class Effect(AbstractPerception):
     def enhanced_effect(
             cls, 
             effect1, 
+            exp1,
             effect2,
+            exp2,
             perception: AbstractPerception = None
         ):
         """
         Create a new enhanced effect part.
         """
-        assert perception is not None
         result = cls(observation=effect1)
         wildcard = effect1.wildcard
         for i, attr2 in enumerate(effect2):
@@ -154,7 +151,7 @@ class Effect(AbstractPerception):
             if attr1 == wildcard and attr2 == wildcard: continue
             if attr1 == wildcard: attr1 = perception[i]
             if attr2 == wildcard: attr2 = perception[i]
-            result[i] = ProbabilityEnhancedAttribute.merged_attributes(attr1, attr2)
+            result[i] = ProbabilityEnhancedAttribute.merged_attributes(attr1, exp1, attr2, exp2)
         return result
 
 

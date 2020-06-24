@@ -193,12 +193,12 @@ class Classifier:
 
 
     def increase_quality(self) -> float:
-        self.q += self.cfg.beta * (1 - self.q)
+        self.q += self.cfg.beta_alp * (1 - self.q)
         return self.q
 
 
     def decrease_quality(self) -> float:
-        self.q -= self.cfg.beta * self.q
+        self.q -= self.cfg.beta_alp * self.q
         return self.q
 
 
@@ -311,11 +311,11 @@ class Classifier:
         time: int
             current step
         """
-        if 1. / self.exp > self.cfg.beta:
+        if 1. / self.exp > self.cfg.beta_alp:
             self.tav = (self.tav * self.exp + (time - self.talp)) / (
                 self.exp + 1)
         else:
-            self.tav += self.cfg.beta * ((time - self.talp) - self.tav)
+            self.tav += self.cfg.beta_alp * ((time - self.talp) - self.tav)
         self.talp = time
 
 
@@ -394,6 +394,8 @@ class Classifier:
         result.condition.specialize_with_condition(other_classifier.condition)
         result.effect = Effect.enhanced_effect(
             self.effect, 
+            self.exp,
             other_classifier.effect,
+            other_classifier.exp,
             perception)
         return result

@@ -12,25 +12,27 @@ from pepacs.agents import EnvironmentAdapter
 class Configuration:
 
     def __init__(self,
-                 classifier_length: int,
-                 number_of_possible_actions: int,
-                 classifier_wildcard='#',
-                 environment_adapter=EnvironmentAdapter,
-                 user_metrics_collector_fcn: Callable = None,
-                 metrics_trial_frequency: int = 5,
-                 do_pee: bool = True,
-                 do_ga: bool=False,
-                 beta: float=0.05,
-                 gamma: float=0.95,
-                 theta_i: float=0.1,
-                 theta_r: float=0.9,
-                 epsilon: float=0.5,
-                 u_max: int=100000,
-                 theta_exp: int=20,
-                 theta_ga: int=100,
-                 theta_as: int=20,
-                 mu: float=0.3,
-                 chi: float=0.8) -> None:
+            classifier_length: int,
+            number_of_possible_actions: int,
+            classifier_wildcard='#',
+            environment_adapter=EnvironmentAdapter,
+            user_metrics_collector_fcn: Callable = None,
+            metrics_trial_frequency: int = 5,
+            do_pep: bool = True,
+            do_ga: bool=False,
+            beta_alp: float=0.05,
+            beta_rl: float=0.05,
+            beta_pep: float=0.01,
+            gamma: float=0.95,
+            theta_i: float=0.1,
+            theta_r: float=0.9,
+            epsilon: float=0.5,
+            u_max: int=100000,
+            theta_exp: int=20,
+            theta_ga: int=100,
+            theta_as: int=20,
+            mu: float=0.3,
+            chi: float=0.8) -> None:
         """
         Creates the configuration object used during training the pepacs agent.
 
@@ -74,10 +76,12 @@ class Configuration:
         self.environment_adapter = environment_adapter
         self.metrics_trial_frequency = metrics_trial_frequency
         self.user_metrics_collector_fcn = user_metrics_collector_fcn
-        self.do_pee = do_pee
+        self.do_pep = do_pep
         self.do_ga = do_ga
         self.theta_exp = theta_exp
-        self.beta = beta
+        self.beta_alp = beta_alp
+        self.beta_rl = beta_rl
+        self.beta_pep = beta_pep
         self.gamma = gamma
         self.theta_i = theta_i
         self.theta_r = theta_r
@@ -95,9 +99,11 @@ class Configuration:
             "\n\t- Number of possible actions: [{}]" \
             "\n\t- Classifier wildcard: [{}]" \
             "\n\t- Environment adapter function: [{}]" \
-            "\n\t- Do Pee: [{}]" \
+            "\n\t- Do Pep: [{}]" \
             "\n\t- Do GA: [{}]" \
-            "\n\t- Beta: [{}]" \
+            "\n\t- Beta_ALP: [{}]" \
+            "\n\t- Beta_RL: [{}]" \
+            "\n\t- Beta_PEP: [{}]" \
             "\n\t- ..." \
             "\n\t- epsilon: [{}]" \
         .format(
@@ -105,8 +111,10 @@ class Configuration:
             self.number_of_possible_actions,
             self.classifier_wildcard,
             self.environment_adapter,
-            self.do_pee,
+            self.do_pep,
             self.do_ga,
-            self.beta,
+            self.beta_alp,
+            self.beta_rl,
+            self.beta_pep,
             self.epsilon
         )

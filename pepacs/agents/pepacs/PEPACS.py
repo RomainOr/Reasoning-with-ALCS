@@ -17,8 +17,9 @@ from pepacs.agents.pepacs.components.action_selection import choose_action
 class PEPACS(Agent):
 
     def __init__(self,
-                 cfg: Configuration,
-                 population: ClassifiersList=None) -> None:
+            cfg: Configuration,
+            population: ClassifiersList=None
+            ) -> None:
         self.cfg = cfg
         self.population = population or ClassifiersList()
 
@@ -74,11 +75,7 @@ class PEPACS(Agent):
                     self.cfg
                 )
                 ClassifiersList.apply_reinforcement_learning(
-                    action_set,
-                    last_reward,
-                    best_fitness,
-                    self.cfg.beta,
-                    self.cfg.gamma
+                    action_set, last_reward, best_fitness, self.cfg.beta_rl, self.cfg.gamma
                 )
                 if self.cfg.do_ga:
                     ClassifiersList.apply_ga(
@@ -117,11 +114,8 @@ class PEPACS(Agent):
                     self.cfg
                 )
                 ClassifiersList.apply_reinforcement_learning(
-                    action_set,
-                    last_reward,
-                    0,
-                    self.cfg.beta,
-                    self.cfg.gamma)
+                    action_set, last_reward, 0, self.cfg.beta_rl, self.cfg.gamma
+                )
             if self.cfg.do_ga:
                 ClassifiersList.apply_ga(
                     time + steps,
@@ -156,11 +150,8 @@ class PEPACS(Agent):
 
             if steps > 0:
                 ClassifiersList.apply_reinforcement_learning(
-                    action_set,
-                    last_reward,
-                    best_fitness,
-                    self.cfg.beta,
-                    self.cfg.gamma)
+                    action_set, last_reward, best_fitness, self.cfg.beta_rl, self.cfg.gamma
+                )
 
             # Create action set
             action_set = match_set.form_action_set(best_classifier)
@@ -173,7 +164,8 @@ class PEPACS(Agent):
             if done:
                 # Apply algorithms
                 ClassifiersList.apply_reinforcement_learning(
-                    action_set, last_reward, 0, self.cfg.beta, self.cfg.gamma)
+                    action_set, last_reward, 0, self.cfg.beta_rl, self.cfg.gamma
+                )
 
             steps += 1
 

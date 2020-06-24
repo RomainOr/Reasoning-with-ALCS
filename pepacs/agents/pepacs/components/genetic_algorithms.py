@@ -122,8 +122,6 @@ def two_point_crossover(parent, donor) -> None:
     left, right = sorted(np.random.choice(
         range(0, parent.cfg.classifier_length + 1), 2, replace=False))
 
-    assert left < right
-
     # Extract chromosomes from condition parts
     chromosome1 = parent.condition[left:right]
     chromosome2 = donor.condition[left:right]

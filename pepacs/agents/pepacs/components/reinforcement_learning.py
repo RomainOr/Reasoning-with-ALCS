@@ -8,7 +8,7 @@ def update_classifier(
         cl, 
         step_reward: int, 
         max_fitness: float,
-        beta: float, 
+        beta_rl: float, 
         gamma: float
     ):
     """
@@ -27,13 +27,13 @@ def update_classifier(
     max_fitness: float
         maximum fitness - back-propagated reinforcement. Maximum fitness
         from the match set
-    beta: float
-        learning rate
+    beta_rl: float
+        learning rate of RL
     gamma: float
         reinforcement rate
     """
     _reward = step_reward + gamma * max_fitness
 
     # Update classifier properties
-    cl.r += beta * (_reward - cl.r)
-    cl.ir += beta * (step_reward - cl.ir)
+    cl.r += beta_rl * (_reward - cl.r)
+    cl.ir += beta_rl * (step_reward - cl.ir)

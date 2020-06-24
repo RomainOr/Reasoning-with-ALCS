@@ -48,13 +48,23 @@ class AbstractMaze(gym.Env):
         self.pos_y = None
         self.action_space = spaces.Discrete(8)
         self.observation_space = MazeObservationSpace(8)
+        self.prob_slippery = 0.0
+
+    def set_prob_slippery(self, prob: float = 0.0):
+        self.prob_slippery = prob
 
     def step(self, action):
         previous_observation = self._observe()
-        self._take_action(
-            action, 
-            previous_observation
-        )
+        if random.random() < self.prob_slippery:
+            self._take_action(
+                random.randint(0, len(ACTION_LOOKUP)-1),
+                previous_observation
+            )
+        else:
+            self._take_action(
+                action, 
+                previous_observation
+            )
 
         observation = self._observe()
         reward = self._get_reward()
@@ -104,7 +114,6 @@ class AbstractMaze(gym.Env):
             for x in range(0, self.maze.max_x):
                 if self.maze.is_path_in_aliasing_matrix(x,y):
                     all_non_aliased_states.append(self.maze.perception(x, y))
-        assert len(all_non_aliased_states) == len(set(all_non_aliased_states))
         return all_non_aliased_states
 
     def _observe(self):

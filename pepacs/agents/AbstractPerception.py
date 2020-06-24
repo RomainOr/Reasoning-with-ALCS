@@ -5,8 +5,6 @@ class AbstractPerception:
     def __init__(self, observation, wildcard='#', oktypes=(str, dict)):
         obs = tuple(observation)
         self.oktypes = oktypes
-        assert type(wildcard) in self.oktypes
-        assert all(isinstance(o, self.oktypes) for o in obs)
         self._items = obs
         self.wildcard = wildcard
 
@@ -61,7 +59,6 @@ class AbstractPerception:
         return self._items[index]
 
     def __setitem__(self, index, value):
-        assert isinstance(value, self.oktypes)
         lst = list(self._items)
         lst[index] = value
 

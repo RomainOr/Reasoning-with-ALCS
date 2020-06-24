@@ -68,18 +68,16 @@ class ClassifiersList(TypedList):
         ):
         # Create a list of candidates.
         # Every enhanceable classifier is a candidate.
-        candidates = [classifier for classifier in action_set if classifier.ee]
+        candidates = [cl for cl in action_set if cl.ee]
         # If there are less than 2 candidates, don't do it
         if len(candidates) < 2:
             return
-        for candidate in candidates:
-            candidates2 = [cl for cl in candidates if candidate != cl and cl.mark == candidate.mark]
-            if len(candidates2) > 0:
-                merger = random.choice(candidates2)
-                new_classifier = candidate.merge_with(merger, previous_situation, time)
-                if new_classifier is not None:
-                    add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
-        return new_list
+        for idx, first in enumerate(candidates):
+            if idx + 1 < len(candidates):
+                for second in candidates[idx+1:]:
+                    if first != second and first.mark == second.mark:
+                        new_classifier = first.merge_with(second, previous_situation, time)
+                        add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
 
 
     @staticmethod
@@ -144,7 +142,7 @@ class ClassifiersList(TypedList):
                 new_cl.tga = time
                 add_classifier(new_cl, action_set, new_list, theta_exp)
 
-        if cfg.do_pee:
+        if cfg.do_pep:
             ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
 
         # No classifier anticipated correctly - generate new one
@@ -166,11 +164,11 @@ class ClassifiersList(TypedList):
             action_set: ClassifiersList,
             reward: int,
             p: float,
-            beta: float,
+            beta_rl: float,
             gamma: float
         ) -> None:
         for cl in action_set:
-            rl.update_classifier(cl, reward, p, beta, gamma)
+            rl.update_classifier(cl, reward, p, beta_rl, gamma)
 
 
     @staticmethod
