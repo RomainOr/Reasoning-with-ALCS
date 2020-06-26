@@ -87,5 +87,5 @@ def _when_full_knowledge_is_achieved(metrics):
 
     return first_trial_when_full_knowledge, stable_trial_when_full_knowledge
 
-def _state_of_population(metrics, trial):
-    return metrics[trial -1]
+def _state_of_population(metrics, trial, step):
+    return metrics[trial//step - 1]
