@@ -24,6 +24,7 @@ class Effect(AbstractPerception):
                            else attr
                            for attr in observation)
         super().__init__(observation, wildcard, oktypes)
+        self.detailled_counter = {}
 
 
     @property
@@ -130,6 +131,7 @@ class Effect(AbstractPerception):
                 elem.make_compact()
                 effect_symbol = perception[i]
                 elem.increase_probability(effect_symbol, update_rate)
+        self.detailled_counter[perception] = self.detailled_counter.get(perception, 0) + 1
 
 
     @classmethod
@@ -157,3 +159,7 @@ class Effect(AbstractPerception):
 
     def __str__(self):
         return ''.join(str(attr) for attr in self)
+
+    
+    def print_detailled_counter(self):
+        return ", ".join("{}:#{}".format("".join(dse_key), dse_value) for dse_key, dse_value in self.detailled_counter.items())
