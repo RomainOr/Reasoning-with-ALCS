@@ -394,8 +394,6 @@ class Classifier:
         result.condition.specialize_with_condition(other_classifier.condition)
         result.effect = Effect.enhanced_effect(
             self.effect, 
-            self.exp,
             other_classifier.effect,
-            other_classifier.exp,
             perception)
         return result

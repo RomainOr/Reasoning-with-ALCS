@@ -136,9 +136,7 @@ class Effect(AbstractPerception):
     def enhanced_effect(
             cls, 
             effect1, 
-            exp1,
             effect2,
-            exp2,
             perception: AbstractPerception = None
         ):
         """
@@ -151,7 +149,7 @@ class Effect(AbstractPerception):
             if attr1 == wildcard and attr2 == wildcard: continue
             if attr1 == wildcard: attr1 = perception[i]
             if attr2 == wildcard: attr2 = perception[i]
-            result[i] = ProbabilityEnhancedAttribute.merged_attributes(attr1, exp1, attr2, exp2)
+            result[i] = ProbabilityEnhancedAttribute.merged_attributes(attr1, attr2)
         return result
 
 

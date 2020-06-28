@@ -14,28 +14,19 @@ class ProbabilityEnhancedAttribute(dict):
             for symbol in attr:
                 self[symbol] = attr[symbol]
         self.adjust_probabilities()
-        self.test = {}
 
 
     @classmethod
     def merged_attributes(
             cls,
             attr1,
-            exp1,
-            attr2,
-            exp2
+            attr2
         ):
         """
         Create a new enhanced effect part.
         """
         result = ProbabilityEnhancedAttribute(attr1)
-        if isinstance(attr1, ProbabilityEnhancedAttribute):
-            for symbol in result:
-                result.test[symbol] = attr1.test.get(symbol, exp1)
-        else:
-            for symbol in result:
-                result.test[symbol] = exp1
-        result.insert(attr2, exp2)
+        result.insert(attr2)
         return result
 
 
@@ -100,28 +91,24 @@ class ProbabilityEnhancedAttribute(dict):
         update_delta = update_rate * (1.0 - self[effect_symbol])
         self[effect_symbol] += update_delta
         self.adjust_probabilities(1.0 + update_delta)
-        self.test[effect_symbol] += 1
 
 
-    def insert_symbol(self, symbol, exp=1):
+    def insert_symbol(self, symbol):
         self[symbol] = self.get(symbol, 0.0) + 1.0 / len(self)
         self.adjust_probabilities()
-        self.test[symbol] = self.test.get(symbol, 0) + exp
 
 
     def insert_attribute(self, o):
         for symbol in self.symbols_specified().union(o.symbols_specified()):
             self[symbol] = self.get(symbol, 0.0) + o.get(symbol, 0.0)
         self.adjust_probabilities()
-        for symbol in o:
-            self.test[symbol] = self.test.get(symbol, 0) + o.test.get(symbol, 0)
 
 
-    def insert(self, symbol_or_attr, exp):
+    def insert(self, symbol_or_attr):
         if isinstance(symbol_or_attr, ProbabilityEnhancedAttribute):
             self.insert_attribute(symbol_or_attr)
         else:
-            self.insert_symbol(symbol_or_attr, exp)
+            self.insert_symbol(symbol_or_attr)
 
 
     def sorted_items(self):
@@ -133,4 +120,4 @@ class ProbabilityEnhancedAttribute(dict):
 
 
     def __str__(self):
-        return "{" + ", ".join( "{}:{:.2f}% ({:.2f}%{})".format(sym[0], sym[1] * 100, self.test[sym[0]]/sum(self.test.values())*100, self.test[sym[0]]) for sym in self.sorted_items()) + "}"
+        return "{" + ", ".join( "{}:{:.2f}%".format(sym[0], sym[1] * 100) for sym in self.sorted_items()) + "}"
