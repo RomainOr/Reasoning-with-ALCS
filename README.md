@@ -1,8 +1,8 @@
-# PEPACS
+# EPEACS
 
 ## Installation
 
-Python 3.x has to be installed to use PEPACS. 
+Python 3.x has to be installed to use EPEACS. 
 We suggest you to use *conda* or *miniconda*.
 
 Then, you have to create a conda environment according to the environment file included in the repository :
