@@ -6,9 +6,9 @@
 
 from __future__ import annotations
 
-from pepacs import Perception
-from pepacs.agents import AbstractPerception
-from pepacs.agents.pepacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
+from epeacs import Perception
+from epeacs.agents import AbstractPerception
+from epeacs.agents.epeacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
 
 class Effect(AbstractPerception):
     """

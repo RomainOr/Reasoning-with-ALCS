@@ -6,15 +6,15 @@
 
 from typing import List, Tuple
 
-from pepacs import Perception
-from pepacs.agents.Agent import Agent, TrialMetrics
-from pepacs.agents.pepacs import Classifier, ClassifiersList, Configuration
-from pepacs.agents.pepacs.Condition import Condition
-from pepacs.agents.pepacs.Effect import Effect
-from pepacs.agents.pepacs.components.subsumption import does_subsume, find_subsumers
-from pepacs.agents.pepacs.components.action_selection import choose_action
+from epeacs import Perception
+from epeacs.agents.Agent import Agent, TrialMetrics
+from epeacs.agents.epeacs import Classifier, ClassifiersList, Configuration
+from epeacs.agents.epeacs.Condition import Condition
+from epeacs.agents.epeacs.Effect import Effect
+from epeacs.agents.epeacs.components.subsumption import does_subsume, find_subsumers
+from epeacs.agents.epeacs.components.action_selection import choose_action
 
-class PEPACS(Agent):
+class EPEACS(Agent):
 
     def __init__(self,
             cfg: Configuration,

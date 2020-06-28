@@ -1,4 +1,4 @@
-name: pepacs
+name: epeacs
 channels:
   - defaults
 dependencies:

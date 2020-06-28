@@ -4,8 +4,8 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from pepacs import Perception
-from pepacs.agents.pepacs import Condition, PMark
+from epeacs import Perception
+from epeacs.agents.epeacs import Condition, PMark
 
 
 def is_state_aliased(

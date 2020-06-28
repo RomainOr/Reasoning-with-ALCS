@@ -1,7 +1,7 @@
 import random
 from itertools import groupby
 
-from pepacs.agents.pepacs import Classifier
+from epeacs.agents.epeacs import Classifier
 
 
 def choose_action(cll, cfg, epsilon: float) -> int:
@@ -91,7 +91,7 @@ def choose_action_from_knowledge_array(cll, cfg) -> Classifier:
     """
     Creates 'knowledge array' that represents the average quality of the
     anticipation for each action in the current list. Chosen is
-    the action, pepacs knows least about the consequences.
+    the action, epeacs knows least about the consequences.
     Then this action is returned.
 
     Parameters

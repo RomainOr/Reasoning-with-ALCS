@@ -1,4 +1,4 @@
-from pepacs.agents.pepacs.components.subsumption import does_subsume
+from epeacs.agents.epeacs.components.subsumption import does_subsume
 
 
 def add_classifier(child, population, new_list, theta_exp: int) -> None:

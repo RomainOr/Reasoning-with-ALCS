@@ -1,7 +1,7 @@
 import random
 from typing import List
 
-from pepacs import Perception, TypedList
+from epeacs import Perception, TypedList
 from . import Configuration, Condition
 
 

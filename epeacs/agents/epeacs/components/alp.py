@@ -7,10 +7,10 @@
 from random import random
 from typing import Optional
 
-from pepacs import Perception
-from pepacs.agents.pepacs import Classifier, ClassifiersList, Condition, Configuration, PMark
-from pepacs.agents.pepacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
-from pepacs.agents.pepacs.components.aliasing_detection import is_state_aliased
+from epeacs import Perception
+from epeacs.agents.epeacs import Classifier, ClassifiersList, Condition, Configuration, PMark
+from epeacs.agents.epeacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
+from epeacs.agents.epeacs.components.aliasing_detection import is_state_aliased
 
 
 def cover(

@@ -10,13 +10,13 @@ import random
 from itertools import chain
 from typing import Optional, List
 
-import pepacs.agents.pepacs.components.alp as alp
-import pepacs.agents.pepacs.components.genetic_algorithms as ga
-import pepacs.agents.pepacs.components.reinforcement_learning as rl
-from pepacs import Perception, TypedList
-from pepacs.agents.pepacs import Classifier, Configuration
-from pepacs.agents.pepacs.components.add_classifier import add_classifier
-from pepacs.agents.pepacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
+import epeacs.agents.epeacs.components.alp as alp
+import epeacs.agents.epeacs.components.genetic_algorithms as ga
+import epeacs.agents.epeacs.components.reinforcement_learning as rl
+from epeacs import Perception, TypedList
+from epeacs.agents.epeacs import Classifier, Configuration
+from epeacs.agents.epeacs.components.add_classifier import add_classifier
+from epeacs.agents.epeacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
 
 class ClassifiersList(TypedList):
     """

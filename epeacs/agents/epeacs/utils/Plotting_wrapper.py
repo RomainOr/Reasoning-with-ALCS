@@ -172,7 +172,7 @@ def plot_classifiers(df, metrics_trial_frequency_explore, number_of_exploit_step
 
 def plot_performance(agent, maze, metrics_df, cfg, env_name, metrics_trial_frequency_explore, number_of_exploit_steps):
     plt.figure(figsize=(13, 10), dpi=100)
-    plt.suptitle(f'PEPACS Performance in {env_name} environment', fontsize=32)
+    plt.suptitle(f'EPEACS Performance in {env_name} environment', fontsize=32)
     ax1 = plt.subplot(221)
     plot_policy(maze, agent, cfg, ax1)
     ax2 = plt.subplot(222)

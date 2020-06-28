@@ -6,7 +6,7 @@
 
 from typing import Callable
 
-from pepacs.agents import EnvironmentAdapter
+from epeacs.agents import EnvironmentAdapter
 
 
 class Configuration:
@@ -34,7 +34,7 @@ class Configuration:
             mu: float=0.3,
             chi: float=0.8) -> None:
         """
-        Creates the configuration object used during training the pepacs agent.
+        Creates the configuration object used during training the epeacs agent.
 
         classifier_length
             length of the condition and effect strings
@@ -43,7 +43,7 @@ class Configuration:
         classifier_wildcard
 
         environment_adapter
-            EnvironmentAdapter class PEPACS needs to use
+            EnvironmentAdapter class EPEACS needs to use
             to interact with the environment
         do_ga
             switch *Genetic Generalization* module

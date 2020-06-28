@@ -9,8 +9,8 @@ from __future__ import annotations
 import random
 from typing import Optional, Union, Callable, List
 
-from pepacs import Perception
-from pepacs.agents.pepacs import Configuration, Condition, Effect, PMark, ProbabilityEnhancedAttribute
+from epeacs import Perception
+from epeacs.agents.epeacs import Configuration, Condition, Effect, PMark, ProbabilityEnhancedAttribute
 
 
 class Classifier:
