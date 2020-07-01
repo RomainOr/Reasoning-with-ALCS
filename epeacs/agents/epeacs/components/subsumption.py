@@ -33,7 +33,7 @@ def find_subsumers(cl, population, theta_exp: int) -> List:
 def does_subsume(cl, other_cl, theta_exp: int) -> bool:
     """
     Returns if a classifier `cl` subsumes `other_cl` classifier
-    No need to chech condition when does_subsume is only applied 
+    No need to check condition when does_subsume is only applied 
     on the matching set or the action set
 
     Parameters

@@ -89,3 +89,31 @@ def _when_full_knowledge_is_achieved(metrics):
 
 def _state_of_population(metrics, trial, step):
     return metrics[trial//step - 1]
+
+def _enhanced_effect_error(population, environment) -> float:
+    theoritical_probabilities = environment.env.get_theoritical_probabilities()
+    # Take into consideration only reliable classifiers
+    reliable_classifiers = [cl for cl in population if cl.is_reliable()]
+    # Accumulation of difference in probabilities
+    error_old_pep = 0.
+    error_new_pep = 0.
+    # For all possible destinations from each path cell
+    for perception, action_and_probabiltiies in theoritical_probabilities.items():
+        for action, probabilities_and_states in action_and_probabiltiies.items():
+            classifiers = [cl for cl in reliable_classifiers if cl.condition.does_match(perception) and cl.action ==  action]
+            most_experienced_classifier = max(classifiers, key=lambda cl: cl.exp)
+            prob = probabilities_and_states['probabilities']
+            for direction in prob:
+                old_effect_attribute, new_effect_attribute = most_experienced_classifier.effect.getEffectAttribute(direction)
+                theoritical_prob_of_attribute = prob[direction]
+                if old_effect_attribute == '#':
+                    if most_experienced_classifier.condition[direction] == '#':
+                        old_effect_attribute = {int(perception[direction]):1.0}
+                        new_effect_attribute = {int(perception[direction]):1.0}
+                    else:
+                        old_effect_attribute = {int(most_experienced_classifier.condition[direction]):1.0}
+                        new_effect_attribute = {int(most_experienced_classifier.condition[direction]):1.0}
+                for key in theoritical_prob_of_attribute:
+                    error_old_pep += abs(theoritical_prob_of_attribute[key] - old_effect_attribute.get(key, 0.0))
+                    error_new_pep += abs(theoritical_prob_of_attribute[key] - new_effect_attribute.get(key, 0.0))
+    return error_old_pep * 100, error_new_pep * 100

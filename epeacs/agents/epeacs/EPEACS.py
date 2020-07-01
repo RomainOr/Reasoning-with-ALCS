@@ -11,7 +11,6 @@ from epeacs.agents.Agent import Agent, TrialMetrics
 from epeacs.agents.epeacs import Classifier, ClassifiersList, Configuration
 from epeacs.agents.epeacs.Condition import Condition
 from epeacs.agents.epeacs.Effect import Effect
-from epeacs.agents.epeacs.components.subsumption import does_subsume, find_subsumers
 from epeacs.agents.epeacs.components.action_selection import choose_action
 
 class EPEACS(Agent):
@@ -28,21 +27,6 @@ class EPEACS(Agent):
 
     def get_cfg(self):
         return self.cfg
-
-    def zip_population(self, does_anticipate_change:bool = True, is_reliable:bool=False):
-        # Remove multiple occurence of same classifiers is they exist (Security check)
-        self.population = ClassifiersList(*list(dict.fromkeys(self.population)))
-        # Keep or not classifiers that anticipate changes
-        if does_anticipate_change:
-            pop = [cl for cl in self.population if cl.does_anticipate_change()]
-            self.population = ClassifiersList(*pop)
-        # Keep all classifiers or only reliable classifiers
-        if is_reliable:
-            pop = [cl for cl in self.population if cl.is_reliable()]
-            self.population = ClassifiersList(*pop)
-        # Clean enhanced effect if necessary
-        for cl in self.population:
-            cl.effect.clean()
 
     def _run_trial_explore(self, env, time, current_trial=None) \
             -> TrialMetrics:
@@ -88,6 +72,13 @@ class EPEACS(Agent):
                         self.cfg.mu,
                         self.cfg.chi,
                         self.cfg.theta_as,
+                        self.cfg.theta_exp
+                    )
+                if self.cfg.do_zip:
+                    ClassifiersList.apply_zip(
+                        time + steps,
+                        self.population,
+                        self.cfg.theta_zip,
                         self.cfg.theta_exp
                     )
 

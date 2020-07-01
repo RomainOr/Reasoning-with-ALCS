@@ -163,3 +163,13 @@ class Effect(AbstractPerception):
     
     def print_detailled_counter(self):
         return ", ".join("{}:#{}".format("".join(dse_key), dse_value) for dse_key, dse_value in self.detailled_counter.items())
+
+    def getEffectAttribute(self, index):
+        for i, attr in enumerate(self):
+            if i == index:
+                if isinstance(attr, ProbabilityEnhancedAttribute):
+                    return {int(k):v for k,v in attr.items()}, {int(k): v / total for total in (sum(attr.test.values()),) for k, v in attr.test.items()}
+                else:
+                    return attr, attr
+            else:
+                continue

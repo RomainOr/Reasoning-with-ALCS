@@ -48,6 +48,7 @@ def cover(
     # with defaults 1 and 0.5 correspondingly.
     new_cl = Classifier(action=action, experience=1, reward=0.5, cfg=cfg)
     new_cl.tga = time
+    new_cl.tzip = time
     new_cl.talp = time
     new_cl.specialize(p0, p1)
     return new_cl

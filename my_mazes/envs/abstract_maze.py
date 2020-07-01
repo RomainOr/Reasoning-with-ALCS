@@ -133,12 +133,12 @@ class AbstractMaze(gym.Env):
                 reachable_states = action_and_reachable_states[key]["reachable_states"]
                 # 1° set up the probabilities depending on slippery if the action done is the expected one
                 for a in ACTION_LOOKUP:
-                    theoritical_probabilities[ACTION_LOOKUP[a]] = {}
+                    theoritical_probabilities[a] = {}
                     for i in range(len(reachable_states)):
-                        if reachable_states[i][a] in theoritical_probabilities[ACTION_LOOKUP[a]]:
-                            theoritical_probabilities[ACTION_LOOKUP[a]][reachable_states[i][a]] += 1. - (number_of_actions -1 ) * self.prob_slippery / number_of_actions
+                        if int(reachable_states[i][a]) in theoritical_probabilities[a]:
+                            theoritical_probabilities[a][int(reachable_states[i][a])] += 1. - (number_of_actions -1 ) * self.prob_slippery / number_of_actions
                         else:
-                            theoritical_probabilities[ACTION_LOOKUP[a]][reachable_states[i][a]] = 1. - (number_of_actions -1 ) * self.prob_slippery / number_of_actions
+                            theoritical_probabilities[a][int(reachable_states[i][a])] = 1. - (number_of_actions -1 ) * self.prob_slippery / number_of_actions
                 # 2° taking in consideration the aliasing states due to the perceptual aliasing issue 
                 for _, prob in action_and_reachable_states[key]["probabilities"].items():
                     for symbol in prob:
@@ -152,10 +152,10 @@ class AbstractMaze(gym.Env):
                         slippery_reachable_states = action_and_reachable_states[slippery_action]["reachable_states"]
                         for a in ACTION_LOOKUP:
                             for i in range(len(slippery_reachable_states)):
-                                if slippery_reachable_states[i][a] in theoritical_probabilities[ACTION_LOOKUP[a]]:
-                                    theoritical_probabilities[ACTION_LOOKUP[a]][slippery_reachable_states[i][a]] += slip_rate_by_action / len(slippery_reachable_states)
+                                if int(slippery_reachable_states[i][a]) in theoritical_probabilities[a]:
+                                    theoritical_probabilities[a][int(slippery_reachable_states[i][a])] += slip_rate_by_action / len(slippery_reachable_states)
                                 else:
-                                    theoritical_probabilities[ACTION_LOOKUP[a]][slippery_reachable_states[i][a]] = slip_rate_by_action / len(slippery_reachable_states)
+                                    theoritical_probabilities[a][int(slippery_reachable_states[i][a])] = slip_rate_by_action / len(slippery_reachable_states)
         return result
 
     def get_all_aliased_states(self):

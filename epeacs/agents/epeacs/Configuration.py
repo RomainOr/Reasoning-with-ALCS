@@ -20,6 +20,7 @@ class Configuration:
             metrics_trial_frequency: int = 5,
             do_pep: bool = True,
             do_ga: bool=False,
+            do_zip: bool=False,
             beta_alp: float=0.05,
             beta_rl: float=0.05,
             beta_pep: float=0.01,
@@ -30,6 +31,7 @@ class Configuration:
             u_max: int=100000,
             theta_exp: int=20,
             theta_ga: int=100,
+            theta_zip: int=500,
             theta_as: int=20,
             mu: float=0.3,
             chi: float=0.8) -> None:
@@ -78,6 +80,8 @@ class Configuration:
         self.user_metrics_collector_fcn = user_metrics_collector_fcn
         self.do_pep = do_pep
         self.do_ga = do_ga
+        self.do_zip = do_zip
+        self.theta_zip = theta_zip
         self.theta_exp = theta_exp
         self.beta_alp = beta_alp
         self.beta_rl = beta_rl
@@ -101,6 +105,7 @@ class Configuration:
             "\n\t- Environment adapter function: [{}]" \
             "\n\t- Do Pep: [{}]" \
             "\n\t- Do GA: [{}]" \
+            "\n\t- Do ZIP: [{}]" \
             "\n\t- Beta_ALP: [{}]" \
             "\n\t- Beta_RL: [{}]" \
             "\n\t- Beta_PEP: [{}]" \
@@ -113,6 +118,7 @@ class Configuration:
             self.environment_adapter,
             self.do_pep,
             self.do_ga,
+            self.do_zip,
             self.beta_alp,
             self.beta_rl,
             self.beta_pep,
