@@ -4,8 +4,6 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-#TODO: Choose one method to compute Probability Enhanced Attribute 
-
 class ProbabilityEnhancedAttribute(dict):
 
     def __init__(self, attr):
@@ -33,14 +31,11 @@ class ProbabilityEnhancedAttribute(dict):
         result = ProbabilityEnhancedAttribute(attr1)
         if isinstance(attr1, ProbabilityEnhancedAttribute):
             for symbol in result:
-                #result.test[symbol] = attr1.test.get(symbol, exp1)
                 result.test[symbol] = 1
         else:
             for symbol in result:
-                #result.test[symbol] = exp1
                 result.test[symbol] = 1
-        #result.insert(attr2, exp2)
-        result.insert(attr2, 1)
+        result.insert(attr2)
         return result
 
 
@@ -120,14 +115,13 @@ class ProbabilityEnhancedAttribute(dict):
         self.adjust_probabilities()
         for symbol in o:
             self.test[symbol] = self.test.get(symbol, 0) + 1
-            #self.test[symbol] = self.test.get(symbol, 0) + o.test.get(symbol, 0)
 
 
-    def insert(self, symbol_or_attr, exp):
+    def insert(self, symbol_or_attr):
         if isinstance(symbol_or_attr, ProbabilityEnhancedAttribute):
             self.insert_attribute(symbol_or_attr)
         else:
-            self.insert_symbol(symbol_or_attr, exp)
+            self.insert_symbol(symbol_or_attr)
 
 
     def sorted_items(self):

@@ -12,7 +12,6 @@ from typing import Optional, List
 
 import epeacs.agents.epeacs.components.alp as alp
 import epeacs.agents.epeacs.components.genetic_algorithms as ga
-import epeacs.agents.epeacs.components.zip as zip
 import epeacs.agents.epeacs.components.reinforcement_learning as rl
 from epeacs import Perception, TypedList
 from epeacs.agents.epeacs import Classifier, Configuration
@@ -141,7 +140,6 @@ class ClassifiersList(TypedList):
 
             if new_cl is not None:
                 new_cl.tga = time
-                new_cl.tzip = time
                 add_classifier(new_cl, action_set, new_list, theta_exp)
 
         if cfg.do_pep:
@@ -237,19 +235,6 @@ class ClassifiersList(TypedList):
                     action_set,
                     theta_exp
                 )
-
-
-    @staticmethod
-    def apply_zip(
-            time: int,
-            pop_set: ClassifiersList,
-            theta_zip: int,
-            theta_exp: int
-        ) -> None:
-        if zip.should_apply(pop_set, time, theta_zip):
-            print('Do zipping at :',time)
-            zip.set_timestamps(pop_set, time)
-            zip.zip_set(pop_set, theta_exp)
 
 
     def __str__(self):

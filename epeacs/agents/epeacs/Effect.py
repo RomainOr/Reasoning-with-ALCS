@@ -84,18 +84,30 @@ class Effect(AbstractPerception):
         return all(item_anticipate_change(eitem, p0[idx], p1[idx], self.wildcard) for idx, eitem in enumerate(self))
 
 
-    def subsumes(self, other: Effect) -> bool:
-        for si, oi in zip(self, other):
+    def subsumes(self, other: Effect, self_condition, other_condition) -> bool:
+        for idx, (si, oi) in enumerate(zip(self, other)):
             if isinstance(si, ProbabilityEnhancedAttribute):
                 if isinstance(oi, ProbabilityEnhancedAttribute):
                     if not si.subsumes(oi): return False
                 else:
-                    if not si.does_contain(oi): return False
+                    if oi == other.wildcard:
+                        if not si.does_contain(other_condition[idx]): return False
+                    else:
+                        if not si.does_contain(oi): return False
             else:
                 if isinstance(oi, ProbabilityEnhancedAttribute):
                     return False
                 else:
-                    if si != oi: return False
+                    if oi == other.wildcard:
+                        if si == self.wildcard:
+                            if self_condition[idx] != other_condition[idx]: return False
+                        else:
+                            if si != other_condition[idx]: return False
+                    else:
+                        if si == self.wildcard:
+                            if self_condition[idx] != oi: return False
+                        else:
+                            if si != oi: return False
         return True
 
 
@@ -170,6 +182,9 @@ class Effect(AbstractPerception):
                 if isinstance(attr, ProbabilityEnhancedAttribute):
                     return {int(k):v for k,v in attr.items()}, {int(k): v / total for total in (sum(attr.test.values()),) for k, v in attr.test.items()}
                 else:
-                    return attr, attr
+                    if attr == self.wildcard:
+                        return attr, attr
+                    else:
+                        return {int(attr):1.0}, {int(attr):1.0}
             else:
                 continue

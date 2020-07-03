@@ -16,7 +16,7 @@ from epeacs.agents.epeacs import Configuration, Condition, Effect, PMark, Probab
 class Classifier:
 
     __slots__ = ['condition', 'action' ,'effect', 'mark', 'q', 'r',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tzip', 'tav', 'cfg', 'ee']
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'cfg', 'ee']
 
     def __init__(
             self,
@@ -30,7 +30,6 @@ class Classifier:
             experience: int=1,
             talp: int=0,
             tga: int=0,
-            tzip: int=0,
             tav: float=0.0,
             cfg: Optional[Configuration] = None
         ) -> None:
@@ -59,7 +58,6 @@ class Classifier:
         self.exp = experience
         self.talp = talp
         self.tga = tga
-        self.tzip = tzip
         self.tav = tav
         self.ee = False
 
@@ -120,7 +118,6 @@ class Classifier:
             immediate_reward=old_cls.ir,
             cfg=old_cls.cfg,
             tga=time,
-            tzip=time,
             talp=time,
             tav=old_cls.tav
         )
@@ -391,7 +388,6 @@ class Classifier:
             reward = (self.r + other_classifier.r) / 2.0,
             talp = time,
             tga = time,
-            tzip=time,
             cfg = self.cfg
         )
         result.condition = Condition(self.condition)
