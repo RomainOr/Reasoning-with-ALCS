@@ -98,16 +98,7 @@ class Effect(AbstractPerception):
                 if isinstance(oi, ProbabilityEnhancedAttribute):
                     return False
                 else:
-                    if oi == other.wildcard:
-                        if si == self.wildcard:
-                            if self_condition[idx] != other_condition[idx]: return False
-                        else:
-                            if si != other_condition[idx]: return False
-                    else:
-                        if si == self.wildcard:
-                            if self_condition[idx] != oi: return False
-                        else:
-                            if si != oi: return False
+                    if si != oi: return False
         return True
 
 

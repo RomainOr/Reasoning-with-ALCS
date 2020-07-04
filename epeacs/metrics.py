@@ -102,9 +102,9 @@ def _enhanced_effect_error(population, environment) -> float:
         for action, probabilities_and_states in action_and_probabiltiies.items():
             classifiers = [cl for cl in reliable_classifiers if cl.condition.does_match(perception) and cl.action ==  action]
             if len(classifiers) > 0:
-                most_experienced_classifier = max(classifiers, key=lambda cl: cl.exp)
+                most_experienced_classifier = max(classifiers, key=lambda cl: cl.exp * cl.num)
             else:
-                most_experienced_classifier = max([cl for cl in population if cl.condition.does_match(perception) and cl.action ==  action], key=lambda cl: cl.exp)
+                most_experienced_classifier = max([cl for cl in population if cl.condition.does_match(perception) and cl.action ==  action], key=lambda cl: cl.exp * cl.num)
             prob = probabilities_and_states['probabilities']
             for direction in prob:
                 old_effect_attribute, new_effect_attribute = most_experienced_classifier.effect.getEffectAttribute(direction)
