@@ -133,4 +133,4 @@ class ProbabilityEnhancedAttribute(dict):
 
 
     def __str__(self):
-        return "{" + ", ".join( "{}:{:.2f}% ({:.2f}%{})".format(sym[0], sym[1] * 100, self.test[sym[0]]/sum(self.test.values())*100, self.test[sym[0]]) for sym in self.sorted_items()) + "}"
+        return "{" + ", ".join( "{}:{:.2f}% ({:.2f}%)".format(sym[0], sym[1] * 100, self.test[sym[0]]/sum(self.test.values())*100) for sym in self.sorted_items()) + "}"

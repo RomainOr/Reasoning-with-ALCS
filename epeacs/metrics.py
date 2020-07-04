@@ -73,6 +73,7 @@ def _when_full_knowledge_is_achieved(metrics):
 
     first_trial_when_full_knowledge = -1
     stable_trial_when_full_knowledge = -1
+    last_trial_when_full_knowledge = -1
 
     for trial in metrics:
 
@@ -84,8 +85,11 @@ def _when_full_knowledge_is_achieved(metrics):
 
         if stable_trial_when_full_knowledge != -1 and trial['knowledge'] != 100:
             stable_trial_when_full_knowledge = -1
+        
+        if trial['knowledge'] == 100:
+            last_trial_when_full_knowledge = trial['trial']
 
-    return first_trial_when_full_knowledge, stable_trial_when_full_knowledge
+    return first_trial_when_full_knowledge, stable_trial_when_full_knowledge, last_trial_when_full_knowledge
 
 def _state_of_population(metrics, trial, step):
     return metrics[trial//step - 1]
