@@ -81,7 +81,7 @@ class Effect(AbstractPerception):
                     return False
             # All checks passed
             return True
-        return all(item_anticipate_change(eitem, p0[idx], p1[idx], self.wildcard) for idx, eitem in enumerate(self))
+        return all(item_anticipate_change(self[idx], p0[idx], p1[idx], self.wildcard) for idx in range(len(p0)))
 
 
     def subsumes(self, other: Effect, self_condition, other_condition) -> bool:

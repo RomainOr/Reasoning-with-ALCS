@@ -94,7 +94,7 @@ def _when_full_knowledge_is_achieved(metrics):
 def _state_of_population(metrics, trial, step):
     return metrics[trial//step - 1]
 
-def _enhanced_effect_error(population, environment) -> float:
+def _enhanced_effect_error(population, environment, classifier_length, random_attribute_length) -> float:
     theoritical_probabilities = environment.env.get_theoritical_probabilities()
     # Take into consideration only reliable classifiers
     reliable_classifiers = [cl for cl in population if cl.is_reliable()]
@@ -123,4 +123,17 @@ def _enhanced_effect_error(population, environment) -> float:
                 for key in theoritical_prob_of_attribute:
                     error_old_pep += abs(theoritical_prob_of_attribute[key] - old_effect_attribute.get(key, 0.0))
                     error_new_pep += abs(theoritical_prob_of_attribute[key] - new_effect_attribute.get(key, 0.0))
-    return error_old_pep * 100, error_new_pep * 100
+            for ra in range(classifier_length-random_attribute_length, classifier_length):
+                old_effect_attribute, new_effect_attribute = most_experienced_classifier.effect.getEffectAttribute(ra)
+                theoritical_prob_of_attribute = {1:0.5, 0:0.5}
+                if old_effect_attribute == '#':
+                    if most_experienced_classifier.condition[ra] == '#':
+                        old_effect_attribute = {int(perception[ra]):1.0}
+                        new_effect_attribute = {int(perception[ra]):1.0}
+                    else:
+                        old_effect_attribute = {int(most_experienced_classifier.condition[ra]):1.0}
+                        new_effect_attribute = {int(most_experienced_classifier.condition[ra]):1.0}
+                for key in theoritical_prob_of_attribute:
+                    error_old_pep += abs(theoritical_prob_of_attribute[key] - old_effect_attribute.get(key, 0.0))
+                    error_new_pep += abs(theoritical_prob_of_attribute[key] - new_effect_attribute.get(key, 0.0))
+    return error_old_pep * 100 / (len(theoritical_probabilities)*8*classifier_length), error_new_pep * 100 / (len(theoritical_probabilities)*8*classifier_length)
