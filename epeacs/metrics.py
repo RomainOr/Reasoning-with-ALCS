@@ -128,8 +128,8 @@ def _enhanced_effect_error(population, environment, classifier_length, random_at
                 theoritical_prob_of_attribute = {1:0.5, 0:0.5}
                 if old_effect_attribute == '#':
                     if most_experienced_classifier.condition[ra] == '#':
-                        old_effect_attribute = {int(perception[ra]):1.0}
-                        new_effect_attribute = {int(perception[ra]):1.0}
+                        old_effect_attribute = {0:1.0, 1:1.0}
+                        new_effect_attribute = {0:1.0, 1:1.0}
                     else:
                         old_effect_attribute = {int(most_experienced_classifier.condition[ra]):1.0}
                         new_effect_attribute = {int(most_experienced_classifier.condition[ra]):1.0}
