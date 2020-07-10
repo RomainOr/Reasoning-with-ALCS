@@ -72,12 +72,18 @@ class ClassifiersList(TypedList):
         # If there are less than 2 candidates, don't do it
         if len(candidates) < 2:
             return
-        for idx, first in enumerate(candidates):
-            if idx + 1 < len(candidates):
-                for second in candidates[idx+1:]:
-                    if first != second and first.mark == second.mark:
-                        new_classifier = first.merge_with(second, previous_situation, time)
-                        add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
+        for candidate in candidates:
+            candidates2 = [cl for cl in candidates if candidate != cl and cl.mark == candidate.mark]
+            if len(candidates2) > 0:
+                merger = random.choice(candidates2)
+                new_classifier = candidate.merge_with(merger, previous_situation, time)
+                add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
+        #for idx, first in enumerate(candidates):
+        #    if idx + 1 < len(candidates):
+        #        for second in candidates[idx+1:]:
+        #            if first != second and first.mark == second.mark:
+        #                new_classifier = first.merge_with(second, previous_situation, time)
+        #                add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
 
 
     @staticmethod
