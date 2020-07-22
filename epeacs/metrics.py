@@ -67,7 +67,10 @@ def _how_many_peps_match_non_aliased_states(pop, env) -> int:
 
 def _mean_reliable_classifier_specificity(pop, env) -> int:
     reliable_classifiers = [cl for cl in pop if cl.is_reliable()]
-    return float(sum(cl.specificity for cl in reliable_classifiers)) / len(reliable_classifiers)
+    if len(reliable_classifiers) > 0:
+        return float(sum(cl.specificity for cl in reliable_classifiers)) / len(reliable_classifiers)
+    else:
+        return 1.
 
 def _when_full_knowledge_is_achieved(metrics):
 
