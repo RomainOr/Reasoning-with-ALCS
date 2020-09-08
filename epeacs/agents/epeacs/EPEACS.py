@@ -11,7 +11,7 @@ from epeacs.agents.Agent import Agent, TrialMetrics
 from epeacs.agents.epeacs import Classifier, ClassifiersList, Configuration
 from epeacs.agents.epeacs.Condition import Condition
 from epeacs.agents.epeacs.Effect import Effect
-from epeacs.agents.epeacs.components.action_selection import choose_action
+from epeacs.agents.epeacs.components.action_selection import choose_classifier
 
 class EPEACS(Agent):
 
@@ -21,12 +21,16 @@ class EPEACS(Agent):
             ) -> None:
         self.cfg = cfg
         self.population = population or ClassifiersList()
+        self.pai_states_memory = []
 
     def get_population(self):
         return self.population
 
     def get_cfg(self):
         return self.cfg
+
+    def get_pai_states_memory(self):
+        return self.pai_states_memory
 
     def zip_population(self):
         print(len(self.population))
@@ -41,29 +45,54 @@ class EPEACS(Agent):
         steps = 0
         raw_state = env.reset()
         state = self.cfg.environment_adapter.to_genotype(raw_state)
-        action = env.action_space.sample()
         last_reward = 0
         prev_state = Perception.empty()
+        match_set = ClassifiersList()
         action_set = ClassifiersList()
         done = False
+
+        # For action chunking
+        t_2_activated_classifier = None
+        t_1_activated_classifier = None
+
+        # For applying alp on behavioral set
+        is_behavioral_sequence = False
 
         while not done:
             
             # Creation of the matching set
+            previous_match_set = match_set
             match_set, _, best_fitness = self.population.form_match_set(state)
 
-            if steps > 0:
-                ClassifiersList.apply_alp(
-                    self.population,
-                    match_set,
-                    action_set,
-                    prev_state,
-                    action,
-                    state,
-                    time + steps,
-                    self.cfg.theta_exp,
-                    self.cfg
-                )
+            if steps > 0:# Apply learning in the last action set
+                if is_behavioral_sequence:
+                    ClassifiersList.apply_alp_behavioral_sequence(
+                        self.population,
+                        match_set,
+                        action_set,
+                        prev_state,
+                        state,
+                        time + steps,
+                        self.cfg.theta_exp,
+                        self.cfg,
+                        self.pai_states_memory,
+                        previous_match_set
+                    )
+                else:
+                    ClassifiersList.apply_alp(
+                        self.population,
+                        match_set,
+                        action_set,
+                        prev_state,
+                        t_1_activated_classifier.action,
+                        state,
+                        time + steps,
+                        self.cfg.theta_exp,
+                        self.cfg,
+                        self.pai_states_memory,
+                        previous_match_set,
+                        t_2_activated_classifier
+                    )
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, best_fitness, self.cfg.beta_rl, self.cfg.gamma
                 )
@@ -81,28 +110,71 @@ class EPEACS(Agent):
                         self.cfg.theta_exp
                     )
 
-            action = choose_action(match_set, self.cfg, self.cfg.epsilon)
+            is_behavioral_sequence = False
+            # Choose classifier
+            action_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
+            #Record last activated classifier
+            t_2_activated_classifier = t_1_activated_classifier
+            t_1_activated_classifier = action_classifier
+
             # Create action set
-            action_set = match_set.form_action_set(action)
+            action_set = match_set.form_action_set(action_classifier)
             # Use environment adapter
-            iaction = self.cfg.environment_adapter.to_lcs_action(action)
+            iaction = self.cfg.environment_adapter.to_lcs_action(action_classifier.action)
             # Do the action
             prev_state = state
             raw_state, last_reward, done, _ = env.step(iaction)
             state = self.cfg.environment_adapter.to_genotype(raw_state)
 
+            # Enter the if condition only if we have chosen a behavioral classifier
+            if action_classifier.behavioral_sequence :
+                is_behavioral_sequence = True
+                # Initialize the message list usefull to decrease quality of classifiers containing looping sequences
+                message_list = [state]
+                for act in action_classifier.behavioral_sequence:
+                    # Use environment adapter to execute the action act and perceive its results
+                    iaction = self.cfg.environment_adapter.to_lcs_action(act)
+                    raw_state, last_reward, done, _ = env.step(iaction)
+                    state = self.cfg.environment_adapter.to_genotype(raw_state)
+                    if state in message_list:
+                        for cl in action_set:    
+                            cl.decrease_quality()
+                    else:
+                        message_list.append(state)
+                    if done:
+                        break
+                    steps += 1
+
+
             if done:
-                ClassifiersList.apply_alp(
-                    self.population,
-                    match_set,
-                    action_set,
-                    prev_state,
-                    action,
-                    state,
-                    time + steps,
-                    self.cfg.theta_exp,
-                    self.cfg
-                )
+                if is_behavioral_sequence:
+                    ClassifiersList.apply_alp_behavioral_sequence(
+                        self.population,
+                        match_set,
+                        action_set,
+                        prev_state,
+                        state,
+                        time + steps,
+                        self.cfg.theta_exp,
+                        self.cfg,
+                        self.pai_states_memory,
+                        previous_match_set
+                    )
+                else:
+                    ClassifiersList.apply_alp(
+                        self.population,
+                        match_set,
+                        action_set,
+                        prev_state,
+                        t_1_activated_classifier.action,
+                        state,
+                        time + steps,
+                        self.cfg.theta_exp,
+                        self.cfg,
+                        self.pai_states_memory,
+                        previous_match_set,
+                        t_2_activated_classifier
+                    )
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, 0, self.cfg.beta_rl, self.cfg.gamma
                 )
@@ -151,6 +223,17 @@ class EPEACS(Agent):
             raw_state, last_reward, done, _ = env.step(iaction)
             state = self.cfg.environment_adapter.to_genotype(raw_state)
 
+            # Enter the if condition only if we have chosen a behavioral classifier
+            if best_classifier.behavioral_sequence :
+                for act in best_classifier.behavioral_sequence:
+                    # Use environment adapter to execute the action act and perceive its results
+                    iaction = self.cfg.environment_adapter.to_lcs_action(act)
+                    raw_state, last_reward, done, _ = env.step(iaction)
+                    state = self.cfg.environment_adapter.to_genotype(raw_state)
+                    if done:
+                        break
+                    steps += 1
+
             if done:
                 # Apply algorithms
                 ClassifiersList.apply_reinforcement_learning(
@@ -158,5 +241,6 @@ class EPEACS(Agent):
                 )
 
             steps += 1
+
 
         return TrialMetrics(steps, last_reward)

@@ -10,7 +10,8 @@ from typing import Optional
 from epeacs import Perception
 from epeacs.agents.epeacs import Classifier, ClassifiersList, Condition, Configuration, PMark
 from epeacs.agents.epeacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
-from epeacs.agents.epeacs.components.aliasing_detection import is_state_aliased
+from epeacs.agents.epeacs.components.aliasing_detection import is_state_aliased, is_perceptual_aliasing_state, set_pai_detection_timestamps, should_pai_detection_apply
+from epeacs.agents.epeacs.components.build_behavioral_sequences import create_behavioral_classifier
 
 
 def cover(
@@ -51,6 +52,7 @@ def cover(
         experience=1, 
         reward=0.5, 
         tga=time,
+        tbseq=time,
         talp=time,
         cfg=cfg
     )
@@ -62,7 +64,12 @@ def expected_case(
         cl: Classifier,
         p0: Perception,
         p1: Perception,
-        time: int
+        time: int,
+        population: ClassifiersList,
+        cfg: Configuration,
+        pai_states_memory,
+        previous_match_set,
+        last_activated_classifier
     ) -> Optional[Classifier]:
     """
     Controls the expected case of a classifier with the help of 
@@ -84,6 +91,27 @@ def expected_case(
 
     if is_state_aliased(cl.condition, cl.mark, p0):
         if cl.cfg.do_pep: cl.ee = True
+        if cfg.bs_max > 0 and last_activated_classifier is not None:
+            # Update the list of detetcted PAi states along with the population
+            match_set_no_bseq = [cl for cl in previous_match_set if cl.behavioral_sequence is None]
+            if should_pai_detection_apply(match_set_no_bseq, time, cfg.theta_bseq):
+                set_pai_detection_timestamps(match_set_no_bseq, time)
+                if is_perceptual_aliasing_state(match_set_no_bseq, p0, cfg):
+                    if p0 not in pai_states_memory:
+                        pai_states_memory.append(p0)
+                else:
+                    if p0 in pai_states_memory:
+                        pai_states_memory.remove(p0)
+                        match_set_bseq = [cl for cl in previous_match_set if cl.behavioral_sequence]
+                        for cl in match_set_bseq:
+                            population.safe_remove(cl)
+            # Create if needed a new behavioral classifier
+            if p0 in pai_states_memory:
+                child = create_behavioral_classifier(last_activated_classifier, cl, p1)
+                if child:
+                    child.tga = time
+                    child.talp = time
+                    return child
 
     diff = cl.mark.get_differences(p0)
     if diff.specificity == 0:

@@ -15,13 +15,14 @@ from epeacs.agents.epeacs import Configuration, Condition, Effect, PMark, Probab
 
 class Classifier:
 
-    __slots__ = ['condition', 'action' ,'effect', 'mark', 'q', 'r',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'cfg', 'ee']
+    __slots__ = ['condition', 'action', 'behavioral_sequence', 'effect', 'mark', 'q', 'r',
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee']
 
     def __init__(
             self,
             condition: Union[Condition, str, None] = None,
             action: Optional[int] = None,
+            behavioral_sequence: Optional[List[int]] = None,
             effect: Union[Effect, str, None] = None,
             quality: float=0.5,
             reward: float=0.5,
@@ -30,6 +31,7 @@ class Classifier:
             experience: int=1,
             talp: int=0,
             tga: int=0,
+            tbseq: int=0,
             tav: float=0.0,
             cfg: Optional[Configuration] = None
         ) -> None:
@@ -49,6 +51,7 @@ class Classifier:
 
         self.condition = build_perception_string(Condition, condition)
         self.action = action
+        self.behavioral_sequence = behavioral_sequence
         self.effect = build_perception_string(Effect, effect)
         self.mark = PMark(cfg=self.cfg)
         self.q = quality
@@ -58,6 +61,7 @@ class Classifier:
         self.exp = experience
         self.talp = talp
         self.tga = tga
+        self.tbseq = tbseq
         self.tav = tav
         self.ee = False
 
@@ -65,6 +69,7 @@ class Classifier:
     def __eq__(self, other):
         if self.condition == other.condition and \
                 self.action == other.action and \
+                self.behavioral_sequence == other.behavioral_sequence and \
                 self.effect == other.effect:
             return True
 
@@ -82,18 +87,19 @@ class Classifier:
     def __repr__(self):
         return f"{self.condition} " \
                f"{self.action} " \
+               f"{str(self.behavioral_sequence)} " \
                f"{str(self.effect):16} " \
                f"{'(' + str(self.mark) + ')':21} \n" \
                f"q: {self.q:<5.3} " \
                f"r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
-               f"exp: {self.exp:<3} tga: {self.tga:<5} talp: {self.talp:<5} " \
+               f"exp: {self.exp:<3} tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} " \
                f"tav: {self.tav:<6.3} num: {self.num} ee: {self.ee}"
 
 
     @classmethod
     def copy_from(cls, old_cls: Classifier, p: Perception, time: int):
         """
-        Copies old classifier with given time (tga, talp).
+        Copies old classifier with given time.
         Old tav gets replaced with new value.
         New classifier also has no mark.
 
@@ -112,12 +118,14 @@ class Classifier:
         new_cls = cls(
             condition=Condition(old_cls.condition, old_cls.cfg.classifier_wildcard),
             action=old_cls.action,
+            behavioral_sequence=old_cls.behavioral_sequence,
             effect=Effect(old_cls.effect, old_cls.cfg.classifier_wildcard),
             quality=old_cls.q,
             reward=old_cls.r,
             immediate_reward=old_cls.ir,
             cfg=old_cls.cfg,
             tga=time,
+            tbseq=time,
             talp=time,
             tav=old_cls.tav
         )
@@ -238,7 +246,9 @@ class Classifier:
         ) -> bool:
         """
         Check if classifier matches previous situation `p0`,
-        has action `action` and predicts the effect `p1`
+        has action `action` and predicts the effect `p1`.
+
+        Usefull to compute knowlegde metric
 
         Parameters
         ----------
@@ -388,6 +398,7 @@ class Classifier:
             reward = (self.r + other_classifier.r) / 2.0,
             talp = time,
             tga = time,
+            tbseq = time,
             cfg = self.cfg
         )
         result.condition = Condition(self.condition)

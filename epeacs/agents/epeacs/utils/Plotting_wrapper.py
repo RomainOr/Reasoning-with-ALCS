@@ -72,6 +72,14 @@ def build_fitness_matrix(env, population, cfg):
             best_cl = find_best_classifier(population, perception, cfg)
             if best_cl:
                 fitness[index] = max(best_cl.fitness, fitness[index])
+                if best_cl.behavioral_sequence:
+                    tmp_x, tmp_y = update_matrix_index(original, index[0], index[1], best_cl.action)
+                    fitness[(tmp_x, tmp_y)] = max(fitness[(tmp_x, tmp_y)], best_cl.fitness)
+                    if len(best_cl.behavioral_sequence) > 1:
+                        for idx, seq in enumerate(best_cl.behavioral_sequence):
+                            if idx != len(best_cl.behavioral_sequence) -1:
+                                tmp_x, tmp_y = update_matrix_index(original, tmp_x, tmp_y, seq)
+                                fitness[(tmp_x, tmp_y)] = max(fitness[(tmp_x, tmp_y)], best_cl.fitness)
             else:
                 fitness[index] = -1
     for index, x in np.ndenumerate(original):
@@ -101,6 +109,9 @@ def build_action_matrix(env, population, cfg, fitness_matrix):
             if best_cl:
                 if action[index].find(ACTION_LOOKUP[best_cl.action]) == -1:
                     action[index] += ACTION_LOOKUP[best_cl.action]
+                if best_cl.behavioral_sequence:
+                    for act in best_cl.behavioral_sequence:
+                        action[index] += ACTION_LOOKUP[act]
             else:
                 action[index] = '?'
         # Wall - fitness = 0

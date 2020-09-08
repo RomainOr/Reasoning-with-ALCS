@@ -30,9 +30,11 @@ class Configuration:
             u_max: int=100000,
             theta_exp: int=20,
             theta_ga: int=100,
+            theta_bseq: int=1000,
             theta_as: int=20,
             mu: float=0.3,
-            chi: float=0.8) -> None:
+            chi: float=0.8,
+            bs_max: int=1) -> None:
         """
         Creates the configuration object used during training the epeacs agent.
 
@@ -63,12 +65,19 @@ class Configuration:
 
         theta_ga
 
+        theta_bseq
+            time before checking PAI states 
+
         theta_as
 
         mu
             GA mutation probability
         chi
             GA crossover probability
+
+        bs_max
+            maximal length of behavioral sequence
+
         """
         self.classifier_length = classifier_length
         self.number_of_possible_actions = number_of_possible_actions
@@ -88,9 +97,11 @@ class Configuration:
         self.epsilon = epsilon
         self.u_max = u_max
         self.theta_ga = theta_ga
+        self.theta_bseq = theta_bseq
         self.theta_as = theta_as
         self.mu = mu
         self.chi = chi
+        self.bs_max = bs_max
 
 
     def __str__(self):
@@ -106,6 +117,7 @@ class Configuration:
             "\n\t- Beta_PEP: [{}]" \
             "\n\t- ..." \
             "\n\t- epsilon: [{}]" \
+            "\n\t- bs_max: [{}]" \
         .format(
             self.classifier_length,
             self.number_of_possible_actions,
@@ -116,5 +128,6 @@ class Configuration:
             self.beta_alp,
             self.beta_rl,
             self.beta_pep,
-            self.epsilon
+            self.epsilon,
+            self.bs_max
         )
