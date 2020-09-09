@@ -1,3 +1,9 @@
+"""
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+"""
+
 import random
 from itertools import groupby
 
@@ -55,9 +61,10 @@ def explore(cll, cfg, pb: float = 0.5) -> Classifier:
     return choose_random_classifiers(cll, cfg)
 
 
-def choose_latest_action(cll, cfg) -> int:
+def choose_latest_action(cll, cfg) -> Classifier:
     """
-    Chooses latest executed action ("action delay bias")
+    Computes latest executed action ("action delay bias") and return 
+    a corresponding classifier
 
     Parameters
     ----------
@@ -68,8 +75,7 @@ def choose_latest_action(cll, cfg) -> int:
 
     Returns
     -------
-    int 
-        Action
+    Classifier
     """
     last_executed_cls = None
     number_of_cls_per_action = {i: 0 for i in range(cfg.number_of_possible_actions)}

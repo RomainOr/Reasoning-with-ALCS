@@ -109,6 +109,7 @@ class Classifier:
             classifier to copy from
         time: int
             time of creation / current epoch
+        p: Perception
 
         Returns
         -------
@@ -119,7 +120,7 @@ class Classifier:
             condition=Condition(old_cls.condition, old_cls.cfg.classifier_wildcard),
             action=old_cls.action,
             behavioral_sequence=old_cls.behavioral_sequence,
-            effect=Effect(old_cls.effect, old_cls.cfg.classifier_wildcard),
+            effect=Effect(p, old_cls.cfg.classifier_wildcard),
             quality=old_cls.q,
             reward=old_cls.r,
             immediate_reward=old_cls.ir,
@@ -129,10 +130,9 @@ class Classifier:
             talp=time,
             tav=old_cls.tav
         )
-        if new_cls.is_enhanced():
-            for idx, ei in enumerate(new_cls.effect):
-                if isinstance(ei, ProbabilityEnhancedAttribute):
-                    new_cls.effect[idx] = p[idx]
+        for idx, ei in enumerate(new_cls.effect):
+            if ei == new_cls.condition[idx] or old_cls.effect[idx] == old_cls.effect.wildcard:
+                new_cls.effect[idx] = new_cls.effect.wildcard
         return new_cls
 
 
@@ -394,6 +394,7 @@ class Classifier:
     def merge_with(self, other_classifier, perception, time):
         result = Classifier(
             action = self.action,
+            behavioral_sequence=self.behavioral_sequence,
             quality = max((self.q + other_classifier.q) / 2.0, 0.5),
             reward = (self.r + other_classifier.r) / 2.0,
             talp = time,

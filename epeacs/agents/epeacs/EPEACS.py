@@ -32,11 +32,18 @@ class EPEACS(Agent):
     def get_pai_states_memory(self):
         return self.pai_states_memory
 
-    def zip_population(self):
-        print(len(self.population))
+    def zip_population(self, does_anticipate_change:bool = True, is_reliable:bool=False):
         # Remove multiple occurence of same classifiers
         self.population = ClassifiersList(*list(dict.fromkeys(self.population)))
-        print(len(self.population))
+        # Keep or not classifiers that anticipate changes
+        if does_anticipate_change:
+            pop = [cl for cl in self.population if cl.does_anticipate_change()]
+            self.population = ClassifiersList(*pop)
+        # Keep all classifiers or only reliable classifiers
+        if is_reliable:
+            pop = [cl for cl in self.population if cl.is_reliable()]
+            self.population = ClassifiersList(*pop)
+
 
     def _run_trial_explore(self, env, time, current_trial=None) \
             -> TrialMetrics:
@@ -150,7 +157,7 @@ class EPEACS(Agent):
                 if is_behavioral_sequence:
                     ClassifiersList.apply_alp_behavioral_sequence(
                         self.population,
-                        match_set,
+                        ClassifiersList(),
                         action_set,
                         prev_state,
                         state,
@@ -163,7 +170,7 @@ class EPEACS(Agent):
                 else:
                     ClassifiersList.apply_alp(
                         self.population,
-                        match_set,
+                        ClassifiersList(),
                         action_set,
                         prev_state,
                         t_1_activated_classifier.action,
@@ -241,6 +248,5 @@ class EPEACS(Agent):
                 )
 
             steps += 1
-
 
         return TrialMetrics(steps, last_reward)
