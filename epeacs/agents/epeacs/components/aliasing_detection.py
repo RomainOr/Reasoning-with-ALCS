@@ -101,7 +101,7 @@ def is_perceptual_aliasing_state(
 
     Parameters
     ----------
-    match_set
+    match_set associated to p0
     p0
     cfg
 
@@ -111,12 +111,12 @@ def is_perceptual_aliasing_state(
     """
     nbr_of_actions = cfg.number_of_possible_actions
     nbr_of_expected_transitions = nbr_of_actions
-    most_experienced_classifiers = {}
     #Find the most experienced classifiers for all actions
+    most_experienced_classifiers = {}
     for cl in match_set:
         if cl.action not in most_experienced_classifiers.keys():
             most_experienced_classifiers[cl.action] = cl
-        elif cl.exp * cl.num > most_experienced_classifiers[cl.action].exp * most_experienced_classifiers[cl.action].num:
+        elif cl.exp * cl.num * pow(cl.q, 3) > most_experienced_classifiers[cl.action].exp * most_experienced_classifiers[cl.action].num * pow(most_experienced_classifiers[cl.action].q, 3) :
             most_experienced_classifiers[cl.action] = cl
     #Check that all these classifiers are enough experienced
     for i in range(nbr_of_actions):

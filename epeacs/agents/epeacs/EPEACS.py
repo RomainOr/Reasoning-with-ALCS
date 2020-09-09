@@ -54,6 +54,7 @@ class EPEACS(Agent):
         state = self.cfg.environment_adapter.to_genotype(raw_state)
         last_reward = 0
         prev_state = Perception.empty()
+        previous_match_set = ClassifiersList()
         match_set = ClassifiersList()
         action_set = ClassifiersList()
         done = False
@@ -68,7 +69,6 @@ class EPEACS(Agent):
         while not done:
             
             # Creation of the matching set
-            previous_match_set = match_set
             match_set, _, best_fitness = self.population.form_match_set(state)
 
             if steps > 0:# Apply learning in the last action set
@@ -117,6 +117,9 @@ class EPEACS(Agent):
                         self.cfg.theta_exp
                     )
 
+            #
+            previous_match_set = match_set
+            #
             is_behavioral_sequence = False
             # Choose classifier
             action_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
