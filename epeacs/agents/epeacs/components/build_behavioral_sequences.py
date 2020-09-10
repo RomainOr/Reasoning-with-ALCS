@@ -77,7 +77,9 @@ def create_behavioral_classifier(
                 action=last_activated_classifier.action, 
                 behavioral_sequence=[],
                 cfg=cl.cfg,
-                quality=max(last_activated_classifier.q, 0.5))
+                quality=max(cl.q, last_activated_classifier.q),
+                reward=cl.r
+            )
             if last_activated_classifier.behavioral_sequence:
                 child.behavioral_sequence.extend(last_activated_classifier.behavioral_sequence)
             child.behavioral_sequence.append(cl.action)

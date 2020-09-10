@@ -124,8 +124,9 @@ def is_perceptual_aliasing_state(
             return False
     #Approximate the number of expected transitions and the reachable states
     reachable_states = {}
+    list_of_most_anticipated_state = []
     for i in range(nbr_of_actions):
-        if not most_experienced_classifiers[i].effect.detailled_counter:
+        if not most_experienced_classifiers[i].is_enhanced():
             if not most_experienced_classifiers[i].does_anticipate_change():
                 nbr_of_expected_transitions -= 1
             else:
@@ -133,12 +134,17 @@ def is_perceptual_aliasing_state(
                 for idx, ei in enumerate(most_experienced_classifiers[i].effect):
                     if ei != most_experienced_classifiers[i].effect.wildcard:
                         anticipation[idx] = ei
-                reachable_states.update( {tuple(anticipation): 0} )
+                if tuple(anticipation) in reachable_states:
+                    nbr_of_expected_transitions -= 1
+                else:
+                    reachable_states.update( {tuple(anticipation): 0} )
         else:
             reachable_states.update(most_experienced_classifiers[i].effect.detailled_counter)
             most_anticipated_state = max(most_experienced_classifiers[i].effect.detailled_counter.items(), key=lambda x : x[1])
-            if p0 == most_anticipated_state[0]:
+            if p0 == most_anticipated_state[0] or most_anticipated_state[0] in list_of_most_anticipated_state:
                 nbr_of_expected_transitions -= 1
+            else:
+                list_of_most_anticipated_state.append(most_anticipated_state[0])
     #Compute the number of reachables states
     nbr_of_reachable_states = len(reachable_states)
     if p0 in reachable_states.keys():
