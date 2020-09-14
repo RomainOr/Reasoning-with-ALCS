@@ -92,17 +92,17 @@ class ClassifiersList(TypedList):
     @staticmethod
     def apply_alp(
             population: ClassifiersList,
+            previous_match_set: ClassifiersList,
             match_set: ClassifiersList,
             action_set: ClassifiersList,
+            penultimate_classifier: Classifier,
             p0: Perception,
             action: int,
             p1: Perception,
             time: int,
             theta_exp: int,
-            cfg: Configuration,
             pai_states_memory,
-            previous_match_set,
-            last_activated_classifier: Classifier
+            cfg: Configuration
         ) -> None:
         """
         The Anticipatory Learning Process. Handles all updates by the ALP,
@@ -122,7 +122,7 @@ class ClassifiersList(TypedList):
         cfg: Configuration
         pai_states_memory
         previous_match_set
-        last_activated_classifier
+        penultimate_classifier
         """
         new_list = ClassifiersList()
         new_cl: Optional[Classifier] = None
@@ -138,7 +138,17 @@ class ClassifiersList(TypedList):
             cl.set_alp_timestamp(time)
 
             if cl.does_anticipate_correctly(p0, p1):
-                new_cl = alp.expected_case(cl, p0, p1, time, population, cfg, pai_states_memory,previous_match_set, last_activated_classifier)
+                new_cl = alp.expected_case(
+                    penultimate_classifier,
+                    cl, 
+                    p0, 
+                    p1, 
+                    time, 
+                    previous_match_set, 
+                    population, 
+                    pai_states_memory, 
+                    cfg
+                )
                 was_expected_case = True
             else:
                 new_cl = alp.unexpected_case(cl, p0, p1, time)
@@ -175,80 +185,6 @@ class ClassifiersList(TypedList):
             new_matching = [cl for cl in new_list if cl.condition.does_match(p1)]
             match_set.extend(new_matching)
 
-
-    @staticmethod
-    def apply_alp_behavioral_sequence(
-            population: ClassifiersList,
-            match_set: ClassifiersList,
-            action_set: ClassifiersList,
-            p0: Perception,
-            p1: Perception,
-            time: int,
-            theta_exp: int,
-            cfg: Configuration,
-            pai_states_memory,
-            previous_match_set
-        ) -> None:
-        """
-        The Anticipatory Learning Process when a behavioral sequence has been executed
-
-        Parameters
-        ----------
-        population
-        match_set
-        action_set
-        p0: Perception
-        p1: Perception
-        time: int
-        theta_exp
-        cfg: Configuration
-        pai_states_memory
-        previous_match_set
-        """
-        new_list = ClassifiersList()
-        new_cl: Optional[Classifier] = None
-
-        idx = 0
-        action_set_length = 0
-        if action_set: action_set_length = len(action_set)
-
-        while(idx < action_set_length):
-            cl = action_set[idx]
-            cl.increase_experience()
-            cl.set_alp_timestamp(time)
-
-            # Useless case
-            if (p0 == p1):
-                cl.decrease_quality()
-            # Expected case
-            elif cl.does_anticipate_correctly(p0, p1):
-                new_cl = alp.expected_case(cl, p0, p1, time, population, cfg, pai_states_memory,previous_match_set, None)
-            # Unexpected case
-            else:
-                new_cl = alp.unexpected_case(cl, p0, p1, time)
-
-            if new_cl is not None:
-                new_cl.tga = time
-                add_classifier(new_cl, action_set, new_list, theta_exp)
-
-            # Quality Anticipation check
-            if cl.is_inadequate():
-                # Removes classifier from population, match set
-                # and current list
-                lists = [x for x in [population, match_set, action_set] if x]
-                for lst in lists:
-                    lst.safe_remove(cl)
-                idx -= 1
-                action_set_length -= 1
-            idx += 1
-
-        # Merge classifiers from new_list into action_set and population
-        action_set.extend(new_list)
-        population.extend(new_list)
-
-        if match_set is not None:
-            new_matching = [cl for cl in new_list if cl.condition.does_match(p1)]
-            match_set.extend(new_matching)
 
 
     @staticmethod

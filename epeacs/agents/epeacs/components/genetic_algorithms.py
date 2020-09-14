@@ -21,7 +21,8 @@ def should_apply(
     """
     Checks the average last GA application to determine if a GA
     should be applied.
-    If no classifier is in the current set, no GA is applied!
+    If no classifier is in the current set or only behavioral classifiers are
+    in the action set, no GA is applied!
 
     Parameters
     ----------
@@ -189,8 +190,11 @@ def delete_classifiers(population, match_set, action_set,
     Parameters
     ----------
     population:
+
     match_set:
+    
     action_set:
+    
     insize: int
         number of children that will be inserted
     theta_as: int
@@ -229,6 +233,7 @@ def _is_preferred_to_delete(cl_del, cl) -> bool:
     Parameters
     ----------
     cl_del: Classifier marked for deletion
+    
     cl: Examined classifier
 
     Returns

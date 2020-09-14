@@ -61,26 +61,19 @@ def cover(
 
 
 def expected_case(
+        penultimate_classifier: Classifier,
         cl: Classifier,
         p0: Perception,
         p1: Perception,
         time: int,
+        previous_match_set: ClassifiersList,
         population: ClassifiersList,
-        cfg: Configuration,
         pai_states_memory,
-        previous_match_set,
-        last_activated_classifier
+        cfg: Configuration,
     ) -> Optional[Classifier]:
     """
     Controls the expected case of a classifier with the help of 
     Specification of Unchanging Components.
-
-    Parameters
-    ----------
-    cl
-    p0
-    p1
-    time
 
     Returns
     ----------
@@ -91,7 +84,7 @@ def expected_case(
 
     if is_state_aliased(cl.condition, cl.mark, p0):
         if cl.cfg.do_pep: cl.ee = True
-        if cfg.bs_max > 0 and last_activated_classifier is not None:
+        if cfg.bs_max > 0 and penultimate_classifier is not None:
             # Update the list of detetcted PAi states along with the population
             match_set_no_bseq = [cl for cl in previous_match_set if cl.behavioral_sequence is None]
             if should_pai_detection_apply(match_set_no_bseq, time, cfg.theta_bseq):
@@ -107,7 +100,7 @@ def expected_case(
                             population.safe_remove(cl)
             # Create if needed a new behavioral classifier
             if p0 in pai_states_memory:
-                child = create_behavioral_classifier(last_activated_classifier, cl, p1)
+                child = create_behavioral_classifier(penultimate_classifier, cl, p1)
                 if child:
                     child.tga = time
                     child.talp = time
@@ -155,13 +148,6 @@ def unexpected_case(
     ) -> Optional[Classifier]:
     """
     Controls the unexpected case of the classifier.
-
-    Parameters
-    ----------
-    cl
-    p0
-    p1
-    time
 
     Returns
     ----------

@@ -63,43 +63,27 @@ class EPEACS(Agent):
         t_2_activated_classifier = None
         t_1_activated_classifier = None
 
-        # For applying alp on behavioral set
-        is_behavioral_sequence = False
-
         while not done:
             
             # Creation of the matching set
             match_set, _, best_fitness = self.population.form_match_set(state)
 
-            if steps > 0:# Apply learning in the last action set
-                if is_behavioral_sequence:
-                    ClassifiersList.apply_alp_behavioral_sequence(
-                        self.population,
-                        match_set,
-                        action_set,
-                        prev_state,
-                        state,
-                        time + steps,
-                        self.cfg.theta_exp,
-                        self.cfg,
-                        self.pai_states_memory,
-                        previous_match_set
-                    )
-                else:
-                    ClassifiersList.apply_alp(
-                        self.population,
-                        match_set,
-                        action_set,
-                        prev_state,
-                        t_1_activated_classifier.action,
-                        state,
-                        time + steps,
-                        self.cfg.theta_exp,
-                        self.cfg,
-                        self.pai_states_memory,
-                        previous_match_set,
-                        t_2_activated_classifier
-                    )
+            # Apply learning in the last action set
+            if steps > 0:
+                ClassifiersList.apply_alp(
+                    self.population,
+                    previous_match_set,
+                    match_set,
+                    action_set,
+                    t_2_activated_classifier,
+                    prev_state,
+                    t_1_activated_classifier.action,
+                    state,
+                    time + steps,
+                    self.cfg.theta_exp,
+                    self.pai_states_memory,
+                    self.cfg
+                )
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, best_fitness, self.cfg.beta_rl, self.cfg.gamma
                 )
@@ -117,16 +101,13 @@ class EPEACS(Agent):
                         self.cfg.theta_exp
                     )
 
-            #
+            # Record the previous match set
             previous_match_set = match_set
-            #
-            is_behavioral_sequence = False
             # Choose classifier
             action_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
-            #Record last activated classifier
+            # Record last activated classifier
             t_2_activated_classifier = t_1_activated_classifier
             t_1_activated_classifier = action_classifier
-
             # Create action set
             action_set = match_set.form_action_set(action_classifier)
             # Use environment adapter
@@ -138,68 +119,53 @@ class EPEACS(Agent):
 
             # Enter the if condition only if we have chosen a behavioral classifier
             if action_classifier.behavioral_sequence :
-                is_behavioral_sequence = True
                 # Initialize the message list usefull to decrease quality of classifiers containing looping sequences
-                message_list = [state]
+                #message_list = [state]
                 for act in action_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(act)
                     raw_state, last_reward, done, _ = env.step(iaction)
                     state = self.cfg.environment_adapter.to_genotype(raw_state)
-                    if state in message_list:
-                        for cl in action_set:    
-                            cl.decrease_quality()
-                    else:
-                        message_list.append(state)
+                    #if state in message_list:
+                    #    for cl in action_set:    
+                    #        cl.decrease_quality()
+                    #else:
+                    #    message_list.append(state)
                     if done:
                         break
                     steps += 1
 
 
             if done:
-                if is_behavioral_sequence:
-                    ClassifiersList.apply_alp_behavioral_sequence(
-                        self.population,
-                        ClassifiersList(),
-                        action_set,
-                        prev_state,
-                        state,
-                        time + steps,
-                        self.cfg.theta_exp,
-                        self.cfg,
-                        self.pai_states_memory,
-                        previous_match_set
-                    )
-                else:
-                    ClassifiersList.apply_alp(
-                        self.population,
-                        ClassifiersList(),
-                        action_set,
-                        prev_state,
-                        t_1_activated_classifier.action,
-                        state,
-                        time + steps,
-                        self.cfg.theta_exp,
-                        self.cfg,
-                        self.pai_states_memory,
-                        previous_match_set,
-                        t_2_activated_classifier
-                    )
+                ClassifiersList.apply_alp(
+                    self.population,
+                    previous_match_set,
+                    ClassifiersList(),
+                    action_set,
+                    t_2_activated_classifier,
+                    prev_state,
+                    t_1_activated_classifier.action,
+                    state,
+                    time + steps,
+                    self.cfg.theta_exp,
+                    self.pai_states_memory,
+                    self.cfg
+                )
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, 0, self.cfg.beta_rl, self.cfg.gamma
                 )
-            if self.cfg.do_ga:
-                ClassifiersList.apply_ga(
-                    time + steps,
-                    self.population,
-                    ClassifiersList(),
-                    action_set,
-                    state,
-                    self.cfg.theta_ga,
-                    self.cfg.mu,
-                    self.cfg.chi,
-                    self.cfg.theta_as,
-                    self.cfg.theta_exp)
+                if self.cfg.do_ga:
+                    ClassifiersList.apply_ga(
+                        time + steps,
+                        self.population,
+                        ClassifiersList(),
+                        action_set,
+                        state,
+                        self.cfg.theta_ga,
+                        self.cfg.mu,
+                        self.cfg.chi,
+                        self.cfg.theta_as,
+                        self.cfg.theta_exp)
 
             steps += 1
         return TrialMetrics(steps, last_reward)

@@ -19,13 +19,11 @@ def population_metrics(population, environment):
         'numerosity': 0,
         'reliable': 0,
     }
-
     for cl in population:
         metrics['population'] += 1
         metrics['numerosity'] += cl.num
         if cl.is_reliable():
             metrics['reliable'] += 1
-
     return metrics
 
 
@@ -49,11 +47,10 @@ def _maze_metrics(pop, env):
     metrics = {
         'knowledge': _maze_knowledge(pop, env)
     }
-
     # Add basic population metrics
     metrics.update(population_metrics(pop, env))
-
     return metrics
+
 
 def _how_many_peps_match_non_aliased_states(pop, env) -> int:
     counter = 0
@@ -65,6 +62,7 @@ def _how_many_peps_match_non_aliased_states(pop, env) -> int:
                 counter += 1
     return counter
 
+
 def _mean_reliable_classifier_specificity(pop, env) -> int:
     reliable_classifiers = [cl for cl in pop if cl.is_reliable()]
     if len(reliable_classifiers) > 0:
@@ -72,35 +70,31 @@ def _mean_reliable_classifier_specificity(pop, env) -> int:
     else:
         return 1.
 
-def _when_full_knowledge_is_achieved(metrics):
 
+def _when_full_knowledge_is_achieved(metrics):
     first_trial_when_full_knowledge = -1
     stable_trial_when_full_knowledge = -1
     last_trial_when_full_knowledge = -1
-
     for trial in metrics:
-
         if first_trial_when_full_knowledge == -1 and trial['knowledge'] == 100:
             first_trial_when_full_knowledge = trial['trial']
-
         if stable_trial_when_full_knowledge == -1 and trial['knowledge'] == 100:
             stable_trial_when_full_knowledge = trial['trial']
-
         if stable_trial_when_full_knowledge != -1 and trial['knowledge'] != 100:
             stable_trial_when_full_knowledge = -1
-        
         if trial['knowledge'] == 100:
             last_trial_when_full_knowledge = trial['trial']
-
     return first_trial_when_full_knowledge, stable_trial_when_full_knowledge, last_trial_when_full_knowledge
+
 
 def _state_of_population(metrics, trial, step):
     return metrics[trial//step - 1]
 
+
 def _enhanced_effect_error(population, environment, classifier_length, random_attribute_length) -> float:
     theoritical_probabilities = environment.env.get_theoritical_probabilities()
     # Take into consideration only reliable classifiers
-    reliable_classifiers = [cl for cl in population if cl.is_reliable()]
+    reliable_classifiers = [cl for cl in population if cl.is_reliable() and cl.behavioral_sequence is None]
     # Accumulation of difference in probabilities
     error_old_pep = 0.
     error_new_pep = 0.
@@ -111,7 +105,7 @@ def _enhanced_effect_error(population, environment, classifier_length, random_at
             if len(classifiers) > 0:
                 most_experienced_classifier = max(classifiers, key=lambda cl: cl.exp * cl.num)
             else:
-                most_experienced_classifier = max([cl for cl in population if cl.condition.does_match(perception) and cl.action ==  action], key=lambda cl: cl.exp * cl.num)
+                most_experienced_classifier = max([cl for cl in population if cl.condition.does_match(perception) and cl.action ==  action and cl.behavioral_sequence is None], key=lambda cl: cl.exp * cl.num)
             prob = probabilities_and_states['probabilities']
             for direction in prob:
                 old_effect_attribute, new_effect_attribute = most_experienced_classifier.effect.getEffectAttribute(direction)

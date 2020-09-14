@@ -34,7 +34,8 @@ def does_subsume(cl, other_cl, theta_exp: int) -> bool:
     """
     Returns if a classifier `cl` subsumes `other_cl` classifier
     No need to check condition when does_subsume is only applied 
-    on the matching set or the action set
+    on the matching set or the action set, but here, an additional test
+    is added on purpose.
 
     Parameters
     ----------
