@@ -16,7 +16,7 @@ from epeacs.agents.epeacs import Configuration, Condition, Effect, PMark, Probab
 class Classifier:
 
     __slots__ = ['condition', 'action', 'behavioral_sequence', 'effect', 'mark', 'q', 'ra', 'rb',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'nta', 'ntb']
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee']
 
     # In paper it's advised to set experience and reward of newly generated
     # classifier to 0. However in original code these values are initialized
@@ -30,8 +30,6 @@ class Classifier:
             quality: float=0.5,
             rewarda: float=0.,
             rewardb: float=0.,
-            nta: int = 1,
-            ntb: int = 1,
             immediate_reward: float=0.0,
             numerosity: int=1,
             experience: int=1,
@@ -63,8 +61,6 @@ class Classifier:
         self.q = quality
         self.ra = rewarda
         self.rb = rewardb
-        self.nta = nta
-        self.ntb = ntb
         self.ir = immediate_reward
         self.num = numerosity
         self.exp = experience
@@ -133,8 +129,6 @@ class Classifier:
             quality=old_cls.q,
             rewarda=old_cls.ra,
             rewardb=old_cls.rb,
-            nta = old_cls.nta,
-            ntb = old_cls.ntb,
             immediate_reward=old_cls.ir,
             cfg=old_cls.cfg,
             tga=time,
@@ -416,8 +410,6 @@ class Classifier:
             quality = max((self.q + other_classifier.q) / 2.0, 0.5),
             rewarda = (self.ra + other_classifier.ra) / 2.0,
             rewardb = (self.rb + other_classifier.rb) / 2.0,
-            nta = max(self.nta, other_classifier.nta),
-            ntb = max(self.ntb, other_classifier.ntb),
             talp = time,
             tga = time,
             tbseq = time,

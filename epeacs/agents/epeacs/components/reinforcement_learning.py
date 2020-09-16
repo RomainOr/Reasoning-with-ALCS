@@ -46,6 +46,7 @@ def update_classifier_double_q_learning(
         step_reward: int, 
         max_fitness_ra: float,
         max_fitness_rb: float,
+        beta_rl: float, 
         gamma: float
     ):
     """
@@ -70,13 +71,7 @@ def update_classifier_double_q_learning(
         reinforcement rate
     """
     if random.random() < 0.5:
-        beta_rl = pow(cl.nta, 0.8)
-        beta_rl = 1. / beta_rl
         cl.ra += beta_rl * (step_reward + gamma * max_fitness_rb - cl.ra)
-        cl.nta += 1.
     else:
-        beta_rl = pow(cl.ntb, 0.8)
-        beta_rl = 1. / beta_rl
         cl.rb += beta_rl * (step_reward + gamma * max_fitness_ra - cl.rb)
-        cl.ntb += 1.
     cl.ir += beta_rl * (step_reward - cl.ir)
