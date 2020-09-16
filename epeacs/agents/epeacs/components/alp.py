@@ -44,14 +44,8 @@ def cover(
     Classifier
         new classifier
     """
-    # In paper it's advised to set experience and reward of newly generated
-    # classifier to 0. However in original code these values are initialized
-    # with defaults 1 and 0.5 correspondingly.
     new_cl = Classifier(
         action=action, 
-        experience=1, 
-        rewarda=0.5, 
-        rewardb=0.5,
         tga=time,
         tbseq=time,
         talp=time,

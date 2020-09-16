@@ -18,6 +18,9 @@ class Classifier:
     __slots__ = ['condition', 'action', 'behavioral_sequence', 'effect', 'mark', 'q', 'ra', 'rb',
                  'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'nta', 'ntb']
 
+    # In paper it's advised to set experience and reward of newly generated
+    # classifier to 0. However in original code these values are initialized
+    # with defaults 1 and 0.5 correspondingly.
     def __init__(
             self,
             condition: Union[Condition, str, None] = None,
@@ -25,8 +28,8 @@ class Classifier:
             behavioral_sequence: Optional[List[int]] = None,
             effect: Union[Effect, str, None] = None,
             quality: float=0.5,
-            rewarda: float=0.5,
-            rewardb: float=0.5,
+            rewarda: float=0.,
+            rewardb: float=0.,
             nta: int = 1,
             ntb: int = 1,
             immediate_reward: float=0.0,
@@ -147,8 +150,13 @@ class Classifier:
 
     @property
     def fitness(self):
-        #return self.q * self.ra
-        return self.q * (self.ra + self.rb) / 2.0
+        max_r = max(self.ra, self.rb)
+        min_r = min(self.ra, self.rb)
+        diff = max_r - min_r
+        nb_actions = 1
+        if self.behavioral_sequence:
+            nb_actions += len(self.behavioral_sequence)
+        return self.q * (min_r + diff / nb_actions)
 
 
     @property

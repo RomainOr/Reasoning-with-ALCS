@@ -186,7 +186,6 @@ class ClassifiersList(TypedList):
             match_set.extend(new_matching)
 
 
-
     @staticmethod
     def apply_reinforcement_learning(
             match_set: ClassifiersList,
@@ -200,10 +199,11 @@ class ClassifiersList(TypedList):
         max_fitness_rb = 0.
         if not done:
             for cl in match_set:
-                if cl.q*cl.ra > max_fitness_ra:
-                    max_fitness_ra = cl.q*cl.ra
-                if cl.q*cl.rb > max_fitness_rb:
-                    max_fitness_rb = cl.q*cl.rb
+                if cl.does_anticipate_change():
+                    if cl.q*cl.ra > max_fitness_ra:
+                        max_fitness_ra = cl.q*cl.ra
+                    if cl.q*cl.rb > max_fitness_rb:
+                        max_fitness_rb = cl.q*cl.rb
         for cl in action_set:
             #rl.update_classifier_q_learning(cl, reward, max_fitness_ra, beta_rl, gamma)
             rl.update_classifier_double_q_learning(cl, reward, max_fitness_ra, max_fitness_rb, gamma)
