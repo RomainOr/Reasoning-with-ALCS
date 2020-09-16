@@ -34,7 +34,7 @@ class Configuration:
             theta_as: int=20,
             mu: float=0.3,
             chi: float=0.8,
-            bs_max: int=1) -> None:
+            bs_max: int=0) -> None:
         """
         Creates the configuration object used during training the epeacs agent.
 
@@ -47,9 +47,19 @@ class Configuration:
         environment_adapter
             EnvironmentAdapter class EPEACS needs to use
             to interact with the environment
+        user_metrics_collector_fcn
+
+        metrics_trial_frequency
+
+        do_pep
+
         do_ga
             switch *Genetic Generalization* module
-        beta
+        beta_alp
+
+        beta_rl
+
+        beta_pep
 
         gamma
 
@@ -67,14 +77,12 @@ class Configuration:
 
         theta_bseq
             time before checking PAI states 
-
         theta_as
 
         mu
             GA mutation probability
         chi
             GA crossover probability
-
         bs_max
             maximal length of behavioral sequence
 

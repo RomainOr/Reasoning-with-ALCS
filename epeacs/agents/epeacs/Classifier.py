@@ -60,6 +60,8 @@ class Classifier:
         self.q = quality
         self.ra = rewarda
         self.rb = rewardb
+        self.nta = nta
+        self.ntb = ntb
         self.ir = immediate_reward
         self.num = numerosity
         self.exp = experience
@@ -68,8 +70,6 @@ class Classifier:
         self.tbseq = tbseq
         self.tav = tav
         self.ee = False
-        self.nta = nta
-        self.ntb = ntb
 
 
     def __eq__(self, other):
