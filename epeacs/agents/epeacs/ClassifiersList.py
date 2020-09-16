@@ -37,7 +37,7 @@ class ClassifiersList(TypedList):
                 if cl.does_anticipate_change() and cl.fitness > best_fitness:
                     best_classifier = cl
                     best_fitness = cl.fitness
-        return ClassifiersList(*matching), best_classifier, best_fitness
+        return ClassifiersList(*matching), best_classifier
 
 
     def form_action_set(self, action_classifier: Classifier) -> ClassifiersList:
@@ -189,14 +189,24 @@ class ClassifiersList(TypedList):
 
     @staticmethod
     def apply_reinforcement_learning(
+            match_set: ClassifiersList,
             action_set: ClassifiersList,
             reward: int,
-            p: float,
             beta_rl: float,
-            gamma: float
+            gamma: float,
+            done: bool
         ) -> None:
+        max_fitness_ra = 0.
+        max_fitness_rb = 0.
+        if not done:
+            for cl in match_set:
+                if cl.q*cl.ra > max_fitness_ra:
+                    max_fitness_ra = cl.q*cl.ra
+                if cl.q*cl.rb > max_fitness_rb:
+                    max_fitness_rb = cl.q*cl.rb
         for cl in action_set:
-            rl.update_classifier(cl, reward, p, beta_rl, gamma)
+            #rl.update_classifier_q_learning(cl, reward, max_fitness_ra, beta_rl, gamma)
+            rl.update_classifier_double_q_learning(cl, reward, max_fitness_ra, max_fitness_rb, gamma)
 
 
     @staticmethod
@@ -236,7 +246,8 @@ class ClassifiersList(TypedList):
 
                     # Update quality and reward
                     child1.q = child2.q = float(sum([child1.q, child2.q]) / 2)
-                    child2.r = child2.r = float(sum([child1.r, child2.r]) / 2)
+                    child1.ra = child2.ra = float(sum([child1.ra, child2.ra]) / 2)
+                    child1.rb = child2.rb = float(sum([child1.rb, child2.rb]) / 2)
 
             child1.q /= 2
             child2.q /= 2

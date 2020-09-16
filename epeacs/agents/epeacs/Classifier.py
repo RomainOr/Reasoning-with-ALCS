@@ -15,8 +15,8 @@ from epeacs.agents.epeacs import Configuration, Condition, Effect, PMark, Probab
 
 class Classifier:
 
-    __slots__ = ['condition', 'action', 'behavioral_sequence', 'effect', 'mark', 'q', 'r',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee']
+    __slots__ = ['condition', 'action', 'behavioral_sequence', 'effect', 'mark', 'q', 'ra', 'rb',
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'nta', 'ntb']
 
     def __init__(
             self,
@@ -25,7 +25,10 @@ class Classifier:
             behavioral_sequence: Optional[List[int]] = None,
             effect: Union[Effect, str, None] = None,
             quality: float=0.5,
-            reward: float=0.5,
+            rewarda: float=0.5,
+            rewardb: float=0.5,
+            nta: int = 1,
+            ntb: int = 1,
             immediate_reward: float=0.0,
             numerosity: int=1,
             experience: int=1,
@@ -55,7 +58,8 @@ class Classifier:
         self.effect = build_perception_string(Effect, effect)
         self.mark = PMark(cfg=self.cfg)
         self.q = quality
-        self.r = reward
+        self.ra = rewarda
+        self.rb = rewardb
         self.ir = immediate_reward
         self.num = numerosity
         self.exp = experience
@@ -64,6 +68,8 @@ class Classifier:
         self.tbseq = tbseq
         self.tav = tav
         self.ee = False
+        self.nta = nta
+        self.ntb = ntb
 
 
     def __eq__(self, other):
@@ -91,7 +97,7 @@ class Classifier:
                f"{str(self.effect):16} " \
                f"{'(' + str(self.mark) + ')':21} \n" \
                f"q: {self.q:<5.3} " \
-               f"r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
+               f"ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
                f"exp: {self.exp:<3} tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} " \
                f"tav: {self.tav:<6.3} num: {self.num} ee: {self.ee}"
 
@@ -122,7 +128,10 @@ class Classifier:
             behavioral_sequence=old_cls.behavioral_sequence,
             effect=Effect(p, old_cls.cfg.classifier_wildcard),
             quality=old_cls.q,
-            reward=old_cls.r,
+            rewarda=old_cls.ra,
+            rewardb=old_cls.rb,
+            nta = old_cls.nta,
+            ntb = old_cls.ntb,
             immediate_reward=old_cls.ir,
             cfg=old_cls.cfg,
             tga=time,
@@ -138,7 +147,8 @@ class Classifier:
 
     @property
     def fitness(self):
-        return self.q * self.r
+        #return self.q * self.ra
+        return self.q * (self.ra + self.rb) / 2.0
 
 
     @property
@@ -396,7 +406,10 @@ class Classifier:
             action = self.action,
             behavioral_sequence=self.behavioral_sequence,
             quality = max((self.q + other_classifier.q) / 2.0, 0.5),
-            reward = (self.r + other_classifier.r) / 2.0,
+            rewarda = (self.ra + other_classifier.ra) / 2.0,
+            rewardb = (self.rb + other_classifier.rb) / 2.0,
+            nta = max(self.nta, other_classifier.nta),
+            ntb = max(self.ntb, other_classifier.ntb),
             talp = time,
             tga = time,
             tbseq = time,

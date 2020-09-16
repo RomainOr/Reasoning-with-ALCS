@@ -50,7 +50,8 @@ def cover(
     new_cl = Classifier(
         action=action, 
         experience=1, 
-        reward=0.5, 
+        rewarda=0.5, 
+        rewardb=0.5,
         tga=time,
         tbseq=time,
         talp=time,

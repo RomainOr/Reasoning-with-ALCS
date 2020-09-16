@@ -66,7 +66,7 @@ class EPEACS(Agent):
         while not done:
             
             # Creation of the matching set
-            match_set, _, best_fitness = self.population.form_match_set(state)
+            match_set, _ = self.population.form_match_set(state)
 
             # Apply learning in the last action set
             if steps > 0:
@@ -85,7 +85,7 @@ class EPEACS(Agent):
                     self.cfg
                 )
                 ClassifiersList.apply_reinforcement_learning(
-                    action_set, last_reward, best_fitness, self.cfg.beta_rl, self.cfg.gamma
+                    match_set, action_set, last_reward, self.cfg.beta_rl, self.cfg.gamma, done
                 )
                 if self.cfg.do_ga:
                     ClassifiersList.apply_ga(
@@ -152,7 +152,7 @@ class EPEACS(Agent):
                     self.cfg
                 )
                 ClassifiersList.apply_reinforcement_learning(
-                    action_set, last_reward, 0, self.cfg.beta_rl, self.cfg.gamma
+                    match_set, action_set, last_reward, self.cfg.beta_rl, self.cfg.gamma, done
                 )
                 if self.cfg.do_ga:
                     ClassifiersList.apply_ga(
@@ -184,11 +184,11 @@ class EPEACS(Agent):
         while not done:
 
             # Compute in one run the matching set, the best matching classifier and the best matching fitness associated to the previous classifier
-            match_set, best_classifier, best_fitness = self.population.form_match_set(state)
+            match_set, best_classifier = self.population.form_match_set(state)
 
             if steps > 0:
                 ClassifiersList.apply_reinforcement_learning(
-                    action_set, last_reward, best_fitness, self.cfg.beta_rl, self.cfg.gamma
+                    match_set, action_set, last_reward, self.cfg.beta_rl, self.cfg.gamma, done
                 )
 
             # Create action set
@@ -213,7 +213,7 @@ class EPEACS(Agent):
             if done:
                 # Apply algorithms
                 ClassifiersList.apply_reinforcement_learning(
-                    action_set, last_reward, 0, self.cfg.beta_rl, self.cfg.gamma
+                    match_set, action_set, last_reward, self.cfg.beta_rl, self.cfg.gamma, done
                 )
 
             steps += 1

@@ -79,8 +79,7 @@ def create_behavioral_classifier(
                 action=penultimate_classifier.action, 
                 behavioral_sequence=[],
                 cfg=cl.cfg,
-                quality=max(cl.q, penultimate_classifier.q),
-                reward=cl.r
+                quality=max(cl.q, penultimate_classifier.q)
             )
             if penultimate_classifier.behavioral_sequence:
                 child.behavioral_sequence.extend(penultimate_classifier.behavioral_sequence)
