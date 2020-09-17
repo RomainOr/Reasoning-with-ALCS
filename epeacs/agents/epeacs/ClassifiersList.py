@@ -206,7 +206,7 @@ class ClassifiersList(TypedList):
                         max_fitness_rb = cl.q*cl.rb
         for cl in action_set:
             #rl.update_classifier_q_learning(cl, reward, max_fitness_ra, beta_rl, gamma)
-            rl.update_classifier_double_q_learning(cl, reward, max_fitness_ra, max_fitness_rb, gamma)
+            rl.update_classifier_double_q_learning(cl, reward, max_fitness_ra, max_fitness_rb, beta_rl, gamma)
 
 
     @staticmethod
