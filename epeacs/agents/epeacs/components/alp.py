@@ -87,12 +87,14 @@ def expected_case(
                 if is_perceptual_aliasing_state(match_set_no_bseq, p0, cfg):
                     if p0 not in pai_states_memory:
                         pai_states_memory.append(p0)
+                    #TODO: else zip ?
                 else:
                     if p0 in pai_states_memory:
                         pai_states_memory.remove(p0)
-                        match_set_bseq = [cl for cl in previous_match_set if cl.behavioral_sequence]
-                        for cl in match_set_bseq:
-                            population.safe_remove(cl)
+                        #TODO: Idée peut-être bonne mais mal implémentée -> Mettre en place un marquer sur les classeurs liés à PAI_states_memory
+                        #match_set_bseq = [cl for cl in previous_match_set if cl.behavioral_sequence]
+                        #for cl in match_set_bseq:
+                        #    population.safe_remove(cl)
             # Create if needed a new behavioral classifier
             if p0 in pai_states_memory:
                 child = create_behavioral_classifier(penultimate_classifier, cl, p1)

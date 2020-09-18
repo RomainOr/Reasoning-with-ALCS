@@ -69,10 +69,7 @@ class ClassifiersList(TypedList):
             time: int,
             cfg: Configuration
         ):
-        # Create a list of candidates.
-        # Every enhanceable classifier is a candidate.
         candidates = [cl for cl in action_set if cl.ee]
-        # If there are less than 2 candidates, don't do it
         if len(candidates) < 2:
             return
         for candidate in candidates:
@@ -81,12 +78,6 @@ class ClassifiersList(TypedList):
                 merger = random.choice(candidates2)
                 new_classifier = candidate.merge_with(merger, previous_situation, time)
                 add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
-        #for idx, first in enumerate(candidates):
-        #    if idx + 1 < len(candidates):
-        #        for second in candidates[idx+1:]:
-        #            if first != second and first.mark == second.mark:
-        #                new_classifier = first.merge_with(second, previous_situation, time)
-        #                add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
 
 
     @staticmethod
@@ -112,17 +103,17 @@ class ClassifiersList(TypedList):
         Parameters
         ----------
         population
+        previous_match_set
         match_set
         action_set
+        penultimate_classifier
         p0: Perception
         action: int
         p1: Perception
         time: int
         theta_exp
-        cfg: Configuration
         pai_states_memory
-        previous_match_set
-        penultimate_classifier
+        cfg: Configuration
         """
         new_list = ClassifiersList()
         new_cl: Optional[Classifier] = None
