@@ -16,7 +16,7 @@ from epeacs.agents.epeacs import Configuration, Condition, Effect, PMark, Probab
 class Classifier:
 
     __slots__ = ['condition', 'action', 'behavioral_sequence', 'effect', 'mark', 'q', 'ra', 'rb',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee']
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'pai_state']
 
     # In paper it's advised to set experience and reward of newly generated
     # classifier to 0. However in original code these values are initialized
@@ -69,6 +69,7 @@ class Classifier:
         self.tbseq = tbseq
         self.tav = tav
         self.ee = False
+        self.pai_state = Perception.empty()
 
 
     def __eq__(self, other):

@@ -136,6 +136,7 @@ class ClassifiersList(TypedList):
                     p1, 
                     time, 
                     previous_match_set, 
+                    match_set,
                     population, 
                     pai_states_memory, 
                     cfg

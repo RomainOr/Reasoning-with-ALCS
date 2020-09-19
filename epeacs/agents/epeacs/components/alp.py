@@ -12,6 +12,7 @@ from epeacs.agents.epeacs import Classifier, ClassifiersList, Condition, Configu
 from epeacs.agents.epeacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
 from epeacs.agents.epeacs.components.aliasing_detection import is_state_aliased, is_perceptual_aliasing_state, set_pai_detection_timestamps, should_pai_detection_apply
 from epeacs.agents.epeacs.components.build_behavioral_sequences import create_behavioral_classifier
+from epeacs.agents.epeacs.components.subsumption import does_subsume
 
 
 def cover(
@@ -62,6 +63,7 @@ def expected_case(
         p1: Perception,
         time: int,
         previous_match_set: ClassifiersList,
+        match_set: ClassifiersList,
         population: ClassifiersList,
         pai_states_memory,
         cfg: Configuration,
@@ -87,20 +89,36 @@ def expected_case(
                 if is_perceptual_aliasing_state(match_set_no_bseq, p0, cfg):
                     if p0 not in pai_states_memory:
                         pai_states_memory.append(p0)
-                    #TODO: else zip ?
+                    else:
+                        behavioral_classifiers_to_zip = [cl for cl in population if cl.pai_state == p0]
+                        behavioral_classifiers_to_delete = []
+                        for idx1 in range(len(behavioral_classifiers_to_zip)-1):
+                            cl = behavioral_classifiers_to_zip[idx1]
+                            if cl in behavioral_classifiers_to_delete:
+                                continue
+                            for idx2 in range(idx1+1, len(behavioral_classifiers_to_zip)):
+                                other_cl = behavioral_classifiers_to_zip[idx2]
+                                if other_cl in behavioral_classifiers_to_delete:
+                                    continue
+                                if does_subsume(cl, other_cl, cfg.theta_exp):
+                                    behavioral_classifiers_to_delete.append(other_cl)
+                        for cl in behavioral_classifiers_to_delete:
+                            population.safe_remove(cl)
+                            match_set.safe_remove(cl)
                 else:
                     if p0 in pai_states_memory:
                         pai_states_memory.remove(p0)
-                        #TODO: Idée peut-être bonne mais mal implémentée -> Mettre en place un marquer sur les classeurs liés à PAI_states_memory
-                        #match_set_bseq = [cl for cl in previous_match_set if cl.behavioral_sequence]
-                        #for cl in match_set_bseq:
-                        #    population.safe_remove(cl)
+                        behavioral_classifiers_to_delete = [cl for cl in population if cl.pai_state == p0]
+                        for cl in behavioral_classifiers_to_delete:
+                            population.safe_remove(cl)
+                            match_set.safe_remove(cl)
             # Create if needed a new behavioral classifier
             if p0 in pai_states_memory:
                 child = create_behavioral_classifier(penultimate_classifier, cl, p1)
                 if child:
                     child.tga = time
                     child.talp = time
+                    child.pai_state = p0
                     return child
 
     diff = cl.mark.get_differences(p0)
