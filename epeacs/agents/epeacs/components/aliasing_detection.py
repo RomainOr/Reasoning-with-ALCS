@@ -114,10 +114,14 @@ def is_perceptual_aliasing_state(
     #Find the most experienced classifiers for all actions
     most_experienced_classifiers = {}
     for cl in match_set:
-        if cl.action not in most_experienced_classifiers.keys():
+        if cl.action not in most_experienced_classifiers:
             most_experienced_classifiers[cl.action] = cl
         elif cl.exp * cl.num * pow(cl.q, 3) > most_experienced_classifiers[cl.action].exp * most_experienced_classifiers[cl.action].num * pow(most_experienced_classifiers[cl.action].q, 3) :
             most_experienced_classifiers[cl.action] = cl
+    #Check that each action get an associated classifier
+    for i in range(nbr_of_actions):
+        if i not in most_experienced_classifiers:
+            return False
     #Check that all these classifiers are enough experienced
     for i in range(nbr_of_actions):
         if most_experienced_classifiers[i].exp <= cfg.theta_exp :
@@ -147,7 +151,7 @@ def is_perceptual_aliasing_state(
                 list_of_most_anticipated_state.append(most_anticipated_state[0])
     #Compute the number of reachables states
     nbr_of_reachable_states = len(reachable_states)
-    if p0 in reachable_states.keys():
+    if p0 in reachable_states:
         nbr_of_reachable_states -= 1
     #Compare the number of expected transitions to the number of reachable states
     if nbr_of_reachable_states > nbr_of_expected_transitions:

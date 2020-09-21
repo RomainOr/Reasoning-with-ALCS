@@ -116,8 +116,8 @@ class AbstractMaze(gym.Env):
         # building the data structure by computing all reachable states depending on the action for every position
         result = {}
         for node, action, neighbour in transitions:
-            if node in result.keys():
-                if action in result[node].keys():
+            if node in result:
+                if action in result[node]:
                     result[node][action]["reachable_states"].append(neighbour)
                 else:
                     result[node][action] = {"reachable_states":[neighbour]}
@@ -126,7 +126,7 @@ class AbstractMaze(gym.Env):
         # completing the data structure with transitions that do not lead to a change in the environment
         for key, value in result.items():
             for action in ACTION_LOOKUP:
-                if action not in value.keys():
+                if action not in value:
                     value[action] = {"reachable_states":[key]}
         # adding to the structure the theoritical probabilities to perceive each item
         number_of_actions = len(ACTION_LOOKUP)
