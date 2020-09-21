@@ -100,7 +100,7 @@ def expected_case(
                                 other_cl = behavioral_classifiers_to_zip[idx2]
                                 if other_cl in behavioral_classifiers_to_delete:
                                     continue
-                                if does_subsume(cl, other_cl, cfg.theta_exp):
+                                if does_subsume(cl, other_cl, cfg.theta_exp) and cl.condition.subsumes(other_cl.condition):
                                     behavioral_classifiers_to_delete.append(other_cl)
                         for cl in behavioral_classifiers_to_delete:
                             population.safe_remove(cl)
