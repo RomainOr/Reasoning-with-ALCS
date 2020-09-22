@@ -159,7 +159,13 @@ class ClassifiersList(TypedList):
                 if new_cl.behavioral_sequence:
                     add_classifier(new_cl, population, new_list, theta_exp)
                 else:
-                    add_classifier(new_cl, action_set, new_list, theta_exp)
+                    if len(action_set) > 0 :
+                        if action_set[0].behavioral_sequence:
+                            add_classifier(new_cl, population, new_list, theta_exp)
+                        else:
+                            add_classifier(new_cl, action_set, new_list, theta_exp)
+                    else:
+                        add_classifier(new_cl, action_set, new_list, theta_exp)
 
         if cfg.do_pep:
             ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
@@ -167,7 +173,13 @@ class ClassifiersList(TypedList):
         # No classifier anticipated correctly - generate new one
         if not was_expected_case:
             new_cl = alp.cover(p0, action, p1, time, cfg)
-            add_classifier(new_cl, action_set, new_list, theta_exp)
+            if len(action_set) > 0 :
+                if action_set[0].behavioral_sequence:
+                    add_classifier(new_cl, population, new_list, theta_exp)
+                else:
+                    add_classifier(new_cl, action_set, new_list, theta_exp)
+            else:
+                add_classifier(new_cl, action_set, new_list, theta_exp)
 
         # Merge classifiers from new_list into self and population
         action_set.extend(new_list)

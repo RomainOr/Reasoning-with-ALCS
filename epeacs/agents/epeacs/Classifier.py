@@ -96,8 +96,7 @@ class Classifier:
                f"{str(self.behavioral_sequence)} " \
                f"{str(self.effect):16} " \
                f"{'(' + str(self.mark) + ')':21} \n" \
-               f"q: {self.q:<5.3} " \
-               f"ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
+               f"q: {self.q:<5.3} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} \n" \
                f"exp: {self.exp:<3} tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} " \
                f"tav: {self.tav:<6.3} num: {self.num} ee: {self.ee}"
 
