@@ -39,7 +39,10 @@ def should_apply(
     bool
         True if GA should be applied, False otherwise
     """
-    if action_set is None:
+    if action_set is None or not action_set:
+        return False
+
+    if action_set[0].behavioral_sequence:
         return False
 
     overall_time = sum(cl.tga * cl.num for cl in action_set)

@@ -131,17 +131,17 @@ class BACS(Agent):
             if action_classifier.behavioral_sequence :
                 is_behavioral_sequence = True
                 # Initialize the message list usefull to decrease quality of classifiers containing looping sequences
-                message_list = [state]
+                #message_list = [state]
                 for act in action_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(act)
                     raw_state, last_reward, done, _ = env.step(iaction)
                     state = self.cfg.environment_adapter.to_genotype(raw_state)
-                    if state in message_list:
-                        for cl in action_set:    
-                            cl.decrease_quality()
-                    else:
-                        message_list.append(state)
+                    #if state in message_list:
+                    #    for cl in action_set:    
+                    #        cl.decrease_quality()
+                    #else:
+                    #    message_list.append(state)
                     if done:
                         break
                     steps += 1
@@ -176,18 +176,18 @@ class BACS(Agent):
                     0,
                     self.cfg.beta,
                     self.cfg.gamma)
-            if self.cfg.do_ga:
-                ClassifiersList.apply_ga(
-                    time + steps,
-                    self.population,
-                    ClassifiersList(),
-                    action_set,
-                    state,
-                    self.cfg.theta_ga,
-                    self.cfg.mu,
-                    self.cfg.chi,
-                    self.cfg.theta_as,
-                    self.cfg.theta_exp)
+                if self.cfg.do_ga:
+                    ClassifiersList.apply_ga(
+                        time + steps,
+                        self.population,
+                        ClassifiersList(),
+                        action_set,
+                        state,
+                        self.cfg.theta_ga,
+                        self.cfg.mu,
+                        self.cfg.chi,
+                        self.cfg.theta_as,
+                        self.cfg.theta_exp)
 
             steps += 1
         return TrialMetrics(steps, last_reward)
