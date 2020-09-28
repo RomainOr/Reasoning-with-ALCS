@@ -34,17 +34,15 @@ class ClassifiersList(TypedList):
         for cl in self:
             if cl.condition.does_match(situation):
                 matching.append(cl)
-                if cl.does_anticipate_change() and cl.fitness > best_fitness:
+                #if cl.does_anticipate_change() and cl.fitness > best_fitness:
+                if cl.fitness > best_fitness:
                     best_classifier = cl
                     best_fitness = cl.fitness
         return ClassifiersList(*matching), best_classifier
 
 
     def form_action_set(self, action_classifier: Classifier) -> ClassifiersList:
-        if action_classifier.behavioral_sequence is None:
-            matching = [cl for cl in self if cl.action == action_classifier.action and cl.behavioral_sequence is None]
-        else :
-            matching = [cl for cl in self if cl.behavioral_sequence == action_classifier.behavioral_sequence and cl.action == action_classifier.action]
+        matching = [cl for cl in self if cl.behavioral_sequence == action_classifier.behavioral_sequence and cl.action == action_classifier.action]
         return ClassifiersList(*matching)
 
 
@@ -127,9 +125,10 @@ class ClassifiersList(TypedList):
             cl = action_set[idx]
             cl.increase_experience()
             cl.set_alp_timestamp(time)
+            pai_state_detected = False
 
             if cl.does_anticipate_correctly(p0, p1):
-                new_cl = alp.expected_case(
+                pai_state_detected, new_cl = alp.expected_case(
                     penultimate_classifier,
                     cl, 
                     p0, 
@@ -156,29 +155,20 @@ class ClassifiersList(TypedList):
             idx += 1
 
             if new_cl is not None:
-                if new_cl.behavioral_sequence:
-                    add_classifier(new_cl, population, new_list, theta_exp)
+                if new_cl.behavioral_sequence and pai_state_detected:
+                    pop_for_addition = [cl for cl in population if cl.behavioral_sequence and cl.condition.does_match(new_cl.condition)]
+                    add_classifier(new_cl, pop_for_addition, new_list, theta_exp)
                 else:
-                    if len(action_set) > 0 :
-                        if action_set[0].behavioral_sequence:
-                            add_classifier(new_cl, population, new_list, theta_exp)
-                        else:
-                            add_classifier(new_cl, action_set, new_list, theta_exp)
-                    else:
-                        add_classifier(new_cl, action_set, new_list, theta_exp)
+                    add_classifier(new_cl, action_set, new_list, theta_exp)
 
         if cfg.do_pep:
             ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
 
-        # No classifier anticipated correctly - generate new one
+        # No classifier anticipated correctly - generate new one through covering
+        # only if we are not in the case of behavioral sequences
         if not was_expected_case:
-            new_cl = alp.cover(p0, action, p1, time, cfg)
-            if len(action_set) > 0 :
-                if action_set[0].behavioral_sequence:
-                    add_classifier(new_cl, population, new_list, theta_exp)
-                else:
-                    add_classifier(new_cl, action_set, new_list, theta_exp)
-            else:
+            if (len(action_set) > 0 and action_set[0].behavioral_sequence is None) or len(action_set) == 0:
+                new_cl = alp.cover(p0, action, p1, time, cfg)
                 add_classifier(new_cl, action_set, new_list, theta_exp)
 
         # Merge classifiers from new_list into self and population

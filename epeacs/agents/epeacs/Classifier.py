@@ -37,6 +37,7 @@ class Classifier:
             tga: int=0,
             tbseq: int=0,
             tav: float=0.0,
+            pai_state: Optional[Perception] = None,
             cfg: Optional[Configuration] = None
         ) -> None:
         if cfg is None:
@@ -69,7 +70,11 @@ class Classifier:
         self.tbseq = tbseq
         self.tav = tav
         self.ee = False
-        self.pai_state = Perception.empty()
+        # To do: Convert into a list if the system tries to bridge several pai states
+        if pai_state:
+            self.pai_state = pai_state
+        else:
+            self.pai_state = Perception.empty()
 
 
     def __eq__(self, other):
@@ -134,7 +139,8 @@ class Classifier:
             tga=time,
             tbseq=time,
             talp=time,
-            tav=old_cls.tav
+            tav=old_cls.tav,
+            pai_state=old_cls.pai_state
         )
         for idx, ei in enumerate(new_cls.effect):
             if ei == new_cls.condition[idx] or old_cls.effect[idx] == old_cls.effect.wildcard:
@@ -333,11 +339,10 @@ class Classifier:
         time: int
             current step
         """
-        if 1. / self.exp > self.cfg.beta_alp:
-            self.tav = (self.tav * self.exp + (time - self.talp)) / (
-                self.exp + 1)
+        if self.exp < 1. / self.cfg.beta_alp:
+            self.tav += (time - self.talp - self.tav) / self.exp
         else:
-            self.tav += self.cfg.beta_alp * ((time - self.talp) - self.tav)
+            self.tav += self.cfg.beta_alp * (time - self.talp - self.tav)
         self.talp = time
 
 
@@ -413,6 +418,7 @@ class Classifier:
             talp = time,
             tga = time,
             tbseq = time,
+            pai_state = self.pai_state,
             cfg = self.cfg
         )
         result.condition = Condition(self.condition)

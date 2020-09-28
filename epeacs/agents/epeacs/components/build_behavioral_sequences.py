@@ -50,7 +50,9 @@ def updated_passthrough(
 def create_behavioral_classifier(
         penultimate_classifier: Classifier,
         cl: Classifier,
-        p1: Perception
+        p1: Perception,
+        pai_state: Perception,
+        time
     ) -> Optional[Classifier]:
     """
     Build a behavioral classifier.
@@ -78,6 +80,10 @@ def create_behavioral_classifier(
             child = Classifier(
                 action=penultimate_classifier.action, 
                 behavioral_sequence=[],
+                tga=time,
+                tbseq=time,
+                talp=time,
+                pai_state=pai_state,
                 cfg=cl.cfg
             )
             if penultimate_classifier.behavioral_sequence:

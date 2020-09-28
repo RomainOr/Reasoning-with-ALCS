@@ -67,7 +67,7 @@ def expected_case(
         population: ClassifiersList,
         pai_states_memory,
         cfg: Configuration,
-    ) -> Optional[Classifier]:
+    ):
     """
     Controls the expected case of a classifier with the help of 
     Specification of Unchanging Components.
@@ -89,22 +89,6 @@ def expected_case(
                 if is_perceptual_aliasing_state(match_set_no_bseq, p0, cfg):
                     if p0 not in pai_states_memory:
                         pai_states_memory.append(p0)
-                    else:
-                        behavioral_classifiers_to_zip = [cl for cl in population if cl.pai_state == p0]
-                        behavioral_classifiers_to_delete = []
-                        for idx1 in range(len(behavioral_classifiers_to_zip)-1):
-                            cl = behavioral_classifiers_to_zip[idx1]
-                            if cl in behavioral_classifiers_to_delete:
-                                continue
-                            for idx2 in range(idx1+1, len(behavioral_classifiers_to_zip)):
-                                other_cl = behavioral_classifiers_to_zip[idx2]
-                                if other_cl in behavioral_classifiers_to_delete:
-                                    continue
-                                if does_subsume(cl, other_cl, cfg.theta_exp) and cl.condition.subsumes(other_cl.condition):
-                                    behavioral_classifiers_to_delete.append(other_cl)
-                        for cl in behavioral_classifiers_to_delete:
-                            population.safe_remove(cl)
-                            match_set.safe_remove(cl)
                 else:
                     if p0 in pai_states_memory:
                         pai_states_memory.remove(p0)
@@ -114,17 +98,14 @@ def expected_case(
                             match_set.safe_remove(cl)
             # Create if needed a new behavioral classifier
             if p0 in pai_states_memory:
-                child = create_behavioral_classifier(penultimate_classifier, cl, p1)
+                child = create_behavioral_classifier(penultimate_classifier, cl, p1,p0, time)
                 if child:
-                    child.tga = time
-                    child.talp = time
-                    child.pai_state = p0
-                    return child
+                    return True, child
 
     diff = cl.mark.get_differences(p0)
     if diff.specificity == 0:
         cl.increase_quality()
-        return None
+        return False, None
 
     child = cl.copy_from(cl, p1, time)
 
@@ -152,7 +133,7 @@ def expected_case(
     if child.q < 0.5:
         child.q = 0.5
 
-    return child
+    return False, child
 
 
 def unexpected_case(

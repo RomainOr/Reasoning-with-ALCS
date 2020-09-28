@@ -51,14 +51,23 @@ def explore(cll, cfg, pb: float = 0.5) -> Classifier:
     Classifier
         Chosen classifier
     """
-    if random.random() < pb:
+    rand = random.random()
+    if rand < 0.25:
+        return choose_random_classifiers(cll, cfg)
+    elif rand < 0.5:
+        return choose_action_from_experience_array(cll, cfg)
+    elif rand < 0.75:
+        return choose_action_from_knowledge_array(cll, cfg)
+    else:
+        return choose_latest_action(cll, cfg)
+    #if random.random() < pb:
         # We are in the biased exploration
-        if random.random() < 0.5:
-            return choose_latest_action(cll, cfg)
-        else:
-            return choose_action_from_knowledge_array(cll, cfg)
+    #    if random.random() < 0.5:
+    #        return choose_latest_action(cll, cfg)
+    #    else:
+    #        return choose_action_from_knowledge_array(cll, cfg)
 
-    return choose_random_classifiers(cll, cfg)
+    #return choose_random_classifiers(cll, cfg)
 
 
 def choose_latest_action(cll, cfg) -> Classifier:
@@ -131,6 +140,45 @@ def choose_action_from_knowledge_array(cll, cfg) -> Classifier:
     return choose_random_classifiers(cll, cfg)
 
 
+def choose_action_from_experience_array(cll, cfg) -> Classifier:
+    """
+    Creates 'experience array' that represents the average experience of the
+    anticipation for each action in the current list. Chosen is
+    the action, the system knows least about the consequences.
+    Then a classifier that corresponds to this action is randomly returned.
+
+    Parameters
+    ----------
+    cll: ClassifierList
+        Matching set
+    cfg: Configuration
+        Allow to retrieve the number of possible actions
+
+    Returns
+    -------
+    Classifier
+    """
+    experience_array = {i: 0.0 for i in range(cfg.number_of_possible_actions)}
+
+    if len(cll) > 0:
+        cll.sort(key=lambda cl: cl.action)
+
+        for _action, _clss in groupby(cll, lambda cl: cl.action):
+            _classifiers = [cl for cl in _clss]
+            agg_exp = sum(cl.exp * cl.num for cl in _classifiers)
+            agg_num = sum(cl.num for cl in _classifiers)
+            experience_array[_action] = agg_exp / float(agg_num)
+        by_exp = sorted(experience_array.items(), key=lambda el: el[1])
+        action = by_exp[0][0]
+
+        classifiers_that_match_action = [cl for cl in cll if cl.action == action]
+        if len(classifiers_that_match_action) > 0:
+            idx = random.randint(0, len(classifiers_that_match_action) -1)
+            return classifiers_that_match_action[idx]
+
+    return choose_random_classifiers(cll, cfg)
+
+
 def choose_random_classifiers(cll, cfg) -> Classifier:
     """
     Chooses one of the possible actions in the environment randomly 
@@ -171,8 +219,9 @@ def choose_fittest_classifier(cll, cfg) -> Classifier:
     Classifier
     """
     if len(cll) > 0:
-        anticipated_change = [cl for cl in cll if cl.does_anticipate_change()]
-        if len(anticipated_change) > 0:
-            return max(anticipated_change, key=lambda cl: cl.fitness)
+        #anticipated_change = [cl for cl in cll if cl.does_anticipate_change()]
+        #if len(anticipated_change) > 0:
+        #    return max(anticipated_change, key=lambda cl: cl.fitness)
+        return max(cll, key=lambda cl: cl.fitness)
     return choose_random_classifiers(cll, cfg)
 
