@@ -13,9 +13,11 @@ from typing import Optional, List
 import epeacs.agents.epeacs.components.alp as alp
 import epeacs.agents.epeacs.components.genetic_algorithms as ga
 import epeacs.agents.epeacs.components.reinforcement_learning as rl
+import epeacs.agents.epeacs.components.aliasing_detection as pai
 from epeacs import Perception, TypedList
 from epeacs.agents.epeacs import Classifier, Configuration
 from epeacs.agents.epeacs.components.add_classifier import add_classifier
+from epeacs.agents.epeacs.components.build_behavioral_sequences import create_behavioral_classifier
 from epeacs.agents.epeacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
 
 class ClassifiersList(TypedList):
@@ -34,8 +36,9 @@ class ClassifiersList(TypedList):
         for cl in self:
             if cl.condition.does_match(situation):
                 matching.append(cl)
-                #if cl.does_anticipate_change() and cl.fitness > best_fitness:
-                if cl.fitness > best_fitness:
+                # Based on hypothesis that a change should be anticipted
+                if cl.does_anticipate_change() and cl.fitness > best_fitness:
+                #if cl.fitness > best_fitness:
                     best_classifier = cl
                     best_fitness = cl.fitness
         return ClassifiersList(*matching), best_classifier
@@ -79,6 +82,49 @@ class ClassifiersList(TypedList):
 
 
     @staticmethod
+    def apply_perceptual_aliasing_issue_management(
+            population: ClassifiersList,
+            previous_match_set: ClassifiersList,
+            match_set: ClassifiersList,
+            action_set: ClassifiersList,
+            penultimate_classifier: Classifier,
+            potential_cls_for_pai: List(Classifier),
+            new_list: ClassifiersList,
+            p0: Perception,
+            p1: Perception,
+            time: int,
+            pai_states_memory,
+            cfg: Configuration
+        ):
+        # First, try to detect a PAI state if needed
+        match_set_no_bseq = [cl for cl in previous_match_set if cl.behavioral_sequence is None]
+        if pai.should_pai_detection_apply(match_set_no_bseq, time, cfg.theta_bseq):
+            pai.set_pai_detection_timestamps(match_set_no_bseq, time)
+            # The system tries to determine is it suffers from th eperceptual aliasing issue
+            if pai.is_perceptual_aliasing_state(match_set_no_bseq, p0, cfg):
+                # Add if needed the new pai state in memory
+                if p0 not in pai_states_memory:
+                    pai_states_memory.append(p0)
+            else:
+                # Remove if needed the pai state from memory and delete all behavioral classifiers created for this state
+                if p0 in pai_states_memory:
+                    pai_states_memory.remove(p0)
+                    behavioral_classifiers_to_delete = [cl for cl in population if cl.pai_state == p0]
+                    for cl in behavioral_classifiers_to_delete:
+                        lists = [x for x in [population, match_set, action_set] if x]
+                        for lst in lists:
+                            lst.safe_remove(cl)
+
+        # Create new behavioral classifiers
+        if p0 in pai_states_memory:
+            for candidate in potential_cls_for_pai:
+                new_cl = create_behavioral_classifier(penultimate_classifier, candidate, p1, p0, time)
+                if new_cl:
+                    pop_for_addition = [cl for cl in population if cl.behavioral_sequence and cl.condition.does_match(new_cl.condition)]
+                    add_classifier(new_cl, pop_for_addition, new_list, cfg.theta_exp)
+
+
+    @staticmethod
     def apply_alp(
             population: ClassifiersList,
             previous_match_set: ClassifiersList,
@@ -89,7 +135,6 @@ class ClassifiersList(TypedList):
             action: int,
             p1: Perception,
             time: int,
-            theta_exp: int,
             pai_states_memory,
             cfg: Configuration
         ) -> None:
@@ -109,7 +154,6 @@ class ClassifiersList(TypedList):
         action: int
         p1: Perception
         time: int
-        theta_exp
         pai_states_memory
         cfg: Configuration
         """
@@ -120,27 +164,20 @@ class ClassifiersList(TypedList):
         idx = 0
         action_set_length = 0
         if action_set: action_set_length = len(action_set)
+        if cfg.bs_max > 0 and penultimate_classifier is not None: potential_cls_for_pai = []
 
+        #Main ALP loop on the action set
         while(idx < action_set_length):
             cl = action_set[idx]
             cl.increase_experience()
             cl.set_alp_timestamp(time)
-            pai_state_detected = False
+            is_aliasing_detected = False
 
             if cl.does_anticipate_correctly(p0, p1):
-                pai_state_detected, new_cl = alp.expected_case(
-                    penultimate_classifier,
-                    cl, 
-                    p0, 
-                    p1, 
-                    time, 
-                    previous_match_set, 
-                    match_set,
-                    population, 
-                    pai_states_memory, 
-                    cfg
-                )
+                is_aliasing_detected, new_cl = alp.expected_case(cl, p0, p1, time, cfg)
                 was_expected_case = True
+                if cfg.bs_max > 0 and penultimate_classifier is not None and is_aliasing_detected:
+                    potential_cls_for_pai.append(cl)
             else:
                 new_cl = alp.unexpected_case(cl, p0, p1, time)
 
@@ -155,21 +192,20 @@ class ClassifiersList(TypedList):
             idx += 1
 
             if new_cl is not None:
-                if new_cl.behavioral_sequence and pai_state_detected:
-                    pop_for_addition = [cl for cl in population if cl.behavioral_sequence and cl.condition.does_match(new_cl.condition)]
-                    add_classifier(new_cl, pop_for_addition, new_list, theta_exp)
-                else:
-                    add_classifier(new_cl, action_set, new_list, theta_exp)
-
-        if cfg.do_pep:
-            ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
+                add_classifier(new_cl, action_set, new_list, cfg.theta_exp)
 
         # No classifier anticipated correctly - generate new one through covering
         # only if we are not in the case of behavioral sequences
         if not was_expected_case:
             if (len(action_set) > 0 and action_set[0].behavioral_sequence is None) or len(action_set) == 0:
                 new_cl = alp.cover(p0, action, p1, time, cfg)
-                add_classifier(new_cl, action_set, new_list, theta_exp)
+                add_classifier(new_cl, action_set, new_list, cfg.theta_exp)
+
+        if cfg.do_pep:
+            ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
+
+        if cfg.bs_max > 0 and penultimate_classifier is not None:
+            ClassifiersList.apply_perceptual_aliasing_issue_management(population, previous_match_set, match_set, action_set, penultimate_classifier, potential_cls_for_pai, new_list, p0, p1, time, pai_states_memory, cfg)
 
         # Merge classifiers from new_list into self and population
         action_set.extend(new_list)

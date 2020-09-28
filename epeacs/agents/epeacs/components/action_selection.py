@@ -52,22 +52,12 @@ def explore(cll, cfg, pb: float = 0.5) -> Classifier:
         Chosen classifier
     """
     rand = random.random()
-    if rand < 0.25:
+    if rand < 1. - pb:
         return choose_random_classifiers(cll, cfg)
-    elif rand < 0.5:
-        return choose_action_from_experience_array(cll, cfg)
-    elif rand < 0.75:
+    elif rand < 3*(1. - pb)/2.: #(1. - pb) + (1. - pb)/2. with 2 beeing the number of biases
         return choose_action_from_knowledge_array(cll, cfg)
     else:
         return choose_latest_action(cll, cfg)
-    #if random.random() < pb:
-        # We are in the biased exploration
-    #    if random.random() < 0.5:
-    #        return choose_latest_action(cll, cfg)
-    #    else:
-    #        return choose_action_from_knowledge_array(cll, cfg)
-
-    #return choose_random_classifiers(cll, cfg)
 
 
 def choose_latest_action(cll, cfg) -> Classifier:
@@ -139,7 +129,7 @@ def choose_action_from_knowledge_array(cll, cfg) -> Classifier:
 
     return choose_random_classifiers(cll, cfg)
 
-
+#To keep to test another day
 def choose_action_from_experience_array(cll, cfg) -> Classifier:
     """
     Creates 'experience array' that represents the average experience of the
@@ -219,9 +209,10 @@ def choose_fittest_classifier(cll, cfg) -> Classifier:
     Classifier
     """
     if len(cll) > 0:
-        #anticipated_change = [cl for cl in cll if cl.does_anticipate_change()]
-        #if len(anticipated_change) > 0:
-        #    return max(anticipated_change, key=lambda cl: cl.fitness)
-        return max(cll, key=lambda cl: cl.fitness)
+        # Based on hypothesis that a change should be anticipted
+        anticipated_change = [cl for cl in cll if cl.does_anticipate_change()]
+        if len(anticipated_change) > 0:
+            return max(anticipated_change, key=lambda cl: cl.fitness)
+        #return max(cll, key=lambda cl: cl.fitness)
     return choose_random_classifiers(cll, cfg)
 

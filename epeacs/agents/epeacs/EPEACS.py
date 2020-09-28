@@ -80,7 +80,6 @@ class EPEACS(Agent):
                     t_1_activated_classifier.action,
                     state,
                     time + steps,
-                    self.cfg.theta_exp,
                     self.pai_states_memory,
                     self.cfg
                 )
@@ -147,7 +146,6 @@ class EPEACS(Agent):
                     t_1_activated_classifier.action,
                     state,
                     time + steps,
-                    self.cfg.theta_exp,
                     self.pai_states_memory,
                     self.cfg
                 )

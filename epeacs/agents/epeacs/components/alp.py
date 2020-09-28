@@ -10,9 +10,7 @@ from typing import Optional
 from epeacs import Perception
 from epeacs.agents.epeacs import Classifier, ClassifiersList, Condition, Configuration, PMark
 from epeacs.agents.epeacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
-from epeacs.agents.epeacs.components.aliasing_detection import is_state_aliased, is_perceptual_aliasing_state, set_pai_detection_timestamps, should_pai_detection_apply
-from epeacs.agents.epeacs.components.build_behavioral_sequences import create_behavioral_classifier
-from epeacs.agents.epeacs.components.subsumption import does_subsume
+from epeacs.agents.epeacs.components.aliasing_detection import is_state_aliased
 
 
 def cover(
@@ -57,15 +55,10 @@ def cover(
 
 
 def expected_case(
-        penultimate_classifier: Classifier,
         cl: Classifier,
         p0: Perception,
         p1: Perception,
         time: int,
-        previous_match_set: ClassifiersList,
-        match_set: ClassifiersList,
-        population: ClassifiersList,
-        pai_states_memory,
         cfg: Configuration,
     ):
     """
@@ -79,33 +72,15 @@ def expected_case(
     if cl.is_enhanced():
         cl.effect.update_enhanced_effect_probs(p1, cl.cfg.beta_pep)
 
+    is_aliasing_detected = False
     if is_state_aliased(cl.condition, cl.mark, p0):
         if cl.cfg.do_pep: cl.ee = True
-        if cfg.bs_max > 0 and penultimate_classifier is not None:
-            # Update the list of detetcted PAi states along with the population
-            match_set_no_bseq = [cl for cl in previous_match_set if cl.behavioral_sequence is None]
-            if should_pai_detection_apply(match_set_no_bseq, time, cfg.theta_bseq):
-                set_pai_detection_timestamps(match_set_no_bseq, time)
-                if is_perceptual_aliasing_state(match_set_no_bseq, p0, cfg):
-                    if p0 not in pai_states_memory:
-                        pai_states_memory.append(p0)
-                else:
-                    if p0 in pai_states_memory:
-                        pai_states_memory.remove(p0)
-                        behavioral_classifiers_to_delete = [cl for cl in population if cl.pai_state == p0]
-                        for cl in behavioral_classifiers_to_delete:
-                            population.safe_remove(cl)
-                            match_set.safe_remove(cl)
-            # Create if needed a new behavioral classifier
-            if p0 in pai_states_memory:
-                child = create_behavioral_classifier(penultimate_classifier, cl, p1,p0, time)
-                if child:
-                    return True, child
+        is_aliasing_detected = True
 
     diff = cl.mark.get_differences(p0)
     if diff.specificity == 0:
         cl.increase_quality()
-        return False, None
+        return is_aliasing_detected, None
 
     child = cl.copy_from(cl, p1, time)
 
@@ -133,7 +108,7 @@ def expected_case(
     if child.q < 0.5:
         child.q = 0.5
 
-    return False, child
+    return is_aliasing_detected, child
 
 
 def unexpected_case(
