@@ -22,7 +22,6 @@ class Configuration:
             do_ga: bool=False,
             beta_alp: float=0.05,
             beta_rl: float=0.05,
-            beta_pep: float=0.01,
             gamma: float=0.95,
             theta_i: float=0.1,
             theta_r: float=0.9,
@@ -58,8 +57,6 @@ class Configuration:
         beta_alp
 
         beta_rl
-
-        beta_pep
 
         gamma
 
@@ -98,7 +95,6 @@ class Configuration:
         self.theta_exp = theta_exp
         self.beta_alp = beta_alp
         self.beta_rl = beta_rl
-        self.beta_pep = beta_pep
         self.gamma = gamma
         self.theta_i = theta_i
         self.theta_r = theta_r
@@ -122,7 +118,6 @@ class Configuration:
             "\n\t- Do GA: [{}]" \
             "\n\t- Beta_ALP: [{}]" \
             "\n\t- Beta_RL: [{}]" \
-            "\n\t- Beta_PEP: [{}]" \
             "\n\t- ..." \
             "\n\t- epsilon: [{}]" \
             "\n\t- bs_max: [{}]" \
@@ -135,7 +130,6 @@ class Configuration:
             self.do_ga,
             self.beta_alp,
             self.beta_rl,
-            self.beta_pep,
             self.epsilon,
             self.bs_max
         )

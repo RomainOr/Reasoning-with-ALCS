@@ -116,7 +116,7 @@ def is_perceptual_aliasing_state(
     for cl in match_set:
         if cl.action not in most_experienced_classifiers:
             most_experienced_classifiers[cl.action] = cl
-        elif cl.exp * cl.num * pow(cl.q, 3) > most_experienced_classifiers[cl.action].exp * most_experienced_classifiers[cl.action].num * pow(most_experienced_classifiers[cl.action].q, 3) :
+        elif cl.exp * pow(cl.q, 3) > most_experienced_classifiers[cl.action].exp * pow(most_experienced_classifiers[cl.action].q, 3) :
             most_experienced_classifiers[cl.action] = cl
     #Check that each action get an associated classifier
     for i in range(nbr_of_actions):
@@ -135,7 +135,7 @@ def is_perceptual_aliasing_state(
                 nbr_of_expected_transitions -= 1
             else:
                 anticipation = list(p0)
-                for idx, ei in enumerate(most_experienced_classifiers[i].effect):
+                for idx, ei in enumerate(most_experienced_classifiers[i].effect[0]):
                     if ei != most_experienced_classifiers[i].effect.wildcard:
                         anticipation[idx] = ei
                 if tuple(anticipation) in reachable_states:
@@ -143,9 +143,10 @@ def is_perceptual_aliasing_state(
                 else:
                     reachable_states.update( {tuple(anticipation): 0} )
         else:
-            reachable_states.update(most_experienced_classifiers[i].effect.detailled_counter)
-            most_anticipated_state = max(most_experienced_classifiers[i].effect.detailled_counter.items(), key=lambda x : x[1])
-            if p0 == most_anticipated_state[0] or most_anticipated_state[0] in list_of_most_anticipated_state:
+            effect_counter_dict = {effect : counter for effect, counter in zip(most_experienced_classifiers[i].effect.effect_list, most_experienced_classifiers[i].effect.effect_detailled_counter)}
+            reachable_states.update(effect_counter_dict)
+            most_anticipated_state = max(effect_counter_dict.items(), key=lambda x : x[1])
+            if most_anticipated_state[0].does_match(p0) or most_anticipated_state[0] in list_of_most_anticipated_state:
                 nbr_of_expected_transitions -= 1
             else:
                 list_of_most_anticipated_state.append(most_anticipated_state[0])

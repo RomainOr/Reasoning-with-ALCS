@@ -18,7 +18,6 @@ from epeacs import Perception, TypedList
 from epeacs.agents.epeacs import Classifier, Configuration
 from epeacs.agents.epeacs.components.add_classifier import add_classifier
 from epeacs.agents.epeacs.components.build_behavioral_sequences import create_behavioral_classifier
-from epeacs.agents.epeacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
 
 class ClassifiersList(TypedList):
     """

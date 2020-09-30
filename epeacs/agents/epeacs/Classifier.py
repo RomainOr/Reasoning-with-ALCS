@@ -10,7 +10,7 @@ import random
 from typing import Optional, Union, Callable, List
 
 from epeacs import Perception
-from epeacs.agents.epeacs import Configuration, Condition, Effect, PMark, ProbabilityEnhancedAttribute
+from epeacs.agents.epeacs import Configuration, Condition, EffectList, Effect, PMark
 
 
 class Classifier:
@@ -26,7 +26,7 @@ class Classifier:
             condition: Union[Condition, str, None] = None,
             action: Optional[int] = None,
             behavioral_sequence: Optional[List[int]] = None,
-            effect: Union[Effect, str, None] = None,
+            effect: Optional[EffectList] = None,
             quality: float=0.5,
             rewarda: float=0.,
             rewardb: float=0.,
@@ -57,7 +57,7 @@ class Classifier:
         self.condition = build_perception_string(Condition, condition)
         self.action = action
         self.behavioral_sequence = behavioral_sequence
-        self.effect = build_perception_string(Effect, effect)
+        self.effect = EffectList(build_perception_string(Effect, effect), self.cfg.classifier_wildcard)
         self.mark = PMark(cfg=self.cfg)
         self.q = quality
         self.ra = rewarda
@@ -70,7 +70,6 @@ class Classifier:
         self.tbseq = tbseq
         self.tav = tav
         self.ee = False
-        # To do: Convert into a list if the system tries to bridge several pai states
         if pai_state:
             self.pai_state = pai_state
         else:
@@ -99,7 +98,7 @@ class Classifier:
         return f"{self.condition} " \
                f"{self.action} " \
                f"{str(self.behavioral_sequence)} " \
-               f"{str(self.effect):16} " \
+               f"{str(self.effect)} " \
                f"{'(' + str(self.mark) + ')':21} \n" \
                f"q: {self.q:<5.3} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} \n" \
                f"exp: {self.exp:<3} tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} " \
@@ -130,7 +129,6 @@ class Classifier:
             condition=Condition(old_cls.condition, old_cls.cfg.classifier_wildcard),
             action=old_cls.action,
             behavioral_sequence=old_cls.behavioral_sequence,
-            effect=Effect(p, old_cls.cfg.classifier_wildcard),
             quality=old_cls.q,
             rewarda=old_cls.ra,
             rewardb=old_cls.rb,
@@ -142,9 +140,15 @@ class Classifier:
             tav=old_cls.tav,
             pai_state=old_cls.pai_state
         )
-        for idx, ei in enumerate(new_cls.effect):
-            if ei == new_cls.condition[idx] or old_cls.effect[idx] == old_cls.effect.wildcard:
-                new_cls.effect[idx] = new_cls.effect.wildcard
+        if old_cls.is_enhanced():
+            for effect in new_cls.effect:
+                if effect.does_match(p):
+                    for idx in range(len(new_cls.effect[0])):
+                        new_cls.effect[0][idx] = effect[idx]
+                    break
+        else:
+            for idx in range(len(new_cls.effect[0])):
+                new_cls.effect[0][idx] = old_cls.effect[0][idx]
         return new_cls
 
 
@@ -172,14 +176,14 @@ class Classifier:
             list specified unchanging attributes indices
         """
         indices = []
-        for idx, (cpi, epi) in enumerate(zip(self.condition, self.effect)):
-            if isinstance(epi, ProbabilityEnhancedAttribute):
-                if cpi != self.cfg.classifier_wildcard and \
-                        epi.does_contain(cpi):
-                    indices.append(idx)
-            else:
-                if cpi != self.cfg.classifier_wildcard and \
-                        epi == self.cfg.classifier_wildcard:
+        for idx, ci in enumerate(self.condition):
+            if ci != self.cfg.classifier_wildcard:
+                to_append = True
+                for e in self.effect:
+                    if e[idx] != self.cfg.classifier_wildcard:
+                        to_append = False
+                        break
+                if to_append:
                     indices.append(idx)
         return indices
 
@@ -242,18 +246,23 @@ class Classifier:
         previous_situation: Perception
         situation: Perception
         """
-        for idx, _ in enumerate(situation):
-            if self.effect[idx] != self.cfg.classifier_wildcard:
-                # If we have a specialized attribute don't change it.
-                continue
-            if previous_situation[idx] != situation[idx]:
-                if self.effect[idx] == self.cfg.classifier_wildcard:
-                    self.effect[idx] = situation[idx]
-                elif self.ee:
-                    if not isinstance(self.effect[idx], ProbabilityEnhancedAttribute):
-                        self.effect[idx] = ProbabilityEnhancedAttribute(self.effect[idx])
-                    self.effect[idx].insert_symbol(situation[idx])
-                self.condition[idx] = previous_situation[idx]
+        new_effect_to_append = False
+        if not self.is_enhanced():
+            for idx, _ in enumerate(situation):
+                if previous_situation[idx] != situation[idx]:
+                    if self.effect[0][idx] == self.cfg.classifier_wildcard:
+                        self.effect[0][idx] = situation[idx]
+                    elif self.ee:
+                        new_effect_to_append = True
+                    self.condition[idx] = previous_situation[idx]
+        if new_effect_to_append or self.is_enhanced():
+            new_effect = Effect.empty(wildcard=self.effect.wildcard, length=self.cfg.classifier_length)
+            for idx in range(len(new_effect)):
+                if previous_situation[idx] != situation[idx]:
+                    new_effect[idx] = situation[idx]
+            if new_effect not in self.effect.effect_list:
+                self.effect.effect_list.append(new_effect)
+                self.effect.effect_detailled_counter.append(1)
 
 
     def predicts_successfully(
@@ -423,10 +432,8 @@ class Classifier:
         )
         result.condition = Condition(self.condition)
         result.condition.specialize_with_condition(other_classifier.condition)
-        result.effect = Effect.enhanced_effect(
+        result.effect = EffectList.enhanced_effect(
             self.effect, 
-            self.exp,
             other_classifier.effect,
-            other_classifier.exp,
             perception)
         return result

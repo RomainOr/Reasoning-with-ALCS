@@ -9,7 +9,6 @@ from typing import Optional
 
 from epeacs import Perception
 from epeacs.agents.epeacs import Classifier, ClassifiersList, Condition, Configuration, PMark
-from epeacs.agents.epeacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
 from epeacs.agents.epeacs.components.aliasing_detection import is_state_aliased
 
 
@@ -70,7 +69,7 @@ def expected_case(
     New classifier or None
     """
     if cl.is_enhanced():
-        cl.effect.update_enhanced_effect_probs(p1, cl.cfg.beta_pep)
+        cl.effect.update_enhanced_effect_probs(p1)
 
     is_aliasing_detected = False
     if is_state_aliased(cl.condition, cl.mark, p0):

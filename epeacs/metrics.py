@@ -105,9 +105,9 @@ def _enhanced_effect_error(population, environment, classifier_length, random_at
                 # Try to promote a reliable classifier
                 reliable_classifiers = [cl for cl in unreliable_classifiers if cl.is_reliable()]
                 if len(reliable_classifiers) > 0:
-                    most_experienced_classifier = max(reliable_classifiers, key=lambda cl: cl.exp * cl.num * pow(cl.q, 3))
+                    most_experienced_classifier = max(reliable_classifiers, key=lambda cl: cl.exp * pow(cl.q, 3))
                 else:
-                    most_experienced_classifier = max(unreliable_classifiers, key=lambda cl: cl.exp * cl.num * pow(cl.q, 3))
+                    most_experienced_classifier = max(unreliable_classifiers, key=lambda cl: cl.exp * pow(cl.q, 3))
             # If there are no matching classifiers, a none case as defaut case
             else:
                 most_experienced_classifier = None
@@ -116,7 +116,7 @@ def _enhanced_effect_error(population, environment, classifier_length, random_at
             if most_experienced_classifier:
                 for direction in prob:
                     # First, effect refinement
-                    old_effect_attribute, new_effect_attribute = most_experienced_classifier.effect.getEffectAttribute(direction)
+                    old_effect_attribute, new_effect_attribute = most_experienced_classifier.effect.getEffectAttribute(perception, direction)
                     theoritical_prob_of_attribute = prob[direction]
                     if old_effect_attribute == '#':
                         if most_experienced_classifier.condition[direction] == '#':
@@ -131,7 +131,7 @@ def _enhanced_effect_error(population, environment, classifier_length, random_at
                         error_new_pep += abs(theoritical_prob_of_attribute[key] - new_effect_attribute.get(key, 0.0))
                 for ra in range(classifier_length-random_attribute_length, classifier_length):
                     # First, effect refinement
-                    old_effect_attribute, new_effect_attribute = most_experienced_classifier.effect.getEffectAttribute(ra)
+                    old_effect_attribute, new_effect_attribute = most_experienced_classifier.effect.getEffectAttribute(perception,ra)
                     # We consider here the probabilities are defined as 50% to get 1 and 50% to get 0. Could be automated and linked to environmental properties
                     theoritical_prob_of_attribute = {1:0.5, 0:0.5}
                     if old_effect_attribute == '#':
