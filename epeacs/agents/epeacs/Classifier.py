@@ -141,10 +141,10 @@ class Classifier:
             pai_state=old_cls.pai_state
         )
         if old_cls.is_enhanced():
-            for effect in new_cls.effect:
-                if effect.does_match(p):
+            for old_effect in old_cls.effect.effect_list:
+                if old_effect.does_match(p):
                     for idx in range(len(new_cls.effect[0])):
-                        new_cls.effect[0][idx] = effect[idx]
+                        new_cls.effect[0][idx] = old_effect[idx]
                     break
         else:
             for idx in range(len(new_cls.effect[0])):
@@ -177,13 +177,16 @@ class Classifier:
         """
         indices = []
         for idx, ci in enumerate(self.condition):
-            if ci != self.cfg.classifier_wildcard:
-                to_append = True
-                for e in self.effect:
-                    if e[idx] != self.cfg.classifier_wildcard:
-                        to_append = False
+            if self.effect.is_enhanced():
+                to_append = False
+                for effect in self.effect.effect_list:
+                    if ci != self.condition.wildcard and effect[idx] == ci:
+                        to_append = True
                         break
                 if to_append:
+                    indices.append(idx)
+            else:
+                if ci != self.condition.wildcard and self.effect[0][idx] == self.effect.wildcard:
                     indices.append(idx)
         return indices
 
@@ -255,7 +258,7 @@ class Classifier:
                     elif self.ee:
                         new_effect_to_append = True
                     self.condition[idx] = previous_situation[idx]
-        if new_effect_to_append or self.is_enhanced():
+        if new_effect_to_append:
             new_effect = Effect.empty(wildcard=self.effect.wildcard, length=self.cfg.classifier_length)
             for idx in range(len(new_effect)):
                 if previous_situation[idx] != situation[idx]:

@@ -34,18 +34,18 @@ def updated_passthrough(
     """
     for i in range(len(child_effect)):
         if last_effect.is_enhanced():
-            child_effect[0][i] = perception[i]
+            child_effect[i] = perception[i]
         elif last_effect[0][i] == child_effect.wildcard:
             if penultimate_effect.is_enhanced():
-                child_effect[0][i] = perception[i]
+                child_effect[i] = perception[i]
             else:
-                child_effect[0][i] = penultimate_effect[0][i]
+                child_effect[i] = penultimate_effect[0][i]
         else:
-            child_effect[0][i] = last_effect[0][i]
+            child_effect[i] = last_effect[0][i]
     # Refining effect
-    for idx, effect_item in enumerate(child_effect[0]):
-        if effect_item != child_effect.wildcard and effect_item == child_condition[idx]:
-            child_effect[0][idx] = child_effect.wildcard
+    for idx in range(len(child_effect)):
+        if child_effect[idx] != child_effect.wildcard and child_effect[idx] == child_condition[idx]:
+            child_effect[idx] = child_effect.wildcard
 
 def create_behavioral_classifier(
         penultimate_classifier: Classifier,
@@ -95,6 +95,6 @@ def create_behavioral_classifier(
             # Thus, we garantee the creation of a classifier that can be used within the environment.
             child.condition = penultimate_classifier.condition
             # Passthrough operation on child effect
-            updated_passthrough(child.effect, penultimate_classifier.effect, cl.effect, p1, child.condition)
+            updated_passthrough(child.effect[0], penultimate_classifier.effect, cl.effect, p1, child.condition)
             return child
     return None

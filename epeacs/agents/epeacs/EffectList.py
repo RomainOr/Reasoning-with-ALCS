@@ -116,7 +116,7 @@ class EffectList():
         result = cls()
         result.effect_list.extend(effectlist1.effect_list)
         result.effect_detailled_counter.extend(effectlist1.effect_detailled_counter)
-        for idxe, e in enumerate(effectlist2):
+        for idxe, e in enumerate(effectlist2.effect_list):
             is_updated = False
             for idxr, r in enumerate(result.effect_list):
                 if e == r:
