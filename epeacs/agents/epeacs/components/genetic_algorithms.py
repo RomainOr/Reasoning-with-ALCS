@@ -43,9 +43,6 @@ def should_apply(
     if action_set is None or not action_set:
         return False
 
-    if action_set[0].behavioral_sequence:
-        return False
-
     overall_time = sum(cl.tga * cl.num for cl in action_set)
     overall_num = sum(cl.num for cl in action_set)
 
@@ -98,6 +95,25 @@ def roulette_wheel_selection(population, fitnessfunc: Callable):
     parent2 = _weighted_random_choice(choices)
 
     return parent1, parent2
+
+
+def behavioral_mutation(cl1, cl2, mu: float) -> None:
+    """
+    Executes a particular mutation in the behavioral classifiers.
+    Specified attributes in classifier conditions are randomly
+    generalized with `mu` probability depending on the other child.
+    """
+    for idx in range(len(cl1.condition)):
+        if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
+            cl2.condition[idx] == cl2.cfg.classifier_wildcard and \
+              random.random() < mu:
+            cl1.condition.generalize(idx)
+            continue
+        if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
+            cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
+              random.random() < mu:
+            cl2.condition.generalize(idx)
+            continue
 
 
 def generalizing_mutation(cl, mu: float) -> None:

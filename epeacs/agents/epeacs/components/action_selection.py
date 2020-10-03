@@ -52,12 +52,41 @@ def explore(cll, cfg, pb: float = 0.5) -> Classifier:
         Chosen classifier
     """
     rand = random.random()
-    if rand < 1. - pb:
+    if rand < pb:
         return choose_random_classifiers(cll, cfg)
-    elif rand < 3*(1. - pb)/2.: #(1. - pb) + (1. - pb)/2. with 2 beeing the number of biases
+    elif rand < pb + 2*(1. - pb)/5.: #pb+ (1. - pb)/3. with 3 being the number of biases
         return choose_action_from_knowledge_array(cll, cfg)
-    else:
+    elif rand < pb + 4*(1. - pb)/5.: #pb+ 2*(1. - pb)/3. with 3 being the number of biases
         return choose_latest_action(cll, cfg)
+    else:
+        return choose_behavioral_sequence(cll, cfg)
+
+
+def choose_behavioral_sequence(cll, cfg) -> Classifier:
+    if len(cll) > 0:
+        behavioral_classifiers = [cl for cl in cll if cl.behavioral_sequence]
+        if len(behavioral_classifiers) > 0:
+            experience_array = {}
+            experience_array_num = {}
+            for bcl in behavioral_classifiers:
+                sequence = [bcl.action]
+                sequence.extend(bcl.behavioral_sequence)
+                sequence = tuple(sequence)
+                if sequence not in experience_array:
+                    experience_array[sequence] = bcl.exp * bcl.num
+                    experience_array_num[sequence] = bcl.num
+                else:
+                    experience_array[sequence] += bcl.exp * bcl.num
+                    experience_array_num[sequence] += bcl.num
+            less_experienced = -1
+            less_experienced_sequence = None
+            for sequence in experience_array:
+                tmp_exp = experience_array[sequence] / float(experience_array_num[sequence])
+                if less_experienced == -1 or less_experienced >= tmp_exp:
+                    less_experienced = tmp_exp
+                    less_experienced_sequence = list(sequence)
+            return Classifier(action=less_experienced_sequence[0], behavioral_sequence=less_experienced_sequence[1:], cfg=cfg)
+    return choose_random_classifiers(cll, cfg)
 
 
 def choose_latest_action(cll, cfg) -> Classifier:
@@ -121,45 +150,6 @@ def choose_action_from_knowledge_array(cll, cfg) -> Classifier:
             knowledge_array[_action] = agg_q / float(agg_num)
         by_quality = sorted(knowledge_array.items(), key=lambda el: el[1])
         action = by_quality[0][0]
-
-        classifiers_that_match_action = [cl for cl in cll if cl.action == action]
-        if len(classifiers_that_match_action) > 0:
-            idx = random.randint(0, len(classifiers_that_match_action) -1)
-            return classifiers_that_match_action[idx]
-
-    return choose_random_classifiers(cll, cfg)
-
-#To keep to test another day
-def choose_action_from_experience_array(cll, cfg) -> Classifier:
-    """
-    Creates 'experience array' that represents the average experience of the
-    anticipation for each action in the current list. Chosen is
-    the action, the system knows least about the consequences.
-    Then a classifier that corresponds to this action is randomly returned.
-
-    Parameters
-    ----------
-    cll: ClassifierList
-        Matching set
-    cfg: Configuration
-        Allow to retrieve the number of possible actions
-
-    Returns
-    -------
-    Classifier
-    """
-    experience_array = {i: 0.0 for i in range(cfg.number_of_possible_actions)}
-
-    if len(cll) > 0:
-        cll.sort(key=lambda cl: cl.action)
-
-        for _action, _clss in groupby(cll, lambda cl: cl.action):
-            _classifiers = [cl for cl in _clss]
-            agg_exp = sum(cl.exp * cl.num for cl in _classifiers)
-            agg_num = sum(cl.num for cl in _classifiers)
-            experience_array[_action] = agg_exp / float(agg_num)
-        by_exp = sorted(experience_array.items(), key=lambda el: el[1])
-        action = by_exp[0][0]
 
         classifiers_that_match_action = [cl for cl in cll if cl.action == action]
         if len(classifiers_that_match_action) > 0:
