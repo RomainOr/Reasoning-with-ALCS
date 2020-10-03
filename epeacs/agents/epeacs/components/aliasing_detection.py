@@ -5,7 +5,7 @@
 """
 
 from epeacs import Perception
-from epeacs.agents.epeacs import ClassifiersList, Condition, Configuration, PMark
+from epeacs.agents.epeacs import ClassifiersList, Condition, Configuration, Effect, PMark
 
 
 def is_state_aliased(
@@ -98,17 +98,37 @@ def is_perceptual_aliasing_state(
     ) -> bool:
     """
     Check if the system suffers from the perceptual aliasing issue in the penultimate perception
+    from the associated match set without the behavioral classifiers
 
     Parameters
     ----------
     match_set associated to p0
+
     p0
+    
     cfg
 
     Returns
     -------
     bool
     """
+
+    def build_anticipation(p0: Perception, effect: Effect):
+        """
+        Build from the perception and the effect of a classifier, the complete expected anticipation
+
+        Parameters
+        ----------
+        p0: Perception
+
+        effect: Effect
+        """
+        anticipation = list(p0)
+        for idx, ei in enumerate(effect):
+            if ei != effect.wildcard:
+                anticipation[idx] = ei
+        return tuple(anticipation)
+
     nbr_of_actions = cfg.number_of_possible_actions
     nbr_of_expected_transitions = nbr_of_actions
     #Find the most experienced classifiers for all actions
@@ -134,19 +154,16 @@ def is_perceptual_aliasing_state(
             if not most_experienced_classifiers[i].does_anticipate_change():
                 nbr_of_expected_transitions -= 1
             else:
-                anticipation = list(p0)
-                for idx, ei in enumerate(most_experienced_classifiers[i].effect[0]):
-                    if ei != most_experienced_classifiers[i].effect.wildcard:
-                        anticipation[idx] = ei
-                if tuple(anticipation) in reachable_states:
+                anticipation = build_anticipation(p0, most_experienced_classifiers[i].effect[0])
+                if anticipation in reachable_states:
                     nbr_of_expected_transitions -= 1
                 else:
-                    reachable_states.update( {tuple(anticipation): 0} )
+                    reachable_states.update( {anticipation: 0} )
         else:
-            effect_counter_dict = {effect : counter for effect, counter in zip(most_experienced_classifiers[i].effect.effect_list, most_experienced_classifiers[i].effect.effect_detailled_counter)}
+            effect_counter_dict = { build_anticipation(p0, effect) : counter for effect, counter in zip(most_experienced_classifiers[i].effect.effect_list, most_experienced_classifiers[i].effect.effect_detailled_counter)}
             reachable_states.update(effect_counter_dict)
             most_anticipated_state = max(effect_counter_dict.items(), key=lambda x : x[1])
-            if most_anticipated_state[0].does_match(p0) or most_anticipated_state[0] in list_of_most_anticipated_state:
+            if most_anticipated_state[0] == p0 or most_anticipated_state[0] in list_of_most_anticipated_state:
                 nbr_of_expected_transitions -= 1
             else:
                 list_of_most_anticipated_state.append(most_anticipated_state[0])

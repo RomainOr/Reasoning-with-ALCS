@@ -141,11 +141,14 @@ class Classifier:
             pai_state=old_cls.pai_state
         )
         if old_cls.is_enhanced():
-            for old_effect in old_cls.effect.effect_list:
-                if old_effect.does_match(p):
-                    for idx in range(len(new_cls.effect[0])):
-                        new_cls.effect[0][idx] = old_effect[idx]
-                    break
+            for idx in range(len(new_cls.effect[0])):
+                change_anticipated = False
+                for effect in old_cls.effect.effect_list:
+                    if effect[idx] != effect.wildcard:
+                        change_anticipated = True
+                        break
+                if change_anticipated and p[idx] != new_cls.condition[idx]:
+                    new_cls.effect[0][idx] = p[idx]
         else:
             for idx in range(len(new_cls.effect[0])):
                 new_cls.effect[0][idx] = old_cls.effect[0][idx]

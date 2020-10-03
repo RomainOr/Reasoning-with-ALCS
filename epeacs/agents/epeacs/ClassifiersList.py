@@ -99,7 +99,7 @@ class ClassifiersList(TypedList):
         match_set_no_bseq = [cl for cl in previous_match_set if cl.behavioral_sequence is None]
         if pai.should_pai_detection_apply(match_set_no_bseq, time, cfg.theta_bseq):
             pai.set_pai_detection_timestamps(match_set_no_bseq, time)
-            # The system tries to determine is it suffers from th eperceptual aliasing issue
+            # The system tries to determine is it suffers from the perceptual aliasing issue
             if pai.is_perceptual_aliasing_state(match_set_no_bseq, p0, cfg):
                 # Add if needed the new pai state in memory
                 if p0 not in pai_states_memory:

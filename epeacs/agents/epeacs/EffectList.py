@@ -96,9 +96,9 @@ class EffectList():
         return len(self.effect_list) > 1
 
 
-    def update_enhanced_effect_probs(self, p1: Perception):
+    def update_enhanced_effect_probs(self, p0, p1: Perception):
         for idx, effect in enumerate(self.effect_list):
-            if effect.does_match(p1):
+            if effect.anticipates_correctly(p0, p1):
                 self.effect_detailled_counter[idx] += 1
                 break
 
