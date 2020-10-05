@@ -68,10 +68,12 @@ def expected_case(
     ----------
     New classifier or None
     """
+    is_aliasing_detected = False
+
     if cl.is_enhanced():
         cl.effect.update_enhanced_effect_probs(p0, p1)
+        is_aliasing_detected = True
 
-    is_aliasing_detected = False
     if is_state_aliased(cl.condition, cl.mark, p0):
         if cl.cfg.do_pep: cl.ee = True
         is_aliasing_detected = True

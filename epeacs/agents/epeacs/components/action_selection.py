@@ -54,12 +54,10 @@ def explore(cll, cfg, pb: float = 0.5) -> Classifier:
     rand = random.random()
     if rand < pb:
         return choose_random_classifiers(cll, cfg)
-    elif rand < pb + 2*(1. - pb)/5.: #pb+ (1. - pb)/3. with 3 being the number of biases
+    elif rand < pb + (1. - pb)/2.: #pb+ (1. - pb)/2. with 2 being the number of biases
         return choose_action_from_knowledge_array(cll, cfg)
-    elif rand < pb + 4*(1. - pb)/5.: #pb+ 2*(1. - pb)/3. with 3 being the number of biases
-        return choose_latest_action(cll, cfg)
     else:
-        return choose_behavioral_sequence(cll, cfg)
+        return choose_latest_action(cll, cfg)
 
 
 def choose_behavioral_sequence(cll, cfg) -> Classifier:

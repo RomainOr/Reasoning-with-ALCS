@@ -160,10 +160,9 @@ class Classifier:
         max_r = max(self.ra, self.rb)
         min_r = min(self.ra, self.rb)
         diff = max_r - min_r
-        nb_actions = 1
         if self.behavioral_sequence:
-            nb_actions += len(self.behavioral_sequence)
-        return self.q * (min_r + diff / nb_actions)
+            return self.q * (max_r - diff * len(self.behavioral_sequence) / self.cfg.bs_max)
+        return self.q * max_r
 
 
     @property

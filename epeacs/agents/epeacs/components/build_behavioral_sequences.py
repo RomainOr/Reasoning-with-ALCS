@@ -34,10 +34,22 @@ def updated_passthrough(
     """
     for i in range(len(child_effect)):
         if last_effect.is_enhanced():
-            child_effect[i] = perception[i]
+            change_anticipated = False
+            for effect in last_effect.effect_list:
+                if effect[i] != effect.wildcard:
+                    change_anticipated = True
+                    break
+            if change_anticipated :
+                child_effect[i] = perception[i]
         elif last_effect[0][i] == child_effect.wildcard:
             if penultimate_effect.is_enhanced():
-                child_effect[i] = perception[i]
+                change_anticipated = False
+                for effect in last_effect.effect_list:
+                    if effect[i] != effect.wildcard:
+                        change_anticipated = True
+                        break
+                if change_anticipated :
+                    child_effect[i] = perception[i]
             else:
                 child_effect[i] = penultimate_effect[0][i]
         else:
