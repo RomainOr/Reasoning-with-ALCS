@@ -35,7 +35,7 @@ def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metric
     return df
 
 def find_best_classifier(population, situation, cfg):
-    unused_match_set, best_classifier = population.form_match_set(situation)
+    unused_match_set, best_classifier, unused_max_fitness_ra, unused_max_fitness_rb = population.form_match_set(situation)
     return best_classifier
 
 def update_matrix_index(original, tmp_x, tmp_y, action):

@@ -32,15 +32,21 @@ class ClassifiersList(TypedList):
         best_classifier = None
         best_fitness = 0.0
         matching = []
+        max_fitness_ra = 0.
+        max_fitness_rb = 0.
         for cl in self:
             if cl.condition.does_match(situation):
                 matching.append(cl)
                 # Based on hypothesis that a change should be anticipted
-                if cl.does_anticipate_change() and cl.fitness > best_fitness:
-                #if cl.fitness > best_fitness:
-                    best_classifier = cl
-                    best_fitness = cl.fitness
-        return ClassifiersList(*matching), best_classifier
+                if cl.does_anticipate_change():
+                    if cl.q*cl.ra > max_fitness_ra:
+                        max_fitness_ra = cl.q*cl.ra
+                    if cl.q*cl.rb > max_fitness_rb:
+                        max_fitness_rb = cl.q*cl.rb
+                    if cl.fitness > best_fitness:
+                        best_classifier = cl
+                        best_fitness = cl.fitness
+        return ClassifiersList(*matching), best_classifier, max_fitness_ra, max_fitness_rb
 
 
     def form_action_set(self, action_classifier: Classifier) -> ClassifiersList:
@@ -116,11 +122,20 @@ class ClassifiersList(TypedList):
 
         # Create new behavioral classifiers
         if p0 in pai_states_memory:
-            for candidate in potential_cls_for_pai:
+            pop_for_addition = [cl for cl in population if cl.behavioral_sequence and cl.condition.does_match(penultimate_classifier.condition)]
+            if len(potential_cls_for_pai) > 0:
+                # Select candidate
+                candidate, _ = ga.roulette_wheel_selection(
+                    potential_cls_for_pai, 
+                    lambda cl: pow(cl.q, 3) * cl.num
+                )
                 new_cl = create_behavioral_classifier(penultimate_classifier, candidate, p1, p0, time)
                 if new_cl:
-                    pop_for_addition = [cl for cl in population if cl.behavioral_sequence and cl.condition.does_match(new_cl.condition)]
-                    add_classifier(new_cl, pop_for_addition, new_list, cfg.theta_exp)
+                        add_classifier(new_cl, pop_for_addition, new_list, cfg.theta_exp)
+            #for candidate in potential_cls_for_pai:
+            #    new_cl = create_behavioral_classifier(penultimate_classifier, candidate, p1, p0, time)
+            #    if new_cl:
+            #        add_classifier(new_cl, pop_for_addition, new_list, cfg.theta_exp)
 
 
     @staticmethod
@@ -207,32 +222,24 @@ class ClassifiersList(TypedList):
             ClassifiersList.apply_perceptual_aliasing_issue_management(population, previous_match_set, match_set, action_set, penultimate_classifier, potential_cls_for_pai, new_list, p0, p1, time, pai_states_memory, cfg)
 
         # Merge classifiers from new_list into self and population
-        action_set.extend(new_list)
         population.extend(new_list)
-
         if match_set is not None:
             new_matching = [cl for cl in new_list if cl.condition.does_match(p1)]
             match_set.extend(new_matching)
+        if action_set:
+            new_action_cls = [cl for cl in new_list if cl.action == action_set[0].action and cl.behavioral_sequence == action_set[0].behavioral_sequence]
+            action_set.extend(new_action_cls)
 
 
     @staticmethod
     def apply_reinforcement_learning(
-            match_set: ClassifiersList,
             action_set: ClassifiersList,
             reward: int,
+            max_fitness_ra: float,
+            max_fitness_rb: float,
             beta_rl: float,
             gamma: float,
-            done: bool
         ) -> None:
-        max_fitness_ra = 0.
-        max_fitness_rb = 0.
-        if not done:
-            for cl in match_set:
-                if cl.does_anticipate_change():
-                    if cl.q*cl.ra > max_fitness_ra:
-                        max_fitness_ra = cl.q*cl.ra
-                    if cl.q*cl.rb > max_fitness_rb:
-                        max_fitness_rb = cl.q*cl.rb
         for cl in action_set:
             #rl.update_classifier_q_learning(cl, reward, max_fitness_ra, beta_rl, gamma)
             rl.update_classifier_double_q_learning(cl, reward, max_fitness_ra, max_fitness_rb, beta_rl, gamma)
@@ -255,7 +262,7 @@ class ClassifiersList(TypedList):
         if ga.should_apply(action_set, time, theta_ga):
             ga.set_timestamps(action_set, time)
 
-            # Variable to manage behaviorla classifiers
+            # Variable to manage behavioral classifiers
             is_behavioral_action_set = False
             if action_set[0].behavioral_sequence:
                 is_behavioral_action_set = True
@@ -291,6 +298,53 @@ class ClassifiersList(TypedList):
 
             # We are interested only in classifiers with specialized condition
             unique_children = {cl for cl in [child1, child2]
+                               if cl.condition.specificity > 0}
+
+            ga.delete_classifiers(
+                population,
+                match_set,
+                action_set,
+                len(unique_children),
+                theta_as
+            )
+
+            # check for subsumers / similar classifiers
+            for child in unique_children:
+                ga.add_classifier(
+                    child,
+                    p,
+                    population,
+                    match_set,
+                    action_set,
+                    theta_exp
+                )
+
+
+    @staticmethod
+    def apply_zip(
+            time: int,
+            population: ClassifiersList,
+            match_set: ClassifiersList,
+            action_set: ClassifiersList,
+            p: Perception,
+            theta_ga: int,
+            mu: float,
+            chi: float,
+            theta_as: int,
+            theta_exp: int
+        ) -> None:
+
+        if ga.should_apply(action_set, time, theta_ga):
+            ga.set_timestamps(action_set, time)
+
+            # Select parents
+            parent1, parent2 = ga.roulette_wheel_selection(
+                action_set, 
+                lambda cl: pow(cl.q, 3) * cl.num
+            )
+
+            # We are interested only in classifiers with specialized condition
+            unique_children = {cl for cl in [parent1, parent2]
                                if cl.condition.specificity > 0}
 
             ga.delete_classifiers(

@@ -66,7 +66,7 @@ class EPEACS(Agent):
         while not done:
             
             # Creation of the matching set
-            match_set, _ = self.population.form_match_set(state)
+            match_set, _, max_fitness_ra, max_fitness_rb = self.population.form_match_set(state)
 
             # Apply learning in the last action set
             if steps > 0:
@@ -84,7 +84,7 @@ class EPEACS(Agent):
                     self.cfg
                 )
                 ClassifiersList.apply_reinforcement_learning(
-                    match_set, action_set, last_reward, self.cfg.beta_rl, self.cfg.gamma, done
+                    action_set, last_reward, max_fitness_ra, max_fitness_rb, self.cfg.beta_rl, self.cfg.gamma
                 )
                 if self.cfg.do_ga:
                     ClassifiersList.apply_ga(
@@ -99,6 +99,19 @@ class EPEACS(Agent):
                         self.cfg.theta_as,
                         self.cfg.theta_exp
                     )
+                #else:
+                #    ClassifiersList.apply_zip(
+                #        time + steps,
+                #        self.population,
+                #        match_set,
+                #        action_set,
+                #        state,
+                #        self.cfg.theta_ga,
+                #        self.cfg.mu,
+                #        self.cfg.chi,
+                #        self.cfg.theta_as,
+                #        self.cfg.theta_exp
+                #    )
 
             # Record the previous match set
             previous_match_set = match_set
@@ -119,17 +132,11 @@ class EPEACS(Agent):
             # Enter the if condition only if we have chosen a behavioral classifier
             if action_classifier.behavioral_sequence :
                 # Initialize the message list usefull to decrease quality of classifiers containing looping sequences
-                #message_list = [state]
                 for act in action_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(act)
                     raw_state, last_reward, done, _ = env.step(iaction)
                     state = self.cfg.environment_adapter.to_genotype(raw_state)
-                    #if state in message_list:
-                    #    for cl in action_set:    
-                    #        cl.decrease_quality()
-                    #else:
-                    #    message_list.append(state)
                     if done:
                         break
                     steps += 1
@@ -150,7 +157,7 @@ class EPEACS(Agent):
                     self.cfg
                 )
                 ClassifiersList.apply_reinforcement_learning(
-                    match_set, action_set, last_reward, self.cfg.beta_rl, self.cfg.gamma, done
+                    action_set, last_reward, 0., 0., self.cfg.beta_rl, self.cfg.gamma
                 )
                 if self.cfg.do_ga:
                     ClassifiersList.apply_ga(
@@ -164,6 +171,19 @@ class EPEACS(Agent):
                         self.cfg.chi,
                         self.cfg.theta_as,
                         self.cfg.theta_exp)
+                #else:
+                #    ClassifiersList.apply_zip(
+                #        time + steps,
+                #        self.population,
+                #        match_set,
+                #        action_set,
+                #        state,
+                #        self.cfg.theta_ga,
+                #        self.cfg.mu,
+                #        self.cfg.chi,
+                #        self.cfg.theta_as,
+                #        self.cfg.theta_exp
+                #    )
 
             steps += 1
         return TrialMetrics(steps, last_reward)
@@ -182,11 +202,11 @@ class EPEACS(Agent):
         while not done:
 
             # Compute in one run the matching set, the best matching classifier and the best matching fitness associated to the previous classifier
-            match_set, best_classifier = self.population.form_match_set(state)
+            match_set, best_classifier, max_fitness_ra, max_fitness_rb = self.population.form_match_set(state)
 
             if steps > 0:
                 ClassifiersList.apply_reinforcement_learning(
-                    match_set, action_set, last_reward, self.cfg.beta_rl, self.cfg.gamma, done
+                    action_set, last_reward, max_fitness_ra, max_fitness_rb, self.cfg.beta_rl, self.cfg.gamma
                 )
 
             # Create action set
@@ -211,7 +231,7 @@ class EPEACS(Agent):
             if done:
                 # Apply algorithms
                 ClassifiersList.apply_reinforcement_learning(
-                    match_set, action_set, last_reward, self.cfg.beta_rl, self.cfg.gamma, done
+                    action_set, last_reward, 0., 0., self.cfg.beta_rl, self.cfg.gamma
                 )
 
             steps += 1
