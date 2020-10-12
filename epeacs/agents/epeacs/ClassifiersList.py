@@ -247,7 +247,8 @@ class ClassifiersList(TypedList):
             mu: float,
             chi: float,
             theta_as: int,
-            theta_exp: int
+            theta_exp: int,
+            do_ga: bool
         ) -> None:
 
         if ga.should_apply(action_set, time, theta_ga):
@@ -267,22 +268,23 @@ class ClassifiersList(TypedList):
             child1 = Classifier.copy_from(parent1, p, time)
             child2 = Classifier.copy_from(parent2, p, time)
 
-            # Execute mutation
-            if is_behavioral_action_set:
-                ga.behavioral_mutation(child1, child2, mu)
-            else:
-                ga.generalizing_mutation(child1, mu)
-                ga.generalizing_mutation(child2, mu)
+            if do_ga:
+                # Execute mutation
+                if is_behavioral_action_set:
+                    ga.behavioral_mutation(child1, child2, mu)
+                else:
+                    ga.generalizing_mutation(child1, mu)
+                    ga.generalizing_mutation(child2, mu)
 
-            # Execute cross-over
-            if random.random() < chi and not is_behavioral_action_set:
-                if child1.effect == child2.effect:
-                    ga.two_point_crossover(child1, child2)
+                # Execute cross-over
+                if random.random() < chi and not is_behavioral_action_set:
+                    if child1.effect == child2.effect:
+                        ga.two_point_crossover(child1, child2)
 
-                    # Update quality and reward
-                    child1.q = child2.q = float(sum([child1.q, child2.q]) / 2)
-                    child1.ra = child2.ra = float(sum([child1.ra, child2.ra]) / 2)
-                    child1.rb = child2.rb = float(sum([child1.rb, child2.rb]) / 2)
+                        # Update quality and reward
+                        child1.q = child2.q = float(sum([child1.q, child2.q]) / 2)
+                        child1.ra = child2.ra = float(sum([child1.ra, child2.ra]) / 2)
+                        child1.rb = child2.rb = float(sum([child1.rb, child2.rb]) / 2)
 
             child1.q /= 2
             child2.q /= 2

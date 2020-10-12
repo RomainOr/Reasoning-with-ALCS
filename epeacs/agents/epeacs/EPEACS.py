@@ -86,19 +86,19 @@ class EPEACS(Agent):
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, max_fitness_ra, max_fitness_rb, self.cfg.beta_rl, self.cfg.gamma
                 )
-                if self.cfg.do_ga:
-                    ClassifiersList.apply_ga(
-                        time + steps,
-                        self.population,
-                        match_set,
-                        action_set,
-                        state,
-                        self.cfg.theta_ga,
-                        self.cfg.mu,
-                        self.cfg.chi,
-                        self.cfg.theta_as,
-                        self.cfg.theta_exp
-                    )
+                ClassifiersList.apply_ga(
+                    time + steps,
+                    self.population,
+                    match_set,
+                    action_set,
+                    state,
+                    self.cfg.theta_ga,
+                    self.cfg.mu,
+                    self.cfg.chi,
+                    self.cfg.theta_as,
+                    self.cfg.theta_exp,
+                    self.cfg.do_ga
+                )
 
             # Record the previous match set
             previous_match_set = match_set
@@ -146,18 +146,19 @@ class EPEACS(Agent):
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, 0., 0., self.cfg.beta_rl, self.cfg.gamma
                 )
-                if self.cfg.do_ga:
-                    ClassifiersList.apply_ga(
-                        time + steps,
-                        self.population,
-                        ClassifiersList(),
-                        action_set,
-                        state,
-                        self.cfg.theta_ga,
-                        self.cfg.mu,
-                        self.cfg.chi,
-                        self.cfg.theta_as,
-                        self.cfg.theta_exp)
+                ClassifiersList.apply_ga(
+                    time + steps,
+                    self.population,
+                    ClassifiersList(),
+                    action_set,
+                    state,
+                    self.cfg.theta_ga,
+                    self.cfg.mu,
+                    self.cfg.chi,
+                    self.cfg.theta_as,
+                    self.cfg.theta_exp,
+                    self.cfg.do_ga
+                )
 
             steps += 1
         return TrialMetrics(steps, last_reward)
