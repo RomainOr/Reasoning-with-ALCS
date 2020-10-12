@@ -123,19 +123,10 @@ class ClassifiersList(TypedList):
         # Create new behavioral classifiers
         if p0 in pai_states_memory:
             pop_for_addition = [cl for cl in population if cl.behavioral_sequence and cl.condition.does_match(penultimate_classifier.condition)]
-            if len(potential_cls_for_pai) > 0:
-                # Select candidate
-                candidate, _ = ga.roulette_wheel_selection(
-                    potential_cls_for_pai, 
-                    lambda cl: pow(cl.q, 3) * cl.num
-                )
+            for candidate in potential_cls_for_pai:
                 new_cl = create_behavioral_classifier(penultimate_classifier, candidate, p1, p0, time)
                 if new_cl:
-                        add_classifier(new_cl, pop_for_addition, new_list, cfg.theta_exp)
-            #for candidate in potential_cls_for_pai:
-            #    new_cl = create_behavioral_classifier(penultimate_classifier, candidate, p1, p0, time)
-            #    if new_cl:
-            #        add_classifier(new_cl, pop_for_addition, new_list, cfg.theta_exp)
+                    add_classifier(new_cl, pop_for_addition, new_list, cfg.theta_exp)
 
 
     @staticmethod
@@ -298,53 +289,6 @@ class ClassifiersList(TypedList):
 
             # We are interested only in classifiers with specialized condition
             unique_children = {cl for cl in [child1, child2]
-                               if cl.condition.specificity > 0}
-
-            ga.delete_classifiers(
-                population,
-                match_set,
-                action_set,
-                len(unique_children),
-                theta_as
-            )
-
-            # check for subsumers / similar classifiers
-            for child in unique_children:
-                ga.add_classifier(
-                    child,
-                    p,
-                    population,
-                    match_set,
-                    action_set,
-                    theta_exp
-                )
-
-
-    @staticmethod
-    def apply_zip(
-            time: int,
-            population: ClassifiersList,
-            match_set: ClassifiersList,
-            action_set: ClassifiersList,
-            p: Perception,
-            theta_ga: int,
-            mu: float,
-            chi: float,
-            theta_as: int,
-            theta_exp: int
-        ) -> None:
-
-        if ga.should_apply(action_set, time, theta_ga):
-            ga.set_timestamps(action_set, time)
-
-            # Select parents
-            parent1, parent2 = ga.roulette_wheel_selection(
-                action_set, 
-                lambda cl: pow(cl.q, 3) * cl.num
-            )
-
-            # We are interested only in classifiers with specialized condition
-            unique_children = {cl for cl in [parent1, parent2]
                                if cl.condition.specificity > 0}
 
             ga.delete_classifiers(

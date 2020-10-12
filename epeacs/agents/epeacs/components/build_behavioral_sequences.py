@@ -33,27 +33,23 @@ def updated_passthrough(
         Condition component to remove unnecessary specification of effect attributes
     """
     for i in range(len(child_effect)):
+        change_anticipated = last_effect[0][i] == child_effect.wildcard
         if last_effect.is_enhanced():
-            change_anticipated = False
             for effect in last_effect.effect_list:
-                if effect[i] != effect.wildcard:
+                if effect[i] != effect.wildcard and effect[i] == perception[i]:
                     change_anticipated = True
                     break
-            if change_anticipated :
-                child_effect[i] = perception[i]
-        elif last_effect[0][i] == child_effect.wildcard:
+        if change_anticipated :
+            child_effect[i] = perception[i]
+        else :
+            change_anticipated = penultimate_effect[0][i] == child_effect.wildcard
             if penultimate_effect.is_enhanced():
-                change_anticipated = False
-                for effect in last_effect.effect_list:
-                    if effect[i] != effect.wildcard:
+                for effect in penultimate_effect.effect_list:
+                    if effect[i] != effect.wildcard and effect[i] == perception[i]:
                         change_anticipated = True
                         break
-                if change_anticipated :
-                    child_effect[i] = perception[i]
-            else:
-                child_effect[i] = penultimate_effect[0][i]
-        else:
-            child_effect[i] = last_effect[0][i]
+            if change_anticipated :
+                child_effect[i] = perception[i]
     # Refining effect
     for idx in range(len(child_effect)):
         if child_effect[idx] != child_effect.wildcard and child_effect[idx] == child_condition[idx]:

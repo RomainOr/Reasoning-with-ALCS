@@ -99,19 +99,6 @@ class EPEACS(Agent):
                         self.cfg.theta_as,
                         self.cfg.theta_exp
                     )
-                #else:
-                #    ClassifiersList.apply_zip(
-                #        time + steps,
-                #        self.population,
-                #        match_set,
-                #        action_set,
-                #        state,
-                #        self.cfg.theta_ga,
-                #        self.cfg.mu,
-                #        self.cfg.chi,
-                #        self.cfg.theta_as,
-                #        self.cfg.theta_exp
-                #    )
 
             # Record the previous match set
             previous_match_set = match_set
@@ -171,19 +158,6 @@ class EPEACS(Agent):
                         self.cfg.chi,
                         self.cfg.theta_as,
                         self.cfg.theta_exp)
-                #else:
-                #    ClassifiersList.apply_zip(
-                #        time + steps,
-                #        self.population,
-                #        match_set,
-                #        action_set,
-                #        state,
-                #        self.cfg.theta_ga,
-                #        self.cfg.mu,
-                #        self.cfg.chi,
-                #        self.cfg.theta_as,
-                #        self.cfg.theta_exp
-                #    )
 
             steps += 1
         return TrialMetrics(steps, last_reward)
