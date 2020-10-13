@@ -245,29 +245,17 @@ class Classifier:
         """
         Specializes the effect part where necessary to correctly anticipate
         the changes from p0 to p1.
+        Only occurs when a new classifier is produced from scratch or by copy.
 
         Parameters
         ----------
         previous_situation: Perception
         situation: Perception
         """
-        new_effect_to_append = False
-        if not self.is_enhanced():
-            for idx, _ in enumerate(situation):
-                if previous_situation[idx] != situation[idx]:
-                    if self.effect[0][idx] == self.cfg.classifier_wildcard:
-                        self.effect[0][idx] = situation[idx]
-                    elif self.ee:
-                        new_effect_to_append = True
-                    self.condition[idx] = previous_situation[idx]
-        if new_effect_to_append:
-            new_effect = Effect.empty(wildcard=self.effect.wildcard, length=self.cfg.classifier_length)
-            for idx in range(len(new_effect)):
-                if previous_situation[idx] != situation[idx]:
-                    new_effect[idx] = situation[idx]
-            if new_effect not in self.effect.effect_list:
-                self.effect.effect_list.append(new_effect)
-                self.effect.effect_detailled_counter.append(1)
+        for idx, _ in enumerate(situation):
+            if previous_situation[idx] != situation[idx] and self.effect[0][idx] == self.cfg.classifier_wildcard:
+                self.effect[0][idx] = situation[idx]
+                self.condition[idx] = previous_situation[idx]
 
 
     def predicts_successfully(

@@ -79,7 +79,7 @@ class ClassifiersList(TypedList):
         if len(candidates) < 2:
             return
         for candidate in candidates:
-            candidates2 = [cl for cl in candidates if candidate != cl and cl.mark == candidate.mark]
+            candidates2 = [cl for cl in candidates if cl.mark == candidate.mark and cl.effect != candidate.effect]
             if len(candidates2) > 0:
                 merger = random.choice(candidates2)
                 new_classifier = candidate.merge_with(merger, previous_situation, time)
@@ -102,7 +102,7 @@ class ClassifiersList(TypedList):
             cfg: Configuration
         ):
         # First, try to detect a PAI state if needed
-        match_set_no_bseq = [cl for cl in previous_match_set if cl.behavioral_sequence is None]
+        match_set_no_bseq = [cl for cl in previous_match_set if cl.behavioral_sequence is None and (not cl.is_marked() or cl.mark.corresponds_to(p0))]
         if pai.should_pai_detection_apply(match_set_no_bseq, time, cfg.theta_bseq):
             pai.set_pai_detection_timestamps(match_set_no_bseq, time)
             # The system tries to determine is it suffers from the perceptual aliasing issue

@@ -40,6 +40,15 @@ class PMark(TypedList):
         return set_ee
 
 
+    def corresponds_to(self, perception: Perception) -> bool:
+        if not self.one_situation_in_mark():
+            return False
+        for idx, item in enumerate(perception):
+            if item not in self[idx]:
+                return False
+        return True
+
+
     def get_differences(self, p0: Perception) -> Condition:
         """
         Determines the strongest differences in between the mark
