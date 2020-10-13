@@ -54,10 +54,8 @@ class EffectList():
         bool
             True if the effect list predicts a change, False otherwise
         """
-        if len(self.effect_list) > 1:
-            return True
-        else:
-            return self.effect_list[0].specify_change
+        index = self.effect_detailled_counter.index(max(self.effect_detailled_counter))
+        return self.effect_list[index].specify_change
 
 
     def is_specializable(self, p0: Perception, p1: Perception) -> bool:
@@ -75,10 +73,8 @@ class EffectList():
         bool
             True if specializable, false otherwise
         """
-        if len(self.effect_list) > 1:
-            return True
-        else:
-            return self.effect_list[0].is_specializable(p0, p1)
+        index = self.effect_detailled_counter.index(max(self.effect_detailled_counter))
+        return self.effect_list[index].is_specializable(p0, p1)
 
 
     def anticipates_correctly(self, p0: Perception, p1: Perception) -> bool:
