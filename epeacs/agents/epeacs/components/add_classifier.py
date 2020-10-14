@@ -1,7 +1,12 @@
 from epeacs.agents.epeacs.components.subsumption import does_subsume
 
 
-def add_classifier(child, population, new_list, theta_exp: int) -> None:
+def add_classifier(
+        child, 
+        population,
+        new_list,
+        theta_exp: int
+    ) -> None:
     """
     Looks for subsuming / similar classifiers in the population of classifiers
     and those created in the current ALP run (`new_list`).
@@ -14,11 +19,11 @@ def add_classifier(child, population, new_list, theta_exp: int) -> None:
     child:
         New classifier to examine
     population:
-        list of classifiers
+        List of classifiers
     new_list:
         A list of newly created classifiers in this ALP run
     theta_exp: int
-        experience threshold for subsumption
+        Experience threshold for subsumption
     """
     old_cl = None
 

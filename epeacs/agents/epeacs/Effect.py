@@ -33,20 +33,26 @@ class Effect(AbstractPerception):
         return any(True for e in self if e != self.wildcard)
 
 
-    def is_specializable(self, p0: Perception, p1: Perception) -> bool:
+    def is_specializable(
+            self,
+            p0: Perception,
+            p1: Perception
+        ) -> bool:
         """
         Determines if the effect part can be modified to anticipate
         changes from `p0` to `p1` correctly by only specializing attributes.
+
         Parameters
         ----------
         p0: Perception
-            previous perception
+            Previous perception
         p1: Perception
-            current perception
+            Current perception
+
         Returns
         -------
         bool
-            True if specializable, false otherwise
+            True if specializable
         """
         for p0i, p1i, ei in zip(p0, p1, self):
             if ei != self.wildcard:
@@ -55,8 +61,32 @@ class Effect(AbstractPerception):
         return True
 
 
-    def anticipates_correctly(self, p0: Perception, p1: Perception) -> bool:
-        def item_anticipate_change(item, p0_item, p1_item, wildcard) -> bool:
+    def does_anticipate_correctly(
+        self,
+        p0: Perception,
+        p1: Perception
+        ) -> bool:
+        """
+        Determines if the effect anticipates correctly changes from `p0` to `p1`.
+
+        Parameters
+        ----------
+        p0: Perception
+            Previous perception
+        p1: Perception
+            Current perception
+
+        Returns
+        -------
+        bool
+            True the anticipation is correct
+        """
+        def _item_anticipate_change(
+                item,
+                p0_item,
+                p1_item,
+                wildcard
+            ) -> bool:
             if item == wildcard:
                 if p0_item != p1_item: return False
             else:
@@ -64,28 +94,7 @@ class Effect(AbstractPerception):
                 if item != p1_item: return False
             # All checks passed
             return True
-        return all(item_anticipate_change(self[idx], p0[idx], p1[idx], self.wildcard) for idx in range(len(p0)))
-
-
-    def does_match(self, other: Perception) -> bool:
-        """
-        Check if condition match other list such as perception or another
-        condition.
-
-        Parameters
-        ----------
-        other: Union[Perception, Condition]
-            perception or condition object
-
-        Returns
-        -------
-        bool
-            True if condition match given list, False otherwise
-        """
-        for ei, oi in zip(self, other):
-            if ei != self.wildcard and oi != self.wildcard and ei != oi:
-                return False
-        return True
+        return all(_item_anticipate_change(self[idx], p0[idx], p1[idx], self.wildcard) for idx in range(len(p0)))
 
 
     def __str__(self):

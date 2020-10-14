@@ -44,7 +44,7 @@ class Classifier:
             raise TypeError("Configuration should be passed to Classifier")
         self.cfg = cfg
 
-        def build_perception_string(
+        def _build_perception_string(
                 cls,
                 initial,
                 length=self.cfg.classifier_length,
@@ -54,10 +54,10 @@ class Classifier:
                 return cls(initial, wildcard=wildcard)
             return cls.empty(wildcard=wildcard, length=length)
 
-        self.condition = build_perception_string(Condition, condition)
+        self.condition = _build_perception_string(Condition, condition)
         self.action = action
         self.behavioral_sequence = behavioral_sequence
-        self.effect = EffectList(build_perception_string(Effect, effect), self.cfg.classifier_wildcard)
+        self.effect = EffectList(_build_perception_string(Effect, effect), self.cfg.classifier_wildcard)
         self.mark = PMark(cfg=self.cfg)
         self.q = quality
         self.ra = rewarda
@@ -82,7 +82,6 @@ class Classifier:
                 self.behavioral_sequence == other.behavioral_sequence and \
                 self.effect == other.effect:
             return True
-
         return False
 
 
@@ -95,18 +94,19 @@ class Classifier:
 
 
     def __repr__(self):
-        return f"{self.condition} " \
-               f"{self.action} " \
-               f"{str(self.behavioral_sequence)} " \
-               f"{str(self.effect)} " \
-               f"{'(' + str(self.mark) + ')':21} \n" \
-               f"q: {self.q:<5.3} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} \n" \
-               f"exp: {self.exp:<3} tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} " \
-               f"tav: {self.tav:<6.3} num: {self.num} ee: {self.ee}"
+        return f"{self.condition} {self.action} {str(self.behavioral_sequence)} {str(self.effect)} ({str(self.mark)})\n" \
+            f"q: {self.q:<6.4} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4}\n" \
+            f"exp: {self.exp:<5} num: {self.num} ee: {self.ee} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \
+            f"tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n" \
 
 
     @classmethod
-    def copy_from(cls, old_cls: Classifier, p: Perception, time: int):
+    def copy_from(
+            cls,
+            old_cls: Classifier,
+            p: Perception,
+            time: int
+        ) -> Classifier:
         """
         Copies old classifier with given time.
         Old tav gets replaced with new value.
@@ -115,15 +115,16 @@ class Classifier:
         Parameters
         ----------
         old_cls: Classifier
-            classifier to copy from
-        time: int
-            time of creation / current epoch
+            Classifier to copy from
         p: Perception
+            Current perception to refine effect component
+        time: int
+            Current epoch
 
         Returns
         -------
         Classifier
-            copied classifier
+            New copied classifier - Hard copy
         """
         new_cls = cls(
             condition=Condition(old_cls.condition, old_cls.cfg.classifier_wildcard),
@@ -156,7 +157,15 @@ class Classifier:
 
 
     @property
-    def fitness(self):
+    def fitness(self) -> float:
+        """
+        Computes the fitness of the classifier.
+
+        Returns
+        -------
+        Float
+            Fitness value
+        """
         max_r = max(self.ra, self.rb)
         min_r = min(self.ra, self.rb)
         diff = max_r - min_r
@@ -175,7 +184,7 @@ class Classifier:
         Returns
         -------
         List[int]
-            list specified unchanging attributes indices
+            List specified unchanging attributes indices
         """
         indices = []
         for idx, ci in enumerate(self.condition):
@@ -194,101 +203,112 @@ class Classifier:
 
 
     @property
-    def specificity(self):
+    def specificity(self) -> float:
+        """
+        Computes the specificity of the classifier.
+
+        Returns
+        -------
+        Float
+            Specificity value
+        """
         return self.condition.specificity / len(self.condition)
 
 
-    def does_anticipate_change(self) -> bool:
+    def is_enhanced(self) -> bool:
         """
-        Checks whether any change in environment is anticipated
+        Checks whether the classifier is enhanced.
 
         Returns
         -------
         bool
-            true if the effect part contains any specified attributes
+            True if the classifier is enhanced
         """
-        return self.effect.specify_change
-
-
-    def is_enhanced(self):
         return self.effect.is_enhanced()
 
 
     def is_reliable(self) -> bool:
-        return self.q > self.cfg.theta_r
-
-
-    def is_inadequate(self) -> bool:
-        return self.q < self.cfg.theta_i
-
-
-    def increase_experience(self) -> int:
-        self.exp += 1
-        return self.exp
-
-
-    def increase_quality(self) -> float:
-        self.q += self.cfg.beta_alp * (1 - self.q)
-        return self.q
-
-
-    def decrease_quality(self) -> float:
-        self.q -= self.cfg.beta_alp * self.q
-        return self.q
-
-
-    def specialize(
-            self,
-            previous_situation: Perception,
-            situation: Perception
-        ) -> None:
         """
-        Specializes the effect part where necessary to correctly anticipate
-        the changes from p0 to p1.
-        Only occurs when a new classifier is produced from scratch or by copy.
-
-        Parameters
-        ----------
-        previous_situation: Perception
-        situation: Perception
-        """
-        for idx, _ in enumerate(situation):
-            if previous_situation[idx] != situation[idx] and self.effect[0][idx] == self.cfg.classifier_wildcard:
-                self.effect[0][idx] = situation[idx]
-                self.condition[idx] = previous_situation[idx]
-
-
-    def predicts_successfully(
-            self,
-            p0: Perception,
-            action: int,
-            p1: Perception
-        ) -> bool:
-        """
-        Check if classifier matches previous situation `p0`,
-        has action `action` and predicts the effect `p1`.
-
-        Usefull to compute knowlegde metric
-
-        Parameters
-        ----------
-        p0: Perception
-            previous situation
-        action: int
-            action
-        p1: Perception
-            anticipated situation after execution action
+        Checks whether the classifier is reliable.
 
         Returns
         -------
         bool
-            True if classifier makes successful predictions, False otherwise
+            True if the classifier is reliable
         """
-        if self.condition.does_match(p0):
-            if self.action == action:
-                if self.does_anticipate_correctly(p0, p1):
-                    return True
-        return False
+        return self.q > self.cfg.theta_r
+
+
+    def is_inadequate(self) -> bool:
+        """
+        Checks whether the classifier is inadequate.
+
+        Returns
+        -------
+        bool
+            True if the classifier is inadequate
+        """
+        return self.q < self.cfg.theta_i
+
+
+    def is_marked(self):
+        """
+        Checks whether the classifier is marked.
+
+        Returns
+        -------
+        bool
+            True if the classifier is marked
+        """
+        return self.mark.is_marked()
+
+
+    def is_more_general(
+            self,
+            other: Classifier
+        ) -> bool:
+        """
+        Checks if the classifiers condition is formally
+        more general than `other`s.
+
+        Parameters
+        ----------
+        other: Classifier
+            Cther classifier to compare
+
+        Returns
+        -------
+        bool
+            True if classifier is more general than other
+        """
+        return self.condition.specificity <= other.condition.specificity
+
+
+    def does_anticipate_change(self) -> bool:
+        """
+        Checks whether any change in environment is anticipated.
+
+        Returns
+        -------
+        bool
+            True if the effect part contains any specified attributes
+        """
+        return self.effect.specify_change
+
+
+    def does_match(self, situation: Perception) -> bool:
+        """
+        Returns if the classifier matches the situation.
+
+        Parameters
+        -------
+        situation
+
+        Returns
+        -------
+        bool
+        """
+        return self.condition.does_match(situation)
 
 
     def does_anticipate_correctly(
@@ -307,39 +327,98 @@ class Classifier:
         Parameters
         ----------
         previous_situation: Perception
-            Previous situation
+            Perception related to a state preceding the action
         situation: Perception
-            Current situation
+            Perception related to a state following the action
 
         Returns
         -------
         bool
-            True if classifier's effect pat anticipates correctly,
-            False otherwise
+            True if classifier's effect pat anticipates correctly
         """
-        return self.effect.anticipates_correctly(previous_situation, situation)
+        return self.effect.does_anticipate_correctly(previous_situation, situation)
 
 
-    def set_mark(self, perception: Perception) -> None:
+    def does_predict_successfully(
+            self,
+            p0: Perception,
+            action: int,
+            p1: Perception
+        ) -> bool:
         """
-        Specializes the mark in all attributes
+        Checks if classifier matches previous situation `p0`,
+        has action `action` and predicts the effect `p1`.
+
+        Usefull to compute knowlegde metric
+
+        Parameters
+        ----------
+        p0: Perception
+            Previous situation
+        action: int
+            Action
+        p1: Perception
+            Anticipated situation
+
+        Returns
+        -------
+        bool
+            True if classifier makes successful predictions
+        """
+        if self.condition.does_match(p0):
+            if self.action == action:
+                if self.does_anticipate_correctly(p0, p1):
+                    return True
+        return False
+
+
+    def increase_experience(self):
+        """
+        Increases the experience of a classifier.
+        """
+        self.exp += 1
+
+
+    def increase_quality(self):
+        """
+        Increases the quality of a classifier.
+        """
+        self.q += self.cfg.beta_alp * (1 - self.q)
+
+
+    def decrease_quality(self):
+        """
+        Decreases the quality of a classifier.
+        """
+        self.q -= self.cfg.beta_alp * self.q
+
+
+    def set_mark(
+            self,
+            perception: Perception
+        ) -> None:
+        """
+        Specializes the mark in all attributes.
 
         Parameters
         ----------
         perception: Perception
-            current situation
+            Current situation
         """
         self.ee = self.mark.set_mark(perception, self.ee)
 
 
-    def set_alp_timestamp(self, time: int) -> None:
+    def set_alp_timestamp(
+            self,
+            time: int
+        ) -> None:
         """
         Sets the ALP time stamp and the application average parameter.
 
         Parameters
         ----------
         time: int
-            current step
+            Current step
         """
         if self.exp < 1. / self.cfg.beta_alp:
             self.tav += (time - self.talp - self.tav) / self.exp
@@ -348,28 +427,33 @@ class Classifier:
         self.talp = time
 
 
-    def is_more_general(self, other: Classifier) -> bool:
+    def specialize(
+            self,
+            previous_situation: Perception,
+            situation: Perception
+        ) -> None:
         """
-        Checks if the classifiers condition is formally
-        more general than `other`s.
+        Specializes the effect part where necessary to correctly anticipate
+        the changes from previous_situation to situation.
+        Only occurs when a new classifier is produced from scratch or by copy.
 
         Parameters
         ----------
-        other: Classifier
-            other classifier to compare
-
-        Returns
-        -------
-        bool
-            True if classifier is more general than other
+        previous_situation: Perception
+            Perception related to a state preceding the action
+        situation: Perception
+            Perception related to a state following the action
         """
-        return self.condition.specificity <= other.condition.specificity
+        for idx, _ in enumerate(situation):
+            if previous_situation[idx] != situation[idx] and self.effect[0][idx] == self.cfg.classifier_wildcard:
+                self.effect[0][idx] = situation[idx]
+                self.condition[idx] = previous_situation[idx]
 
 
     def generalize_unchanging_condition_attribute(
-                self,
-                randomfunc: Callable=random.choice
-            ) -> bool:
+            self,
+            randomfunc: Callable=random.choice
+        ) -> bool:
         """
         Generalizes one randomly unchanging attribute in the condition.
         An unchanging attribute is one that is anticipated not to change
@@ -378,7 +462,7 @@ class Classifier:
         Parameters
         ----------
         randomfunc: Callable
-            function returning attribute index to generalize
+            Function returning attribute index to generalize
 
         Returns
         -------
@@ -392,25 +476,26 @@ class Classifier:
         return False
 
 
-    def is_marked(self):
-        return self.mark.is_marked()
-
-
-    def does_match(self, situation: Perception) -> bool:
+    def merge_with(
+            self,
+            other_classifier,
+            time
+        ) -> Classifier:
         """
-        Returns if the classifier matches the situation.
+        Merges two classifier in an enhanced one.
+
         Parameters
-        -------
-        situation
+        ----------
+        other_classifier: Classifier
+            Classifier to merge with the self one
+        time: int
+            Current epoch
 
         Returns
         -------
-        bool
+        Classifier
+            New enhanced classifier
         """
-        return self.condition.does_match(situation)
-
-
-    def merge_with(self, other_classifier, perception, time):
         result = Classifier(
             action = self.action,
             behavioral_sequence=self.behavioral_sequence,
@@ -427,6 +512,5 @@ class Classifier:
         result.condition.specialize_with_condition(other_classifier.condition)
         result.effect = EffectList.enhanced_effect(
             self.effect, 
-            other_classifier.effect,
-            perception)
+            other_classifier.effect)
         return result

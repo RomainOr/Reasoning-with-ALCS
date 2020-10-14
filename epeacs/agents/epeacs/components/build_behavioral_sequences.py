@@ -19,16 +19,17 @@ def updated_passthrough(
     """
     Passthrough operator defined by Stolzmann that we have refined.
     It is only used on the effect component of classifiers.
-    The target is to get first a behavioral classifier that can bridge the aliased state.
-    As a consequence, we do not enable the building of a behavioral enhanced classifier.
 
     Parameters
     ----------
     child_effect
         The effect component to compute and the result
     penultimate_effect
+        The effect component of the penultimate classifier
     last_effect
+        The effect component of the last classifier
     perception
+        The current perception to refine the effect component of the child
     child_condition
         Condition component to remove unnecessary specification of effect attributes
     """
@@ -60,16 +61,23 @@ def create_behavioral_classifier(
         cl: Classifier,
         p1: Perception,
         pai_state: Perception,
-        time
+        time: int
     ) -> Optional[Classifier]:
     """
-    Build a behavioral classifier.
+    Builds a behavioral classifier.
 
     Parameters
     ----------
-    penultimate_classifier
-    cl
-    p1
+    penultimate_classifier: Classifier
+        Penultimate classifier selected through classifier selection previously
+    cl: Classifier
+        Current classifier of the action set
+    p1: Perception
+        Perception received after the action is done
+    pai_state: Perception
+        Perception of the Perceptual Aliasing State
+    time: int
+        Curretn epoch
 
     Returns
     ----------

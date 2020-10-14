@@ -10,9 +10,14 @@ from itertools import groupby
 from epeacs.agents.epeacs import Classifier
 
 
-def choose_classifier(cll, cfg, epsilon: float) -> Classifier:
+def choose_classifier(
+        cll,
+        cfg,
+        epsilon: float
+    ) -> Classifier:
     """
-    Chooses which classifier to use given matching set
+    Chooses which classifier to use given matching set through an
+    epsilon greedy method.
 
     Parameters
     ----------
@@ -33,9 +38,16 @@ def choose_classifier(cll, cfg, epsilon: float) -> Classifier:
     return choose_fittest_classifier(cll, cfg)
 
 
-def explore(cll, cfg, pb: float = 0.5) -> Classifier:
+def explore(
+        cll,
+        cfg,
+        pb: float = 0.5
+    ) -> Classifier:
     """
-    Chooses classifier according to current exploration policy
+    Chooses classifier according to current exploration policy.
+    There is pb probability to choose a random classifier.
+    Otherwise, in double biased exploration, there is 
+    (1-pb)/2 to use one of the bias.
 
     Parameters
     ----------
@@ -60,37 +72,13 @@ def explore(cll, cfg, pb: float = 0.5) -> Classifier:
         return choose_latest_action(cll, cfg)
 
 
-def choose_behavioral_sequence(cll, cfg) -> Classifier:
-    if len(cll) > 0:
-        behavioral_classifiers = [cl for cl in cll if cl.behavioral_sequence]
-        if len(behavioral_classifiers) > 0:
-            experience_array = {}
-            experience_array_num = {}
-            for bcl in behavioral_classifiers:
-                sequence = [bcl.action]
-                sequence.extend(bcl.behavioral_sequence)
-                sequence = tuple(sequence)
-                if sequence not in experience_array:
-                    experience_array[sequence] = bcl.exp * bcl.num
-                    experience_array_num[sequence] = bcl.num
-                else:
-                    experience_array[sequence] += bcl.exp * bcl.num
-                    experience_array_num[sequence] += bcl.num
-            less_experienced = -1
-            less_experienced_sequence = None
-            for sequence in experience_array:
-                tmp_exp = experience_array[sequence] / float(experience_array_num[sequence])
-                if less_experienced == -1 or less_experienced >= tmp_exp:
-                    less_experienced = tmp_exp
-                    less_experienced_sequence = list(sequence)
-            return Classifier(action=less_experienced_sequence[0], behavioral_sequence=less_experienced_sequence[1:], cfg=cfg)
-    return choose_random_classifiers(cll, cfg)
-
-
-def choose_latest_action(cll, cfg) -> Classifier:
+def choose_latest_action(
+        cll,
+        cfg
+    )-> Classifier:
     """
     Computes latest executed action ("action delay bias") and return 
-    a corresponding classifier
+    a corresponding classifier.
 
     Parameters
     ----------
@@ -118,7 +106,10 @@ def choose_latest_action(cll, cfg) -> Classifier:
     return choose_random_classifiers(cll, cfg)
 
 
-def choose_action_from_knowledge_array(cll, cfg) -> Classifier:
+def choose_action_from_knowledge_array(
+        cll,
+        cfg
+    ) -> Classifier:
     """
     Creates 'knowledge array' that represents the average quality of the
     anticipation for each action in the current list. Chosen is
@@ -157,10 +148,13 @@ def choose_action_from_knowledge_array(cll, cfg) -> Classifier:
     return choose_random_classifiers(cll, cfg)
 
 
-def choose_random_classifiers(cll, cfg) -> Classifier:
+def choose_random_classifiers(
+        cll,
+        cfg
+    )-> Classifier:
     """
     Chooses one of the possible actions in the environment randomly 
-    and return a corresponding classifier
+    and return a corresponding classifier.
 
     Parameters
     ----------
@@ -181,7 +175,10 @@ def choose_random_classifiers(cll, cfg) -> Classifier:
     return Classifier(action=action, cfg=cfg)
 
 
-def choose_fittest_classifier(cll, cfg) -> Classifier:
+def choose_fittest_classifier(
+        cll,
+        cfg
+    )-> Classifier:
     """
     Chooses the fittest classifier in the matching set
 
@@ -197,10 +194,8 @@ def choose_fittest_classifier(cll, cfg) -> Classifier:
     Classifier
     """
     if len(cll) > 0:
-        # Based on hypothesis that a change should be anticipted
+        # TODO : Based on hypothesis that a change should be anticipted
         anticipated_change = [cl for cl in cll if cl.does_anticipate_change()]
         if len(anticipated_change) > 0:
             return max(anticipated_change, key=lambda cl: cl.fitness)
-        #return max(cll, key=lambda cl: cl.fitness)
     return choose_random_classifiers(cll, cfg)
-

@@ -19,13 +19,17 @@ def is_state_aliased(
 
     Parameters
     ----------
-    condition
-    mark
-    p0
+    condition: Condition
+        Condition of the classifier used to check if the state is aliased
+    mark: PMark
+        Mark of the classifier used to check if the state is aliased
+    p0: Perception
+        Perception of the state in the previous step
 
     Returns
     -------
     bool
+        True if the state p0 is aliased
     """
     if mark.one_situation_in_mark():
         situation = Condition(condition)
@@ -37,7 +41,7 @@ def is_state_aliased(
 
 
 def should_pai_detection_apply(
-        match_set, 
+        match_set: ClassifiersList,
         time: int, 
         theta_bseq: int
     ) -> bool:
@@ -47,10 +51,11 @@ def should_pai_detection_apply(
 
     Parameters
     ----------
-    match_set
-        population of classifiers (with `num` and `tbseq` properties)
+    match_set: ClassifiersList
+        Population of classifiers having no mark or a mark that corresponds to p0
+        and whose condition matches p0, without the behavioral ones.
     time: int
-        current epoch
+        Current epoch
     theta_bseq: int
         The pai detection threshold (θga ∈ N) controls the PAI detection frequency.
 
@@ -74,7 +79,10 @@ def should_pai_detection_apply(
     return False
 
 
-def set_pai_detection_timestamps(match_set, epoch: int) -> None:
+def set_pai_detection_timestamps(
+        match_set, 
+        epoch: int
+    ) -> None:
     """
     Sets the pai detection time stamps to the current time to control
     the detection frequency.
@@ -83,10 +91,11 @@ def set_pai_detection_timestamps(match_set, epoch: int) -> None:
 
     Parameters
     ----------
-    match_set
-        population of classifiers
+    match_set: ClassifiersList
+        Population of classifiers having no mark or a mark that corresponds to p0
+        and whose condition matches p0, without the behavioral ones.
     epoch: int
-        current epoch
+        Current epoch
     """
     for cl in match_set:
         cl.tbseq = epoch
@@ -102,26 +111,38 @@ def is_perceptual_aliasing_state(
 
     Parameters
     ----------
-    match_set associated to p0
-
-    p0
-    
-    cfg
+    match_set: ClassifiersList
+        Population of classifiers having no mark or a mark that corresponds to p0
+        and whose condition matches p0, without the behavioral ones.
+    p0: Perception
+        Perception of the state in the previous step
+    cfg: Configuration
+        Configuration used in the ALCS
 
     Returns
     -------
     bool
+        True if the aliased state is associated to the Perceptual Aliasing Issue
     """
 
-    def build_anticipation(p0: Perception, effect: Effect):
+    def _build_anticipation(
+            p0: Perception,
+            effect: Effect
+        ) -> tuple:
         """
         Build from the perception and the effect of a classifier, the complete expected anticipation
 
         Parameters
         ----------
         p0: Perception
-
+            Perception of the state in the previous step
         effect: Effect
+            Anticipation associated to a classifier
+
+        Returns
+        -------
+        tuple
+            Complete expected anticipation as a tuple
         """
         anticipation = list(p0)
         for idx, ei in enumerate(effect):
@@ -151,7 +172,7 @@ def is_perceptual_aliasing_state(
     list_of_most_anticipated_state = []
     for i in range(nbr_of_actions):
         if not most_experienced_classifiers[i].is_enhanced():
-            anticipation = build_anticipation(p0, most_experienced_classifiers[i].effect[0])
+            anticipation = _build_anticipation(p0, most_experienced_classifiers[i].effect[0])
             reachable_states.update( {anticipation: 0} )
             if anticipation in list_of_most_anticipated_state:
                 nbr_of_expected_transitions -= 1
@@ -161,7 +182,7 @@ def is_perceptual_aliasing_state(
             else:
                 list_of_most_anticipated_state.append(anticipation)
         else:
-            effect_counter_dict = { build_anticipation(p0, effect) : counter for effect, counter in zip(most_experienced_classifiers[i].effect.effect_list, most_experienced_classifiers[i].effect.effect_detailled_counter)}
+            effect_counter_dict = { _build_anticipation(p0, effect) : counter for effect, counter in zip(most_experienced_classifiers[i].effect.effect_list, most_experienced_classifiers[i].effect.effect_detailled_counter)}
             reachable_states.update(effect_counter_dict)
             most_anticipated_state = max(effect_counter_dict.items(), key=lambda x : x[1])
             if most_anticipated_state[0] in list_of_most_anticipated_state:

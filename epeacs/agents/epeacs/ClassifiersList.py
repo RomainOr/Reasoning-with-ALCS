@@ -28,7 +28,24 @@ class ClassifiersList(TypedList):
         super().__init__((Classifier, ), *args)
 
 
-    def form_match_set(self, situation: Perception) -> ClassifiersList:
+    def form_match_set(
+            self,
+            situation: Perception
+        ) -> ClassifiersList:
+        """
+        Builds the ClassifiersList from the whole population with all classifiers whose condition
+        matches the current situation.
+
+        Parameters
+        ----------
+        situation: Perception
+            Current perception
+
+        Returns
+        ----------
+        ClassifiersList
+            The whole set of matching classifiers
+        """
         best_classifier = None
         best_fitness = 0.0
         matching = []
@@ -37,7 +54,7 @@ class ClassifiersList(TypedList):
         for cl in self:
             if cl.condition.does_match(situation):
                 matching.append(cl)
-                # Based on hypothesis that a change should be anticipted
+                # TODO : Based on hypothesis that a change should be anticipted
                 if cl.does_anticipate_change():
                     if cl.q*cl.ra > max_fitness_ra:
                         max_fitness_ra = cl.q*cl.ra
@@ -49,14 +66,31 @@ class ClassifiersList(TypedList):
         return ClassifiersList(*matching), best_classifier, max_fitness_ra, max_fitness_rb
 
 
-    def form_action_set(self, action_classifier: Classifier) -> ClassifiersList:
+    def form_action_set(
+            self,
+            action_classifier: Classifier
+        ) -> ClassifiersList:
+        """
+        Builds the ClassifiersList from the match set with all classifiers whose actions
+        match the ones of the selected classifier.
+
+        Parameters
+        ----------
+        action_classifier: Classifier
+            Classifier choosen by policies
+
+        Returns
+        ----------
+        ClassifiersList
+            The action set
+        """
         matching = [cl for cl in self if cl.behavioral_sequence == action_classifier.behavioral_sequence and cl.action == action_classifier.action]
         return ClassifiersList(*matching)
 
 
     def expand(self) -> List[Classifier]:
         """
-        Returns an array containing all micro-classifiers
+        Returns an array containing all micro-classifiers.
 
         Returns
         -------
@@ -71,10 +105,9 @@ class ClassifiersList(TypedList):
     def apply_enhanced_effect_part_check(
             action_set: ClassifiersList,
             new_list: ClassifiersList,
-            previous_situation: Perception,
             time: int,
             cfg: Configuration
-        ):
+        ) -> None:
         candidates = [cl for cl in action_set if cl.ee]
         if len(candidates) < 2:
             return
@@ -82,7 +115,7 @@ class ClassifiersList(TypedList):
             candidates2 = [cl for cl in candidates if cl.mark == candidate.mark and cl.effect != candidate.effect]
             if len(candidates2) > 0:
                 merger = random.choice(candidates2)
-                new_classifier = candidate.merge_with(merger, previous_situation, time)
+                new_classifier = candidate.merge_with(merger, time)
                 add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
 
 
@@ -100,7 +133,7 @@ class ClassifiersList(TypedList):
             time: int,
             pai_states_memory,
             cfg: Configuration
-        ):
+        ) -> None:
         # First, try to detect a PAI state if needed
         match_set_no_bseq = [cl for cl in previous_match_set if cl.behavioral_sequence is None and (not cl.is_marked() or cl.mark.corresponds_to(p0))]
         if pai.should_pai_detection_apply(match_set_no_bseq, time, cfg.theta_bseq):
@@ -207,7 +240,7 @@ class ClassifiersList(TypedList):
                 add_classifier(new_cl, action_set, new_list, cfg.theta_exp)
 
         if cfg.do_pep:
-            ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
+            ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, time, cfg)
 
         if cfg.bs_max > 0 and penultimate_classifier is not None:
             ClassifiersList.apply_perceptual_aliasing_issue_management(population, previous_match_set, match_set, action_set, penultimate_classifier, potential_cls_for_pai, new_list, p0, p1, time, pai_states_memory, cfg)

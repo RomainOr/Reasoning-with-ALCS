@@ -32,7 +32,11 @@ class EPEACS(Agent):
     def get_pai_states_memory(self):
         return self.pai_states_memory
 
-    def zip_population(self, does_anticipate_change:bool = True, is_reliable:bool=False):
+    def zip_population(
+            self,
+            does_anticipate_change:bool = True,
+            is_reliable:bool=False
+        ):
         # Remove multiple occurence of same classifiers
         self.population = ClassifiersList(*list(dict.fromkeys(self.population)))
         # Keep or not classifiers that anticipate changes
@@ -45,8 +49,12 @@ class EPEACS(Agent):
             self.population = ClassifiersList(*pop)
 
 
-    def _run_trial_explore(self, env, time, current_trial=None) \
-            -> TrialMetrics:
+    def _run_trial_explore(
+            self,
+            env,
+            time,
+            current_trial=None
+        ) -> TrialMetrics:
 
         # Initial conditions
         steps = 0
@@ -163,8 +171,12 @@ class EPEACS(Agent):
             steps += 1
         return TrialMetrics(steps, last_reward)
 
-    def _run_trial_exploit(self, env, time=None, current_trial=None) \
-            -> TrialMetrics:
+    def _run_trial_exploit(
+            self,
+            env,
+            time,
+            current_trial=None
+        ) -> TrialMetrics:
 
         # Initial conditions
         steps = 0

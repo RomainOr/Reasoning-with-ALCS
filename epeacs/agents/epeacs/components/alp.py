@@ -21,8 +21,6 @@ def cover(
     ) -> Classifier:
     """
     Covering - creates a classifier that anticipates a change correctly.
-    The reward of the new classifier is set to 0 to prevent *reward bubbles*
-    in the environmental model.
 
     Parameters
     ----------
@@ -71,7 +69,7 @@ def expected_case(
     is_aliasing_detected = False
 
     if cl.is_enhanced():
-        cl.effect.update_enhanced_effect_probs(p0, p1)
+        cl.effect.update_effect_detailled_counter(p0, p1)
         is_aliasing_detected = True
 
     if is_state_aliased(cl.condition, cl.mark, p0):

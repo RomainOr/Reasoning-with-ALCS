@@ -23,14 +23,20 @@ class PMark(TypedList):
         return any(len(attrib) != 0 for attrib in self)
 
 
-    def set_mark(self, perception: Perception, is_ee: bool) -> bool:
+    def set_mark(
+            self,
+            perception: Perception,
+            is_ee: bool
+        ) -> bool:
         """
         Specializes the mark in all attributes
 
         Parameters
         ----------
         perception: Perception
-            current situation
+            Current situation
+        is_ee: bool
+            Indicates if the classifier is enhanceable
         """
         set_ee = is_ee
         for idx, item in enumerate(perception):
@@ -40,7 +46,23 @@ class PMark(TypedList):
         return set_ee
 
 
-    def corresponds_to(self, perception: Perception) -> bool:
+    def corresponds_to(
+            self,
+            perception: Perception
+        ) -> bool:
+        """
+        Indicates if the mark corresponds to the perception
+
+        Parameters
+        ----------
+        perception: Perception
+            Current situation
+
+        Returns
+        ----------
+        bool
+            True if they correspond
+        """
         if not self.one_situation_in_mark():
             return False
         for idx, item in enumerate(perception):
@@ -49,14 +71,18 @@ class PMark(TypedList):
         return True
 
 
-    def get_differences(self, p0: Perception) -> Condition:
+    def get_differences(
+            self,
+            p0: Perception
+        ) -> Condition:
         """
         Determines the strongest differences in between the mark
         and current perception.
 
         Parameters
         ----------
-        p0
+        p0: Perception
+            Current situation
 
         Returns
         ----------

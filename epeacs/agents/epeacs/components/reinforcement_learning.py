@@ -14,26 +14,23 @@ def update_classifier_q_learning(
         max_fitness: float,
         beta_rl: float, 
         gamma: float
-    ):
+    ) -> None:
     """
     Applies adapted Q-Learning according to current reinforcement
     `reward` and back-propagated reinforcement `maximum_fitness`.
 
-    Classifier parameters are updated.
-
     Parameters
     ----------
     cl:
-        classifier with `r` and `ir` properties
+        Classifier with `r` and `ir` properties
     step_reward: int
-        current reward obtained from the environment after executing step
+        Current reward obtained from the environment after executing step
     max_fitness: float
-        maximum fitness - back-propagated reinforcement. Maximum fitness
-        from the match set
-    beta: float
-        learning rate
+        Maximum fitness - back-propagated reinforcement - from the match set
+    beta_rl: float
+        Learning rate of RL
     gamma: float
-        reinforcement rate
+        Reinforcement rate
     """
     _reward = step_reward + gamma * max_fitness
     cl.ra += beta_rl * (_reward - cl.ra)
@@ -48,27 +45,25 @@ def update_classifier_double_q_learning(
         max_fitness_rb: float,
         beta_rl: float, 
         gamma: float
-    ):
+    ) -> None:
     """
     Applies adapted Double Q-Learning according to current reinforcement
     `reward` and back-propagated reinforcement `maximum_fitness`.
 
-    Classifier parameters are updated.
-
     Parameters
     ----------
     cl:
-        classifier with `r` and `ir` properties
+        Classifier with `r` and `ir` properties
     step_reward: int
-        current reward obtained from the environment after executing step
+        Current reward obtained from the environment after executing step
     max_fitness_ra: float
-        maximum fitness - back-propagated reinforcement. Maximum fitness
-        from the action set and from the Q_a function
+        Maximum fitness from the action set and from the Q_a function
     max_fitness_rb: float
-        maximum fitness - back-propagated reinforcement. Maximum fitness
-        from the action set and from the Q_b function
+        Maximum fitness from the action set and from the Q_b function
+    beta_rl: float
+        Learning rate of RL
     gamma: float
-        reinforcement rate
+        Reinforcement rate
     """
     if random.random() < 0.5:
         cl.ra += beta_rl * (step_reward + gamma * max_fitness_rb - cl.ra)

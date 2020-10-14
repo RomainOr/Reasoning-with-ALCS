@@ -23,6 +23,8 @@ class Condition(AbstractPerception):
     @property
     def specificity(self) -> int:
         """
+        Counts the number of items different from the wildcard in the condition.
+
         Returns
         -------
         int
@@ -34,6 +36,8 @@ class Condition(AbstractPerception):
     @property
     def wildcard_count(self) -> int:
         """
+        Counts the number of wildcards in the condition.
+
         Returns
         -------
         int
@@ -42,13 +46,35 @@ class Condition(AbstractPerception):
         return sum(1 for attr in self if attr == self.wildcard)
 
 
-    def specialize_with_condition(self, other: Condition) -> None:
+    def specialize_with_condition(
+            self,
+            other: Condition
+        ) -> None:
+        """
+        Specializes the condition with another one.
+
+        Parameters
+        ----------
+        other: Condition
+            Condition object
+        """
         for idx, new_el in enumerate(other):
             if new_el != self.wildcard:
                 self[idx] = new_el
 
 
-    def generalize(self, position=None):
+    def generalize(
+            self,
+            position: int
+        ):
+        """
+        Generalizes the condition at the given position.
+
+        Parameters
+        ----------
+        position: int
+            Index to update
+        """
         self[position] = self.wildcard
 
 
@@ -71,15 +97,18 @@ class Condition(AbstractPerception):
             self.generalize(ridx)
 
 
-    def does_match(self, other: Union[Perception, Condition]) -> bool:
+    def does_match(
+            self,
+            other: Union[Perception, Condition]
+        ) -> bool:
         """
-        Check if condition match other list such as perception or another
+        Checks if condition match other list such as perception or another
         condition.
 
         Parameters
         ----------
         other: Union[Perception, Condition]
-            perception or condition object
+            Perception or condition object
 
         Returns
         -------
@@ -92,5 +121,21 @@ class Condition(AbstractPerception):
         return True
 
 
-    def subsumes(self, other: Condition) -> bool:
+    def subsumes(
+        self,
+        other: Condition
+        ) -> bool:
+        """
+        Determines if the condition subsumes another condition.
+
+        Parameters
+        ----------
+        other: Condition
+            Other condition
+
+        Returns
+        -------
+        bool
+            True if self subsumes other
+        """
         return self.does_match(other)

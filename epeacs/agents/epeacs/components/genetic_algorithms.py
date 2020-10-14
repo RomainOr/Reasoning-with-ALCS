@@ -21,18 +21,17 @@ def should_apply(
     """
     Checks the average last GA application to determine if a GA
     should be applied.
-    If no classifier is in the current set or only behavioral classifiers are
-    in the action set, no GA is applied!
+    If no classifier is in the current set, no GA is applied!
 
     Parameters
     ----------
     action_set
-        population of classifiers (with `num` and `tga` properties)
+        Population of classifiers (with `num` and `tga` properties)
     time: int
-        current epoch
+        Current epoch
     theta_ga: int
-        The GA application threshold (θga ∈ N) controls the GA frequency. A GA
-        is applied in an action set if the average delay of the last GA
+        The GA application threshold (θga ∈ N) controls the GA frequency.
+        A GA is applied in an action set if the average delay of the last GA
         application of the classifiers in the set is greater than θga.
 
     Returns
@@ -55,7 +54,10 @@ def should_apply(
     return False
 
 
-def set_timestamps(action_set, epoch: int) -> None:
+def set_timestamps(
+        action_set,
+        epoch: int
+    ) -> None:
     """
     Sets the GA time stamps to the current time to control
     the GA application frequency.
@@ -65,43 +67,67 @@ def set_timestamps(action_set, epoch: int) -> None:
     Parameters
     ----------
     action_set
-        population of classifiers
+        Population of classifiers
     epoch: int
-        current epoch
+        Current epoch
     """
     for cl in action_set:
         cl.tga = epoch
 
 
-def roulette_wheel_selection(population, fitnessfunc: Callable):
+def roulette_wheel_selection(
+        population,
+        fitnessfunc: Callable
+    ) -> tuple:
     """
-    Select two objects from population according
+    Selects two objects from population according
     to roulette-wheel selection.
 
     Parameters
     ----------
     population
-        population of classifiers
+        Population of classifiers
     fitnessfunc: Callable
-        function evaluating fitness for each classifier. Very often cl.q^3
+        Function evaluating fitness for each classifier.
+
     Returns
     -------
     tuple
-        two classifiers selected as parents
+        Two classifiers selected as parents
     """
-    choices = {cl: fitnessfunc(cl) for cl in population}
+    def _weighted_random_choice(choices: Dict):
+        max = sum(choices.values())
+        pick = random.uniform(0, max)
+        current = 0
+        for key, value in choices.items():
+            current += value
+            if current > pick:
+                return key
 
+    choices = {cl: fitnessfunc(cl) for cl in population}
     parent1 = _weighted_random_choice(choices)
     parent2 = _weighted_random_choice(choices)
-
     return parent1, parent2
 
 
-def behavioral_mutation(cl1, cl2, mu: float) -> None:
+def behavioral_mutation(
+        cl1,
+        cl2,
+        mu: float
+    ) -> None:
     """
     Executes a particular mutation in the behavioral classifiers.
     Specified attributes in classifier conditions are randomly
     generalized with `mu` probability depending on the other child.
+
+    Parameters
+    ----------
+    cl1
+        First behavioral classifier
+    cl2
+        Second behavioral classifier
+    mu
+        Mutation rate
     """
     for idx in range(len(cl1.condition)):
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
@@ -116,18 +142,34 @@ def behavioral_mutation(cl1, cl2, mu: float) -> None:
             continue
 
 
-def generalizing_mutation(cl, mu: float) -> None:
+def generalizing_mutation(
+        cl,
+        mu: float
+    ) -> None:
     """
     Executes the generalizing mutation in the classifier.
     Specified attributes in classifier conditions are randomly
     generalized with `mu` probability.
+
+    Parameters
+    ----------
+    cl1
+        First behavioral classifier
+    cl2
+        Second behavioral classifier
+    mu
+        Mutation rate
     """
+    # TODO : Inductive principles to check
     for idx, cond in enumerate(cl.condition):
         if cond != cl.cfg.classifier_wildcard and random.random() < mu:
             cl.condition.generalize(idx)
 
 
-def two_point_crossover(parent, donor) -> None:
+def two_point_crossover(
+        parent,
+        donor
+    ) -> None:
     """
     Executes two-point crossover using condition parts of two classifiers.
     Condition in both classifiers are changed.
@@ -139,6 +181,7 @@ def two_point_crossover(parent, donor) -> None:
     donor
         Classifier
     """
+    # TODO : Inductive principles to check
     left, right = sorted(np.random.choice(
         range(0, parent.cfg.classifier_length + 1), 2, replace=False))
 
@@ -161,23 +204,23 @@ def add_classifier(
         theta_exp: int
     )-> None:
     """
-    Find subsumer/similar classifier, if present - increase its numerosity,
+    Finds subsumer/similar classifier, if present - increase its numerosity,
     else add this new classifier
 
     Parameters
     ----------
     cl:
-        newly created classifier
+        Newly created classifier
     p: Perception
-        current perception
+        Current perception
     population:
-        population of classifiers
+        Population of classifiers
     match_set:
-        match set
+        Match set
     action_set:
-        action set
+        Action set
     theta_exp: int
-        subsumption experience threshold
+        Subsumption experience threshold
     """
     # Find_subsumers computes subsumer or classifier that are equal
     subsumers = find_subsumers(cl, action_set, theta_exp)
@@ -198,25 +241,31 @@ def add_classifier(
             old_cl.num += 1
 
 
-def delete_classifiers(population, match_set, action_set,
-                       insize: int, theta_as: int):
+def delete_classifiers(
+        population,
+        match_set,
+        action_set,
+        insize: int, 
+        theta_as: int
+    ) -> None:
     """
-    Make room for new classifiers
+    Makes room for new classifiers
 
     Parameters
     ----------
     population:
-
+        Whole population of classifiers
     match_set:
-    
+        Population of classifiers that match p0
     action_set:
-    
+        Population of classifiers from the matching that have the selection action
     insize: int
         number of children that will be inserted
     theta_as: int
         The action set size threshold (θas ∈ N) specifies
         the maximal number of classifiers in an action set.
     """
+    # TODO : Inductive principles to check
     while (insize + sum(cl.num for cl in action_set)) > theta_as:
         cl_del = None
 
@@ -241,22 +290,27 @@ def delete_classifiers(population, match_set, action_set,
                     lst.safe_remove(cl_del)
 
 
-def _is_preferred_to_delete(cl_del, cl) -> bool:
+def _is_preferred_to_delete(
+        cl_del,
+        cl
+    ) -> bool:
     """
     Compares two classifiers `cl_del` (marked for deletion) with `cl` to
     check whether `cl` should be deleted instead.
 
     Parameters
     ----------
-    cl_del: Classifier marked for deletion
-    
-    cl: Examined classifier
+    cl_del
+        Classifier marked for deletion
+    cl
+        Examined classifier
 
     Returns
     -------
     bool
         True if `cl` is "worse" than `cl_del`. False otherwise
     """
+    # TODO : Inductive principles to check
     if cl.q - cl_del.q < -0.1:
         return True
 
@@ -268,14 +322,3 @@ def _is_preferred_to_delete(cl_del, cl) -> bool:
                 return True
 
     return False
-
-
-def _weighted_random_choice(choices: Dict):
-    max = sum(choices.values())
-    pick = random.uniform(0, max)
-    current = 0
-
-    for key, value in choices.items():
-        current += value
-        if current > pick:
-            return key

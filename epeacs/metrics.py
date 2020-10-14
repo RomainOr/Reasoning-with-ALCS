@@ -5,7 +5,11 @@
 """
 
 
-def basic_metrics(trial: int, steps: int, reward: int):
+def basic_metrics(
+    trial: int,
+    steps: int, 
+    reward: int
+    ) -> dict:
     return {
         'trial': trial,
         'steps_in_trial': steps,
@@ -13,7 +17,10 @@ def basic_metrics(trial: int, steps: int, reward: int):
     }
 
 
-def population_metrics(population, environment):
+def population_metrics(
+        population,
+        environment
+    ):
     metrics = {
         'population': 0,
         'numerosity': 0,
@@ -27,9 +34,15 @@ def population_metrics(population, environment):
     return metrics
 
 
-def _maze_metrics(pop, env):
+def _maze_metrics(
+        pop,
+        env
+    ) -> dict:
 
-    def _maze_knowledge(population, environment) -> float:
+    def _maze_knowledge(
+            population,
+            environment
+        ) -> float:
         transitions = environment.env.get_all_possible_transitions()
         # Take into consideration only reliable classifiers
         reliable_classifiers = [cl for cl in population if cl.is_reliable()]
@@ -40,7 +53,7 @@ def _maze_metrics(pop, env):
             p0 = environment.env.maze.perception(*start)
             p1 = environment.env.maze.perception(*end)
             if any([True for cl in reliable_classifiers
-                    if cl.predicts_successfully(p0, action, p1)]):
+                    if cl.does_predict_successfully(p0, action, p1)]):
                 nr_correct += 1
         return nr_correct / len(transitions) * 100.0
 
@@ -52,7 +65,10 @@ def _maze_metrics(pop, env):
     return metrics
 
 
-def _how_many_peps_match_non_aliased_states(pop, env) -> int:
+def _how_many_peps_match_non_aliased_states(
+        pop,
+        env
+    ) -> int:
     counter = 0
     non_aliased_perceptions = env.env.get_all_non_aliased_states()
     enhanced_classifiers = [cl for cl in pop if cl.is_reliable() and cl.is_enhanced()]
@@ -63,7 +79,11 @@ def _how_many_peps_match_non_aliased_states(pop, env) -> int:
     return counter
 
 
-def _mean_reliable_classifier_specificity(pop, env) -> int:
+def _mean_reliable_classifier_specificity(
+        pop,
+        env
+    ) -> int:
+    # TODO : Return values for legacy cl, behavioral cl, enhanced cl, behavioral enhanced cl and all ?
     reliable_classifiers = [cl for cl in pop if cl.is_reliable()]
     if len(reliable_classifiers) > 0:
         return float(sum(cl.specificity for cl in reliable_classifiers)) / len(reliable_classifiers)
@@ -71,7 +91,7 @@ def _mean_reliable_classifier_specificity(pop, env) -> int:
         return 1.
 
 
-def _when_full_knowledge_is_achieved(metrics):
+def _when_full_knowledge_is_achieved(metrics) -> tuple:
     first_trial_when_full_knowledge = -1
     stable_trial_when_full_knowledge = -1
     last_trial_when_full_knowledge = -1
@@ -87,11 +107,20 @@ def _when_full_knowledge_is_achieved(metrics):
     return first_trial_when_full_knowledge, stable_trial_when_full_knowledge, last_trial_when_full_knowledge
 
 
-def _state_of_population(metrics, trial, step):
+def _state_of_population(
+        metrics,
+        trial, 
+        step
+    ) -> dict:
     return metrics[trial//step - 1]
 
 
-def _enhanced_effect_error(population, environment, classifier_length, random_attribute_length) -> float:
+def _enhanced_effect_error(
+        population,
+        environment,
+        classifier_length,
+        random_attribute_length
+    ) -> float:
     theoritical_probabilities = environment.env.get_theoritical_probabilities()
     # Accumulation of difference in probabilities
     error_old_pep = 0.
