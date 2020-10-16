@@ -171,27 +171,26 @@ def is_perceptual_aliasing_state(
     reachable_states = {}
     list_of_most_anticipated_state = []
     for i in range(nbr_of_actions):
-        if not most_experienced_classifiers[i].is_enhanced():
-            anticipation = _build_anticipation(p0, most_experienced_classifiers[i].effect[0])
-            reachable_states.update( {anticipation: 0} )
-            if anticipation in list_of_most_anticipated_state:
-                nbr_of_expected_transitions -= 1
-            elif anticipation == p0:
-                nbr_of_expected_transitions -= 1
-                list_of_most_anticipated_state.append(anticipation)
+        if most_experienced_classifiers[i].does_anticipate_change():
+            if not most_experienced_classifiers[i].is_enhanced():
+                anticipation = _build_anticipation(p0, most_experienced_classifiers[i].effect[0])
+                reachable_states.update( {anticipation: 0} )
+                if anticipation in list_of_most_anticipated_state:
+                    nbr_of_expected_transitions -= 1
+                else:
+                    list_of_most_anticipated_state.append(anticipation)
             else:
-                list_of_most_anticipated_state.append(anticipation)
+                effect_counter_dict = { _build_anticipation(p0, effect) : counter for effect, counter in zip(most_experienced_classifiers[i].effect.effect_list, most_experienced_classifiers[i].effect.effect_detailled_counter)}
+                reachable_states.update(effect_counter_dict)
+                most_anticipated_state = max(effect_counter_dict.items(), key=lambda x : x[1])
+                if most_anticipated_state[0] in list_of_most_anticipated_state:
+                    nbr_of_expected_transitions -= 1
+                else:
+                    list_of_most_anticipated_state.append(most_anticipated_state[0])
         else:
-            effect_counter_dict = { _build_anticipation(p0, effect) : counter for effect, counter in zip(most_experienced_classifiers[i].effect.effect_list, most_experienced_classifiers[i].effect.effect_detailled_counter)}
-            reachable_states.update(effect_counter_dict)
-            most_anticipated_state = max(effect_counter_dict.items(), key=lambda x : x[1])
-            if most_anticipated_state[0] in list_of_most_anticipated_state:
-                nbr_of_expected_transitions -= 1
-            elif most_anticipated_state[0] == p0:
-                nbr_of_expected_transitions -= 1
-                list_of_most_anticipated_state.append(most_anticipated_state[0])
-            else:
-                list_of_most_anticipated_state.append(most_anticipated_state[0])
+            nbr_of_expected_transitions -= 1
+            if p0 not in list_of_most_anticipated_state:
+                list_of_most_anticipated_state.append(p0)
     #Compute the number of reachables states
     nbr_of_reachable_states = len(reachable_states)
     if p0 in reachable_states:
