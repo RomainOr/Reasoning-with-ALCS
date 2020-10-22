@@ -192,6 +192,10 @@ class EPEACS(Agent):
             match_set, best_classifier, max_fitness_ra, max_fitness_rb = self.population.form_match_set(state)
 
             if steps > 0:
+                # TODO : Update experience of classifier to get clues about their usage
+                for cl in action_set:
+                    cl.increase_experience()
+                # Apply algorithms
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, max_fitness_ra, max_fitness_rb, self.cfg.beta_rl, self.cfg.gamma
                 )
@@ -216,6 +220,9 @@ class EPEACS(Agent):
                     steps += 1
 
             if done:
+                # TODO : Update experience of classifier to get clues about their usage
+                for cl in action_set:
+                    cl.increase_experience()
                 # Apply algorithms
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, 0., 0., self.cfg.beta_rl, self.cfg.gamma

@@ -16,7 +16,7 @@ from epeacs.agents.epeacs import Configuration, Condition, EffectList, Effect, P
 class Classifier:
 
     __slots__ = ['condition', 'action', 'behavioral_sequence', 'effect', 'mark', 'q', 'ra', 'rb',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'pai_state']
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'pai_state', 'err']
 
     # In paper it's advised to set experience and reward of newly generated
     # classifier to 0. However in original code these values are initialized
@@ -74,6 +74,7 @@ class Classifier:
             self.pai_state = pai_state
         else:
             self.pai_state = Perception.empty()
+        self.err = 0.
 
 
     def __eq__(self, other):
@@ -95,7 +96,7 @@ class Classifier:
 
     def __repr__(self):
         return f"{self.condition} {self.action} {str(self.behavioral_sequence)} {str(self.effect)} ({str(self.mark)})\n" \
-            f"q: {self.q:<6.4} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4}\n" \
+            f"q: {self.q:<6.4} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} err: {self.err:<6.4}\n" \
             f"exp: {self.exp:<5} num: {self.num} ee: {self.ee} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \
             f"tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n" \
 
@@ -166,9 +167,10 @@ class Classifier:
         Float
             Fitness value
         """
+        epsilon = 1e-6
         max_r = max(self.ra, self.rb)
         min_r = min(self.ra, self.rb)
-        diff = max_r - min_r
+        diff = max_r - min_r + epsilon
         if self.behavioral_sequence:
             return self.q * (max_r - diff * len(self.behavioral_sequence) / self.cfg.bs_max)
         return self.q * max_r
