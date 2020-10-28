@@ -8,9 +8,9 @@ from __future__ import annotations
 
 from typing import Optional
 
-from epeacs import Perception
-from epeacs.agents import AbstractPerception
-from epeacs.agents.epeacs import Configuration, Effect
+from beacs import Perception
+from beacs.agents import AbstractPerception
+from beacs.agents.beacs import Configuration, Effect
 
 class EffectList():
     """

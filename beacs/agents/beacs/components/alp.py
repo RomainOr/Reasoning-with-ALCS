@@ -7,9 +7,9 @@
 from random import random
 from typing import Optional
 
-from epeacs import Perception
-from epeacs.agents.epeacs import Classifier, ClassifiersList, Condition, Configuration, PMark
-from epeacs.agents.epeacs.components.aliasing_detection import is_state_aliased
+from beacs import Perception
+from beacs.agents.beacs import Classifier, ClassifiersList, Condition, Configuration, PMark
+from beacs.agents.beacs.components.aliasing_detection import is_state_aliased
 
 
 def cover(
@@ -81,7 +81,7 @@ def expected_case(
         cl.increase_quality()
         return is_aliasing_detected, None
 
-    child = cl.copy_from(cl, p1, time)
+    child = cl.copy_from(cl, p0, p1, time)
 
     no_spec = len(cl.specified_unchanging_attributes)
     no_spec_new = diff.specificity
@@ -127,7 +127,7 @@ def unexpected_case(
     cl.set_mark(p0)
     if not cl.effect.is_specializable(p0, p1):
         return None
-    child = cl.copy_from(cl, p1, time)
+    child = cl.copy_from(cl, p0, p1, time)
     child.specialize(p0, p1)
     if child.q < 0.5:
         child.q = 0.5

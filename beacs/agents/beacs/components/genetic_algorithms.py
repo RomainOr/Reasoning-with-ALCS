@@ -9,8 +9,8 @@ from typing import Callable, Dict
 
 import numpy as np
 
-from epeacs import Perception
-from epeacs.agents.epeacs.components.subsumption import find_subsumers
+from beacs import Perception
+from beacs.agents.beacs.components.subsumption import find_subsumers
 
 
 def should_apply(

@@ -9,8 +9,8 @@ from __future__ import annotations
 import random
 from typing import Optional, Union, Callable, List
 
-from epeacs import Perception
-from epeacs.agents.epeacs import Configuration, Condition, EffectList, Effect, PMark
+from beacs import Perception
+from beacs.agents.beacs import Configuration, Condition, EffectList, Effect, PMark
 
 
 class Classifier:
@@ -105,7 +105,8 @@ class Classifier:
     def copy_from(
             cls,
             old_cls: Classifier,
-            p: Perception,
+            p0: Perception,
+            p1: Perception,
             time: int
         ) -> Classifier:
         """
@@ -149,8 +150,8 @@ class Classifier:
                     if effect[idx] != effect.wildcard:
                         change_anticipated = True
                         break
-                if change_anticipated and p[idx] != new_cls.condition[idx]:
-                    new_cls.effect[0][idx] = p[idx]
+                if change_anticipated and p1[idx] != new_cls.condition[idx]:
+                    new_cls.effect[0][idx] = p1[idx]
         else:
             for idx in range(len(new_cls.effect[0])):
                 new_cls.effect[0][idx] = old_cls.effect[0][idx]

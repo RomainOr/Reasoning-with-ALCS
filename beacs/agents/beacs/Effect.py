@@ -6,8 +6,8 @@
 
 from __future__ import annotations
 
-from epeacs import Perception
-from epeacs.agents import AbstractPerception
+from beacs import Perception
+from beacs.agents import AbstractPerception
 
 class Effect(AbstractPerception):
     """

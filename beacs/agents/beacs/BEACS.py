@@ -6,14 +6,14 @@
 
 from typing import List, Tuple
 
-from epeacs import Perception
-from epeacs.agents.Agent import Agent, TrialMetrics
-from epeacs.agents.epeacs import Classifier, ClassifiersList, Configuration
-from epeacs.agents.epeacs.Condition import Condition
-from epeacs.agents.epeacs.Effect import Effect
-from epeacs.agents.epeacs.components.action_selection import choose_classifier
+from beacs import Perception
+from beacs.agents.Agent import Agent, TrialMetrics
+from beacs.agents.beacs import Classifier, ClassifiersList, Configuration
+from beacs.agents.beacs.Condition import Condition
+from beacs.agents.beacs.Effect import Effect
+from beacs.agents.beacs.components.action_selection import choose_classifier
 
-class EPEACS(Agent):
+class BEACS(Agent):
 
     def __init__(self,
             cfg: Configuration,
@@ -99,6 +99,7 @@ class EPEACS(Agent):
                     self.population,
                     match_set,
                     action_set,
+                    prev_state,
                     state,
                     self.cfg.theta_ga,
                     self.cfg.mu,
@@ -159,6 +160,7 @@ class EPEACS(Agent):
                     self.population,
                     ClassifiersList(),
                     action_set,
+                    prev_state,
                     state,
                     self.cfg.theta_ga,
                     self.cfg.mu,

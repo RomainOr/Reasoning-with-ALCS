@@ -9,8 +9,8 @@ from __future__ import annotations
 import random
 from typing import Callable, Union
 
-from epeacs import Perception
-from epeacs.agents import AbstractPerception
+from beacs import Perception
+from beacs.agents import AbstractPerception
 
 
 class Condition(AbstractPerception):

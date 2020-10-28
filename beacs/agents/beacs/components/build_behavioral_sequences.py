@@ -6,8 +6,8 @@
 
 from typing import Optional
 
-from epeacs import Perception
-from epeacs.agents.epeacs import Classifier
+from beacs import Perception
+from beacs.agents.beacs import Classifier
 
 def updated_passthrough(
         child_effect, 

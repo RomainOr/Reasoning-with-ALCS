@@ -10,14 +10,14 @@ import random
 from itertools import chain
 from typing import Optional, List
 
-import epeacs.agents.epeacs.components.alp as alp
-import epeacs.agents.epeacs.components.genetic_algorithms as ga
-import epeacs.agents.epeacs.components.reinforcement_learning as rl
-import epeacs.agents.epeacs.components.aliasing_detection as pai
-from epeacs import Perception, TypedList
-from epeacs.agents.epeacs import Classifier, Configuration
-from epeacs.agents.epeacs.components.add_classifier import add_classifier
-from epeacs.agents.epeacs.components.build_behavioral_sequences import create_behavioral_classifier
+import beacs.agents.beacs.components.alp as alp
+import beacs.agents.beacs.components.genetic_algorithms as ga
+import beacs.agents.beacs.components.reinforcement_learning as rl
+import beacs.agents.beacs.components.aliasing_detection as pai
+from beacs import Perception, TypedList
+from beacs.agents.beacs import Classifier, Configuration
+from beacs.agents.beacs.components.add_classifier import add_classifier
+from beacs.agents.beacs.components.build_behavioral_sequences import create_behavioral_classifier
 
 class ClassifiersList(TypedList):
     """
@@ -275,7 +275,8 @@ class ClassifiersList(TypedList):
             population: ClassifiersList,
             match_set: ClassifiersList,
             action_set: ClassifiersList,
-            p: Perception,
+            p0: Perception,
+            p1: Perception,
             theta_ga: int,
             mu: float,
             chi: float,
@@ -298,8 +299,8 @@ class ClassifiersList(TypedList):
                 lambda cl: pow(cl.q, 3) * cl.num
             )
 
-            child1 = Classifier.copy_from(parent1, p, time)
-            child2 = Classifier.copy_from(parent2, p, time)
+            child1 = Classifier.copy_from(parent1, p0, p1, time)
+            child2 = Classifier.copy_from(parent2, p0, p1, time)
 
             if do_ga:
                 # Execute mutation
@@ -338,7 +339,7 @@ class ClassifiersList(TypedList):
             for child in unique_children:
                 ga.add_classifier(
                     child,
-                    p,
+                    p1,
                     population,
                     match_set,
                     action_set,

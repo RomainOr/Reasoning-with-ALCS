@@ -7,7 +7,7 @@
 import random
 from itertools import groupby
 
-from epeacs.agents.epeacs import Classifier
+from beacs.agents.beacs import Classifier
 
 
 def choose_classifier(

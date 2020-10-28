@@ -66,9 +66,9 @@ def update_classifier_double_q_learning(
         Reinforcement rate
     """
     if random.random() < 0.5:
-        cl.err += beta_rl * ((step_reward + gamma * max_fitness_rb - cl.ra) - cl.err)
+        cl.err += beta_rl * (abs(step_reward + gamma * max_fitness_rb - cl.ra) - cl.err)
         cl.ra += beta_rl * (step_reward + gamma * max_fitness_rb - cl.ra)
     else:
-        cl.err += beta_rl * ((step_reward + gamma * max_fitness_ra - cl.rb) - cl.err)
+        cl.err += beta_rl * (abs(step_reward + gamma * max_fitness_ra - cl.rb) - cl.err)
         cl.rb += beta_rl * (step_reward + gamma * max_fitness_ra - cl.rb)
     cl.ir += beta_rl * (step_reward - cl.ir)

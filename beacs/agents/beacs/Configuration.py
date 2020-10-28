@@ -6,7 +6,7 @@
 
 from typing import Callable
 
-from epeacs.agents import EnvironmentAdapter
+from beacs.agents import EnvironmentAdapter
 
 
 class Configuration:
@@ -35,7 +35,7 @@ class Configuration:
             chi: float=0.8,
             bs_max: int=0) -> None:
         """
-        Creates the configuration object used during training the epeacs agent.
+        Creates the configuration object used during training the beacs agent.
 
         classifier_length
             length of the condition and effect strings
@@ -44,7 +44,7 @@ class Configuration:
         classifier_wildcard
 
         environment_adapter
-            EnvironmentAdapter class EPEACS needs to use
+            EnvironmentAdapter class BEACS needs to use
             to interact with the environment
         user_metrics_collector_fcn
 

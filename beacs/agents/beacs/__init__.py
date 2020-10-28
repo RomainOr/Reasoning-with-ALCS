@@ -5,4 +5,4 @@ from .EffectList import EffectList
 from .PMark import PMark
 from .Classifier import Classifier
 from .ClassifiersList import ClassifiersList
-from .EPEACS import EPEACS
+from .BEACS import BEACS

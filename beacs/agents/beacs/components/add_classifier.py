@@ -1,4 +1,4 @@
-from epeacs.agents.epeacs.components.subsumption import does_subsume
+from beacs.agents.beacs.components.subsumption import does_subsume
 
 
 def add_classifier(
