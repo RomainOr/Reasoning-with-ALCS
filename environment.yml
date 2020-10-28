@@ -1,4 +1,4 @@
-name: bacs
+name: beacs
 channels:
   - defaults
 dependencies:

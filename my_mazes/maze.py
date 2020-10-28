@@ -93,7 +93,7 @@ class Maze:
         else:
             nw = str(self.matrix[pos_y - 1, pos_x - 1])
 
-        return n, ne, e, se, s, sw, w, nw#, str(random.randint(0, 1))
+        return n, ne, e, se, s, sw, w, nw
 
     def is_wall(self, pos_x, pos_y):
         return self.matrix[pos_y, pos_x] == WALL_MAPPING
