@@ -11,7 +11,7 @@ from typing import Optional
 from beacs import Perception, UBR
 from beacs.agents.beacs import Configuration, Effect
 
-class EffectList():
+class Anticipation():
     """
     List of anticipations
     """
@@ -19,10 +19,10 @@ class EffectList():
     def __init__(self, effect: Optional[Effect] = None, wildcard='#'):
         if effect:
             self.effect_list = [effect]
-            self.effect_detailled_counter = [1]
+            self.effect_counter = [1]
         else:
             self.effect_list = []
-            self.effect_detailled_counter = []
+            self.effect_counter = []
         self.wildcard = wildcard
 
 
@@ -43,43 +43,48 @@ class EffectList():
 
 
     def __str__(self):
-        return "("+", ".join("{}:#{}".format(str(effect), counter) for effect, counter in zip(self.effect_list, self.effect_detailled_counter)) + ")"
+        return "("+", ".join("{}:#{}".format(str(effect), counter) for effect, counter in zip(self.effect_list, self.effect_counter)) + ")"
 
 
     @classmethod
-    def enhanced_effect(
+    def enhanced(
             cls, 
-            effectlist1: EffectList,
-            effectlist2: EffectList
-        ) -> EffectList:
+            effectlist1: Anticipation,
+            effectlist2: Anticipation
+        ) -> Anticipation:
         """
         Creates a new enhanced effectlist by merging two effect lists.
         
         Parameters
         ----------
-        effectlist1: EffectList
+        effectlist1: Anticipation
             First effect list
-        effectlist2: EffectList
+        effectlist2: Anticipation
             Second effect list
 
         Returns
         -------
-        EffectList
+        Anticipation
             New effect list by merging both lists
         """
         result = cls()
         result.effect_list.extend(effectlist1.effect_list)
-        result.effect_detailled_counter.extend(effectlist1.effect_detailled_counter)
+        result.effect_counter.extend(effectlist1.effect_counter)
         for idxe, e in enumerate(effectlist2.effect_list):
             is_updated = False
             for idxr, r in enumerate(result.effect_list):
-                if r == e: # NOTE to refine for UBR
-                    result.effect_detailled_counter[idxr] += effectlist2.effect_detailled_counter[idxe]
+                if r.subsumes(e):
+                    result.effect_counter[idxr] += effectlist2.effect_counter[idxe]
+                    is_updated = True
+                    break
+                if e.subsumes(r):
+                    result.effect_list[idxr] = e
+                    result.effect_counter[idxr] += effectlist2.effect_counter[idxe]
                     is_updated = True
                     break
             if not is_updated:
                 result.effect_list.append(e)
-                result.effect_detailled_counter.append(effectlist2.effect_detailled_counter[idxe])
+                result.effect_counter.append(effectlist2.effect_counter[idxe])
         return result
             
 
@@ -94,7 +99,7 @@ class EffectList():
         bool
             True if the effect list predicts a change
         """
-        index = self.effect_detailled_counter.index(max(self.effect_detailled_counter))
+        index = self.effect_counter.index(max(self.effect_counter))
         return self.effect_list[index].specify_change
 
 
@@ -131,7 +136,7 @@ class EffectList():
         bool
             True if specializable
         """
-        index = self.effect_detailled_counter.index(max(self.effect_detailled_counter))
+        index = self.effect_counter.index(max(self.effect_counter))
         return self.effect_list[index].is_specializable(p0, p1)
 
 
@@ -163,15 +168,15 @@ class EffectList():
 
     def subsumes(
             self,
-            other: EffectList
+            other: Anticipation
         ) -> bool:
         """
         Determines if the effect list subsumes another effect list.
 
         Parameters
         ----------
-        other: EffectList
-            Other EffectList
+        other: Anticipation
+            Other Anticipation
 
         Returns
         -------
@@ -182,7 +187,7 @@ class EffectList():
         return set(other.effect_list) <= set(self.effect_list)
 
 
-    def update_effect_detailled_counter(
+    def update_anticipation_counter(
             self,
             p0: Perception,
             p1: Perception
@@ -199,7 +204,7 @@ class EffectList():
         """
         for idx, effect in enumerate(self.effect_list):
             if effect.does_anticipate_correctly(p0, p1):
-                self.effect_detailled_counter[idx] += 1
+                self.effect_counter[idx] += 1
                 break
 
 
@@ -211,6 +216,7 @@ class EffectList():
         """
         Computes from raw observations the probability to get each effect attribute
         for a position in the anticipation.
+        Only usefull for metrics computation.
 
         Parameters
         ----------
@@ -225,14 +231,14 @@ class EffectList():
             The respective probabilities
         """
         # NOTE to refine for UBR
-        total_counter = float(sum(self.effect_detailled_counter))
+        total_counter = float(sum(self.effect_counter))
         result = {}
         for idx, effect in enumerate(self.effect_list):
             if effect[index] == effect.wildcard:
-                result[int(perception[index])] = result.get(int(perception[index]), 0) + self.effect_detailled_counter[idx] / total_counter
+                result[int(perception[index])] = result.get(int(perception[index]), 0) + self.effect_counter[idx] / total_counter
             else:
                 if isinstance(effect[index], UBR) and effect[index].spread == 0.:
-                    result[int(effect[index].lower_bound)] = result.get(int(effect[index].lower_bound), 0) + self.effect_detailled_counter[idx] / total_counter
+                    result[int(effect[index].lower_bound)] = result.get(int(effect[index].lower_bound), 0) + self.effect_counter[idx] / total_counter
                 else:
-                    result[int(effect[index])] = result.get(int(effect[index]), 0) + self.effect_detailled_counter[idx] / total_counter
+                    result[int(effect[index])] = result.get(int(effect[index]), 0) + self.effect_counter[idx] / total_counter
         return result, result

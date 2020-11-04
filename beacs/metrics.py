@@ -129,7 +129,7 @@ def _enhanced_effect_error(
     for perception, action_and_probabiltiies in theoritical_probabilities.items():
         for action, probabilities_and_states in action_and_probabiltiies.items():
             # Try to find a suitable one, even if it is unreliable
-            unreliable_classifiers = [cl for cl in population if cl.condition.does_match(perception) and cl.action ==  action and cl.behavioral_sequence is None]
+            unreliable_classifiers = [cl for cl in population if cl.does_match(perception) and cl.action ==  action and cl.behavioral_sequence is None]
             if len(unreliable_classifiers) > 0:
                 # Try to promote a reliable classifier
                 reliable_classifiers = [cl for cl in unreliable_classifiers if cl.is_reliable()]
@@ -145,7 +145,7 @@ def _enhanced_effect_error(
             if most_experienced_classifier:
                 for direction in prob:
                     # First, effect refinement
-                    old_effect_attribute, new_effect_attribute = most_experienced_classifier.effect.getEffectAttribute(perception, direction)
+                    old_effect_attribute, new_effect_attribute = most_experienced_classifier.anticipation.getEffectAttribute(perception, direction)
                     theoritical_prob_of_attribute = prob[direction]
                     if old_effect_attribute == '#':
                         if most_experienced_classifier.condition[direction] == '#':
@@ -160,7 +160,7 @@ def _enhanced_effect_error(
                         error_new_pep += abs(theoritical_prob_of_attribute[key] - new_effect_attribute.get(key, 0.0))
                 for ra in range(classifier_length-random_attribute_length, classifier_length):
                     # First, effect refinement
-                    old_effect_attribute, new_effect_attribute = most_experienced_classifier.effect.getEffectAttribute(perception,ra)
+                    old_effect_attribute, new_effect_attribute = most_experienced_classifier.anticipation.getEffectAttribute(perception,ra)
                     # We consider here the probabilities are defined as 50% to get 1 and 50% to get 0. Could be automated and linked to environmental properties
                     theoritical_prob_of_attribute = {1:0.5, 0:0.5}
                     if old_effect_attribute == '#':

@@ -97,9 +97,17 @@ class Effect(AbstractPerception):
         return all(_item_anticipate_change(self[idx], p0[idx], p1[idx], self.wildcard) for idx in range(len(p0)))
 
 
-    # NOTE to refine for UBR
-    #def subsumes(self, other: Effect) -> bool:
-    
+    def subsumes(self, other: Effect) -> bool:
+        for ei, oi in zip(self, other):
+            if isinstance(ei, UBR) and isinstance(oi, UBR):
+                if not ei.subsumes(oi): return False
+            elif not isinstance(ei, UBR) and isinstance(oi, UBR):
+                return False
+            elif isinstance(ei, UBR) and not isinstance(oi, UBR):
+                return False
+            else:
+                if ei != oi: return False
+        return True
 
     def __str__(self):
         return ''.join(str(attr) for attr in self)

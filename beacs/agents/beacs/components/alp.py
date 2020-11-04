@@ -69,7 +69,7 @@ def expected_case(
     is_aliasing_detected = False
 
     if cl.is_enhanced():
-        cl.effect.update_effect_detailled_counter(p0, p1)
+        cl.update_anticipation_counter(p0, p1)
         is_aliasing_detected = True
 
     if is_state_aliased(cl.condition, cl.mark, p0):
@@ -102,7 +102,7 @@ def expected_case(
             diff.generalize_specific_attribute_randomly()
             spec_new -= 1
 
-    child.condition.specialize_with_condition(diff)
+    child.specialize_with_condition(diff)
 
     if child.q < 0.5:
         child.q = 0.5
@@ -125,7 +125,7 @@ def unexpected_case(
     """
     cl.decrease_quality()
     cl.set_mark(p0)
-    if not cl.effect.is_specializable(p0, p1):
+    if not cl.is_specializable(p0, p1):
         return None
     child = cl.copy_from(cl, p0, p1, time)
     child.specialize(p0, p1)

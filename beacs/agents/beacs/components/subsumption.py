@@ -31,7 +31,7 @@ def find_subsumers(
         are first)
     """
     subsumers = [sub for sub in population if does_subsume(sub, cl, theta_exp)]
-    return sorted(subsumers, key=lambda cl: cl.condition.specificity)
+    return sorted(subsumers, key=lambda cl: cl.specificity)
 
 
 def does_subsume(
@@ -62,7 +62,7 @@ def does_subsume(
         cl.is_more_general(other_cl) and \
             cl.action == other_cl.action and \
                 cl.behavioral_sequence == other_cl.behavioral_sequence and \
-                    cl.effect.subsumes(other_cl.effect):
+                    cl.anticipation.subsumes(other_cl.anticipation):
         return True
 
     return False

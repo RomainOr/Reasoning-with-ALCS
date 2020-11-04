@@ -132,12 +132,12 @@ def behavioral_mutation(
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] == cl2.cfg.classifier_wildcard and \
               random.random() < mu:
-            cl1.condition.generalize(idx)
+            cl1.generalize_condition_attribute(idx)
             continue
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
               random.random() < mu:
-            cl2.condition.generalize(idx)
+            cl2.generalize_condition_attribute(idx)
             continue
 
 
@@ -162,7 +162,7 @@ def generalizing_mutation(
     # NOTE refine with UBR ?
     for idx, cond in enumerate(cl.condition):
         if cond != cl.cfg.classifier_wildcard and random.random() < mu:
-            cl.condition.generalize(idx)
+            cl.generalize_condition_attribute(idx)
 
 
 def two_point_crossover(
@@ -234,7 +234,7 @@ def add_classifier(
         else:
             population.append(cl)
             action_set.append(cl)
-            if match_set is not None and cl.condition.does_match(p):
+            if match_set is not None and cl.does_match(p):
                 match_set.append(cl)
     else:
         old_cl = subsumers[0]

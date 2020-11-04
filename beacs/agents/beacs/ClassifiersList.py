@@ -52,7 +52,7 @@ class ClassifiersList(TypedList):
         max_fitness_ra = 0.
         max_fitness_rb = 0.
         for cl in self:
-            if cl.condition.does_match(situation):
+            if cl.does_match(situation):
                 matching.append(cl)
                 # TODO : Based on hypothesis that a change should be anticipted
                 if cl.does_anticipate_change():
@@ -112,7 +112,7 @@ class ClassifiersList(TypedList):
         if len(candidates) < 2:
             return
         for candidate in candidates:
-            candidates2 = [cl for cl in candidates if cl.mark == candidate.mark and not cl.effect.subsumes(candidate.effect)]
+            candidates2 = [cl for cl in candidates if cl.mark == candidate.mark and not cl.anticipation.subsumes(candidate.anticipation)]
             if len(candidates2) > 0:
                 merger = random.choice(candidates2)
                 new_classifier = candidate.merge_with(merger, time)
@@ -155,7 +155,7 @@ class ClassifiersList(TypedList):
 
         # Create new behavioral classifiers
         if p0 in pai_states_memory:
-            pop_for_addition = [cl for cl in population if cl.behavioral_sequence and cl.condition.does_match(penultimate_classifier.condition)]
+            pop_for_addition = [cl for cl in population if cl.behavioral_sequence and cl.does_match(penultimate_classifier.condition)]
             for candidate in potential_cls_for_pai:
                 new_cl = create_behavioral_classifier(penultimate_classifier, candidate, p1, p0, time)
                 if new_cl:
@@ -248,7 +248,7 @@ class ClassifiersList(TypedList):
         # Merge classifiers from new_list into self and population
         population.extend(new_list)
         if match_set is not None:
-            new_matching = [cl for cl in new_list if cl.condition.does_match(p1)]
+            new_matching = [cl for cl in new_list if cl.does_match(p1)]
             match_set.extend(new_matching)
         if action_set:
             new_action_cls = [cl for cl in new_list if cl.action == action_set[0].action and cl.behavioral_sequence == action_set[0].behavioral_sequence]
@@ -312,7 +312,7 @@ class ClassifiersList(TypedList):
 
                 # Execute cross-over
                 if random.random() < chi and not is_behavioral_action_set:
-                    if child1.effect == child2.effect:
+                    if child1.anticipation == child2.anticipation:
                         ga.two_point_crossover(child1, child2)
 
                         # Update quality and reward
@@ -324,8 +324,7 @@ class ClassifiersList(TypedList):
             child2.q /= 2
 
             # We are interested only in classifiers with specialized condition
-            unique_children = {cl for cl in [child1, child2]
-                               if cl.condition.specificity > 0}
+            unique_children = {cl for cl in [child1, child2] if cl.specificity > 0}
 
             ga.delete_classifiers(
                 population,

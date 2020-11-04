@@ -10,12 +10,12 @@ import random
 from typing import Optional, Union, Callable, List
 
 from beacs import Perception, UBR
-from beacs.agents.beacs import Configuration, Condition, EffectList, Effect, PMark
+from beacs.agents.beacs import Configuration, Condition, Anticipation, Effect, PMark
 
 
 class Classifier:
 
-    __slots__ = ['condition', 'action', 'behavioral_sequence', 'effect', 'mark', 'q', 'ra', 'rb',
+    __slots__ = ['condition', 'action', 'behavioral_sequence', 'anticipation', 'mark', 'q', 'ra', 'rb',
                  'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'pai_state', 'err']
 
     # In paper it's advised to set experience and reward of newly generated
@@ -26,7 +26,7 @@ class Classifier:
             condition: Union[Condition, str, None] = None,
             action: Optional[int] = None,
             behavioral_sequence: Optional[List[int]] = None,
-            effect: Optional[EffectList] = None,
+            anticipation: Optional[Anticipation] = None,
             quality: float=0.5,
             rewarda: float=0.,
             rewardb: float=0.,
@@ -57,7 +57,7 @@ class Classifier:
         self.condition = _build_perception_string(Condition, condition)
         self.action = action
         self.behavioral_sequence = behavioral_sequence
-        self.effect = EffectList(_build_perception_string(Effect, effect), self.cfg.classifier_wildcard)
+        self.anticipation = Anticipation(_build_perception_string(Effect, anticipation), self.cfg.classifier_wildcard)
         self.mark = PMark(cfg=self.cfg)
         self.q = quality
         self.ra = rewarda
@@ -81,7 +81,7 @@ class Classifier:
         if self.condition == other.condition and \
                 self.action == other.action and \
                 self.behavioral_sequence == other.behavioral_sequence and \
-                self.effect == other.effect:
+                self.anticipation == other.anticipation:
             return True
         return False
 
@@ -91,11 +91,11 @@ class Classifier:
 
 
     def __hash__(self):
-        return hash((str(self.condition), self.action, str(self.effect)))
+        return hash((str(self.condition), self.action, str(self.anticipation)))
 
 
     def __repr__(self):
-        return f"{self.condition} {self.action} {str(self.behavioral_sequence)} {str(self.effect)} ({str(self.mark)})\n" \
+        return f"{self.condition} {self.action} {str(self.behavioral_sequence)} {str(self.anticipation)} ({str(self.mark)})\n" \
             f"q: {self.q:<6.4} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} err: {self.err:<6.4}\n" \
             f"exp: {self.exp:<5} num: {self.num} ee: {self.ee} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \
             f"tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n" \
@@ -144,17 +144,17 @@ class Classifier:
             pai_state=old_cls.pai_state
         )
         if old_cls.is_enhanced():
-            for idx in range(len(new_cls.effect[0])):
+            for idx in range(len(new_cls.anticipation[0])):
                 change_anticipated = False
-                for effect in old_cls.effect.effect_list:
+                for effect in old_cls.anticipation.effect_list:
                     if effect[idx] != effect.wildcard:
                         change_anticipated = True
                         break
                 if change_anticipated and p1[idx] not in new_cls.condition[idx]:
-                    new_cls.effect[0][idx] = UBR(p1[idx], p1[idx])
+                    new_cls.anticipation[0][idx] = UBR(p1[idx], p1[idx])
         else:
-            for idx in range(len(new_cls.effect[0])):
-                new_cls.effect[0][idx] = old_cls.effect[0][idx]
+            for idx in range(len(new_cls.anticipation[0])):
+                new_cls.anticipation[0][idx] = old_cls.anticipation[0][idx]
         return new_cls
 
 
@@ -205,7 +205,7 @@ class Classifier:
             Specificity value
         """
         # NOTE refine with UBR ?
-        return self.condition.specificity / len(self.condition)
+        return self.condition.specificity
 
 
     def is_enhanced(self) -> bool:
@@ -217,7 +217,7 @@ class Classifier:
         bool
             True if the classifier is enhanced
         """
-        return self.effect.is_enhanced()
+        return self.anticipation.is_enhanced()
 
 
     def is_reliable(self) -> bool:
@@ -278,6 +278,30 @@ class Classifier:
         return self.condition.specificity <= other.condition.specificity
 
 
+    def is_specializable(
+            self,
+            p0: Perception,
+            p1: Perception
+        ) -> bool:
+        """
+        Determines if the effect part can be modified to anticipate
+        changes from `p0` to `p1` correctly by only specializing attributes.
+
+        Parameters
+        ----------
+        p0: Perception
+            Previous perception
+        p1: Perception
+            Current perception
+
+        Returns
+        -------
+        bool
+            True if specializable
+        """
+        return self.anticipation.is_specializable(p0, p1)
+
+
     def does_anticipate_change(self) -> bool:
         """
         Checks whether any change in environment is anticipated.
@@ -287,10 +311,13 @@ class Classifier:
         bool
             True if the effect part contains any specified attributes
         """
-        return self.effect.specify_change
+        return self.anticipation.specify_change
 
 
-    def does_match(self, situation: Perception) -> bool:
+    def does_match(
+            self,
+            other: Union[Perception, Condition]
+        ) -> bool:
         """
         Returns if the classifier matches the situation.
 
@@ -302,7 +329,7 @@ class Classifier:
         -------
         bool
         """
-        return self.condition.does_match(situation)
+        return self.condition.does_match(other)
 
 
     def does_anticipate_correctly(
@@ -330,7 +357,7 @@ class Classifier:
         bool
             True if classifier's effect pat anticipates correctly
         """
-        return self.effect.does_anticipate_correctly(previous_situation, situation)
+        return self.anticipation.does_anticipate_correctly(previous_situation, situation)
 
 
     def does_predict_successfully(
@@ -421,6 +448,24 @@ class Classifier:
         self.talp = time
 
 
+    def update_anticipation_counter(
+            self,
+            p0: Perception,
+            p1: Perception
+        ) -> None:
+        """
+        Updates the counter of respective effect when it correctly anticipates.
+
+        Parameters
+        ----------
+        p0: Perception
+            Previous perception
+        p1: Perception
+            Current perception
+        """
+        self.anticipation.update_anticipation_counter(p0,p1)
+
+
     def specialize(
             self,
             previous_situation: Perception,
@@ -439,16 +484,36 @@ class Classifier:
             Perception related to a state following the action
         """
         for idx, _ in enumerate(situation):
-            if previous_situation[idx] != situation[idx] and self.effect[0][idx] == self.cfg.classifier_wildcard:
-                self.effect[0][idx] = UBR(situation[idx], situation[idx])
+            if previous_situation[idx] != situation[idx] and self.anticipation[0][idx] == self.cfg.classifier_wildcard:
+                self.anticipation[0][idx] = UBR(situation[idx], situation[idx])
                 self.condition[idx] = UBR(previous_situation[idx], previous_situation[idx])
+
+
+    def specialize_with_condition(
+            self,
+            other: Condition
+        ) -> None:
+        """
+        Specializes the condition with another one.
+
+        Parameters
+        ----------
+        other: Condition
+            Condition object
+        """
+        self.condition.specialize_with_condition(other)
+
+
+    def generalize_condition_attribute(self, idx):
+        """
+        Generalizes one attribute in the condition at idx.
+        """
+        self.condition.generalize(idx)
 
 
     def generalize_unchanging_condition_attribute(self):
         """
         Generalizes one randomly unchanging attribute in the condition.
-        An unchanging attribute is one that is anticipated not to change
-        in the effect part.
         """
         ridx = random.choice(self.specified_unchanging_attributes)
         self.condition.generalize(ridx)
@@ -488,8 +553,8 @@ class Classifier:
         )
         # NOTE refine with UBR ?
         result.condition = Condition(self.condition)
-        result.condition.specialize_with_condition(other_classifier.condition)
-        result.effect = EffectList.enhanced_effect(
-            self.effect, 
-            other_classifier.effect)
+        result.specialize_with_condition(other_classifier.condition)
+        result.anticipation = Anticipation.enhanced(
+            self.anticipation, 
+            other_classifier.anticipation)
         return result

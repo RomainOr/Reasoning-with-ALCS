@@ -112,6 +112,6 @@ def create_behavioral_classifier(
             # Thus, we garantee the creation of a classifier that can be used within the environment.
             child.condition = penultimate_classifier.condition
             # Passthrough operation on child effect
-            updated_passthrough(child.effect[0], penultimate_classifier.effect, cl.effect, p1, child.condition)
+            updated_passthrough(child.anticipation[0], penultimate_classifier.anticipation, cl.anticipation, p1, child.condition)
             return child
     return None
