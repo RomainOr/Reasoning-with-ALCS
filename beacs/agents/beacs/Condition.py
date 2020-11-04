@@ -9,7 +9,7 @@ from __future__ import annotations
 import random
 from typing import Callable, Union
 
-from beacs import Perception
+from beacs import Perception, UBR
 from beacs.agents import AbstractPerception
 
 
@@ -75,7 +75,10 @@ class Condition(AbstractPerception):
         position: int
             Index to update
         """
-        self[position] = self.wildcard
+        if isinstance(self[position], UBR):
+            self[position] = self.wildcard
+        else:
+            self[position] = self.wildcard
 
 
     def generalize_specific_attribute_randomly(
@@ -116,26 +119,13 @@ class Condition(AbstractPerception):
             True if condition match given list, False otherwise
         """
         for ci, oi in zip(self, other):
-            if ci != self.wildcard and oi != self.wildcard and ci != oi:
+            if isinstance(ci, UBR) and isinstance(oi, UBR):
+                if not ci.subsumes(oi): return False
+            elif not isinstance(ci, UBR) and isinstance(oi, UBR):
                 return False
+            elif isinstance(ci, UBR) and not isinstance(oi, UBR):
+                if oi == self.wildcard or oi not in ci: return False
+            else:
+                if ci != self.wildcard and oi != self.wildcard and ci != oi:
+                    return False
         return True
-
-
-    def subsumes(
-        self,
-        other: Condition
-        ) -> bool:
-        """
-        Determines if the condition subsumes another condition.
-
-        Parameters
-        ----------
-        other: Condition
-            Other condition
-
-        Returns
-        -------
-        bool
-            True if self subsumes other
-        """
-        return self.does_match(other)

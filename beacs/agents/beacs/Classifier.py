@@ -9,7 +9,7 @@ from __future__ import annotations
 import random
 from typing import Optional, Union, Callable, List
 
-from beacs import Perception
+from beacs import Perception, UBR
 from beacs.agents.beacs import Configuration, Condition, EffectList, Effect, PMark
 
 
@@ -150,8 +150,8 @@ class Classifier:
                     if effect[idx] != effect.wildcard:
                         change_anticipated = True
                         break
-                if change_anticipated and p1[idx] != new_cls.condition[idx]:
-                    new_cls.effect[0][idx] = p1[idx]
+                if change_anticipated and p1[idx] not in new_cls.condition[idx]:
+                    new_cls.effect[0][idx] = UBR(p1[idx], p1[idx])
         else:
             for idx in range(len(new_cls.effect[0])):
                 new_cls.effect[0][idx] = old_cls.effect[0][idx]
@@ -180,27 +180,16 @@ class Classifier:
     @property
     def specified_unchanging_attributes(self) -> List[int]:
         """
-        Determines the number of specified unchanging attributes in
-        the classifier. An unchanging attribute is one that is anticipated
-        not to change in the effect part.
+        Determines the number of non-# symbols in cl.C
 
         Returns
         -------
         List[int]
-            List specified unchanging attributes indices
+            List specified specified attributes indices
         """
         indices = []
         for idx, ci in enumerate(self.condition):
-            if self.effect.is_enhanced():
-                to_append = False
-                for effect in self.effect.effect_list:
-                    if ci != self.condition.wildcard and effect[idx] == ci:
-                        to_append = True
-                        break
-                if to_append:
-                    indices.append(idx)
-            else:
-                if ci != self.condition.wildcard and self.effect[0][idx] == self.effect.wildcard:
+                if ci != self.condition.wildcard:
                     indices.append(idx)
         return indices
 
@@ -215,6 +204,7 @@ class Classifier:
         Float
             Specificity value
         """
+        # NOTE refine with UBR ?
         return self.condition.specificity / len(self.condition)
 
 
@@ -284,6 +274,7 @@ class Classifier:
         bool
             True if classifier is more general than other
         """
+        # NOTE refine with UBR ?
         return self.condition.specificity <= other.condition.specificity
 
 
@@ -449,34 +440,18 @@ class Classifier:
         """
         for idx, _ in enumerate(situation):
             if previous_situation[idx] != situation[idx] and self.effect[0][idx] == self.cfg.classifier_wildcard:
-                self.effect[0][idx] = situation[idx]
-                self.condition[idx] = previous_situation[idx]
+                self.effect[0][idx] = UBR(situation[idx], situation[idx])
+                self.condition[idx] = UBR(previous_situation[idx], previous_situation[idx])
 
 
-    def generalize_unchanging_condition_attribute(
-            self,
-            randomfunc: Callable=random.choice
-        ) -> bool:
+    def generalize_unchanging_condition_attribute(self):
         """
         Generalizes one randomly unchanging attribute in the condition.
         An unchanging attribute is one that is anticipated not to change
         in the effect part.
-
-        Parameters
-        ----------
-        randomfunc: Callable
-            Function returning attribute index to generalize
-
-        Returns
-        -------
-        bool
-            True if attribute was generalized, False otherwise
         """
-        if len(self.specified_unchanging_attributes) > 0:
-            ridx = randomfunc(self.specified_unchanging_attributes)
-            self.condition.generalize(ridx)
-            return True
-        return False
+        ridx = random.choice(self.specified_unchanging_attributes)
+        self.condition.generalize(ridx)
 
 
     def merge_with(
@@ -511,6 +486,7 @@ class Classifier:
             pai_state = self.pai_state,
             cfg = self.cfg
         )
+        # NOTE refine with UBR ?
         result.condition = Condition(self.condition)
         result.condition.specialize_with_condition(other_classifier.condition)
         result.effect = EffectList.enhanced_effect(

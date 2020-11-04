@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from beacs import Perception
+from beacs import Perception, UBR
 from beacs.agents import AbstractPerception
 
 class Effect(AbstractPerception):
@@ -56,7 +56,7 @@ class Effect(AbstractPerception):
         """
         for p0i, p1i, ei in zip(p0, p1, self):
             if ei != self.wildcard:
-                if ei != p1i or p0i == p1i:
+                if p1i not in ei or p0i == p1i:
                     return False
         return True
 
@@ -91,11 +91,15 @@ class Effect(AbstractPerception):
                 if p0_item != p1_item: return False
             else:
                 if p0_item == p1_item: return False
-                if item != p1_item: return False
+                if p1_item not in item: return False
             # All checks passed
             return True
         return all(_item_anticipate_change(self[idx], p0[idx], p1[idx], self.wildcard) for idx in range(len(p0)))
 
+
+    # NOTE to refine for UBR
+    #def subsumes(self, other: Effect) -> bool:
+    
 
     def __str__(self):
         return ''.join(str(attr) for attr in self)

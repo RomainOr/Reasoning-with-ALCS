@@ -1,16 +1,15 @@
 import random
 from typing import List
 
-from beacs import Perception, TypedList
+from beacs import Perception, UBR
 from . import Configuration, Condition
 
 
-class PMark(TypedList):
+class PMark():
 
     def __init__(self, cfg: Configuration) -> None:
         self.cfg = cfg
-        initial: List = [set() for _ in range(self.cfg.classifier_length)]
-        super().__init__((set,), *initial)
+        self._items = [set() for _ in range(self.cfg.classifier_length)]
 
 
     def is_marked(self) -> bool:
@@ -103,11 +102,11 @@ class PMark(TypedList):
             possible_idx = [pi for pi, p in enumerate(p0) if
                             p not in self[pi] and len(self[pi]) > 0]
             rand_idx = random.choice(possible_idx)
-            diff[rand_idx] = p0[rand_idx]
+            diff[rand_idx] = UBR(p0[rand_idx], p0[rand_idx])
         elif nr2 > 0:
             for idx, item in enumerate(self):
                 if len(item) > 1:
-                    diff[idx] = p0[idx]
+                    diff[idx] = UBR(p0[idx], p0[idx])
         return diff
 
 
@@ -141,3 +140,24 @@ class PMark(TypedList):
             return "".join(compact_set_str(x) for x in self)
         else:
             return "empty"
+
+    def insert(self, index: int, o) -> None:
+        self._items.insert(index, o)
+
+    def __setitem__(self, i, o):
+        self._items[i] = o
+
+    def __delitem__(self, i):
+        del self._items[i]
+
+    def __getitem__(self, i):
+        return self._items[i]
+
+    def __len__(self) -> int:
+        return len(self._items)
+
+    def __hash__(self):
+        return hash(self._items)
+
+    def __eq__(self, o) -> bool:
+        return self._items == o._items

@@ -7,8 +7,6 @@
 import random
 from typing import Callable, Dict
 
-import numpy as np
-
 from beacs import Perception
 from beacs.agents.beacs.components.subsumption import find_subsumers
 
@@ -129,6 +127,7 @@ def behavioral_mutation(
     mu
         Mutation rate
     """
+    # NOTE refine with UBR ?
     for idx in range(len(cl1.condition)):
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] == cl2.cfg.classifier_wildcard and \
@@ -160,7 +159,7 @@ def generalizing_mutation(
     mu
         Mutation rate
     """
-    # TODO : Inductive principles to check
+    # NOTE refine with UBR ?
     for idx, cond in enumerate(cl.condition):
         if cond != cl.cfg.classifier_wildcard and random.random() < mu:
             cl.condition.generalize(idx)
@@ -181,9 +180,11 @@ def two_point_crossover(
     donor
         Classifier
     """
-    # TODO : Inductive principles to check
-    left, right = sorted(np.random.choice(
-        range(0, parent.cfg.classifier_length + 1), 2, replace=False))
+    # NOTE refine with UBR ? One-point crossover : pros and cons
+
+    sample_list = sorted(random.sample(range(0, parent.cfg.classifier_length + 1), 2))
+    left = sample_list[0]
+    right = sample_list[1]
 
     # Extract chromosomes from condition parts
     chromosome1 = parent.condition[left:right]
@@ -265,7 +266,6 @@ def delete_classifiers(
         The action set size threshold (θas ∈ N) specifies
         the maximal number of classifiers in an action set.
     """
-    # TODO : Inductive principles to check
     while (insize + sum(cl.num for cl in action_set)) > theta_as:
         cl_del = None
 

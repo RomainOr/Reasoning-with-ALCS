@@ -2,13 +2,13 @@ from copy import copy
 
 class AbstractPerception:
 
-    def __init__(self, observation, wildcard='#', oktypes=(str)):
+    def __init__(self, observation, wildcard='#'):
         self._items = tuple(observation)
         self.wildcard = wildcard
 
 
     @classmethod
-    def empty(cls, length: int, wildcard='#', oktypes=(str)):
+    def empty(cls, length: int, wildcard='#'):
         """
         Creates an AbstractPerception composed from wildcard symbols.
         Note that in case that wildcard is an object is get's copied
@@ -20,8 +20,6 @@ class AbstractPerception:
             length of perception string
         wildcard: Any
             wildcard symbol
-        oktypes: (str, dict)
-            tuple of allowed classes to represent perception string
 
         Returns
         -------

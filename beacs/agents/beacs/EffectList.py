@@ -8,8 +8,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from beacs import Perception
-from beacs.agents import AbstractPerception
+from beacs import Perception, UBR
 from beacs.agents.beacs import Configuration, Effect
 
 class EffectList():
@@ -74,7 +73,7 @@ class EffectList():
         for idxe, e in enumerate(effectlist2.effect_list):
             is_updated = False
             for idxr, r in enumerate(result.effect_list):
-                if e == r:
+                if r == e: # NOTE to refine for UBR
                     result.effect_detailled_counter[idxr] += effectlist2.effect_detailled_counter[idxe]
                     is_updated = True
                     break
@@ -179,6 +178,7 @@ class EffectList():
         bool
             True if self subsumes other
         """
+        # NOTE to refine for UBR
         return set(other.effect_list) <= set(self.effect_list)
 
 
@@ -224,11 +224,15 @@ class EffectList():
         tuple
             The respective probabilities
         """
+        # NOTE to refine for UBR
         total_counter = float(sum(self.effect_detailled_counter))
         result = {}
         for idx, effect in enumerate(self.effect_list):
             if effect[index] == effect.wildcard:
                 result[int(perception[index])] = result.get(int(perception[index]), 0) + self.effect_detailled_counter[idx] / total_counter
             else:
-                result[int(effect[index])] = result.get(int(effect[index]), 0) + self.effect_detailled_counter[idx] / total_counter
+                if isinstance(effect[index], UBR) and effect[index].spread == 0.:
+                    result[int(effect[index].lower_bound)] = result.get(int(effect[index].lower_bound), 0) + self.effect_detailled_counter[idx] / total_counter
+                else:
+                    result[int(effect[index])] = result.get(int(effect[index]), 0) + self.effect_detailled_counter[idx] / total_counter
         return result, result

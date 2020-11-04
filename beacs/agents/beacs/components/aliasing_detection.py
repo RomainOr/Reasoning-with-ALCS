@@ -149,7 +149,9 @@ def is_perceptual_aliasing_state(
             if ei != effect.wildcard:
                 anticipation[idx] = ei
         return tuple(anticipation)
-
+    
+    # NOTE refine with UBR ?
+    
     nbr_of_actions = cfg.number_of_possible_actions
     nbr_of_expected_transitions = nbr_of_actions
     #Find the most experienced classifiers for all actions

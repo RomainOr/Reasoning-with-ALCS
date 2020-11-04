@@ -6,7 +6,7 @@
 
 from typing import Optional
 
-from beacs import Perception
+from beacs import Perception, UBR
 from beacs.agents.beacs import Classifier
 
 def updated_passthrough(
@@ -41,7 +41,7 @@ def updated_passthrough(
                     change_anticipated = True
                     break
         if change_anticipated :
-            child_effect[i] = perception[i]
+            child_effect[i] = UBR(perception[i], perception[i])
         else :
             change_anticipated = penultimate_effect[0][i] != child_effect.wildcard
             if penultimate_effect.is_enhanced():
@@ -50,11 +50,12 @@ def updated_passthrough(
                         change_anticipated = True
                         break
             if change_anticipated :
-                child_effect[i] = perception[i]
+                child_effect[i] = UBR(perception[i], perception[i])
     # Refining effect
     for idx in range(len(child_effect)):
-        if child_effect[idx] != child_effect.wildcard and child_effect[idx] == child_condition[idx]:
-            child_effect[idx] = child_effect.wildcard
+        if child_effect[idx] != child_effect.wildcard:
+            if child_condition[idx] == (child_effect[idx]):
+                child_effect[idx] = child_effect.wildcard
 
 def create_behavioral_classifier(
         penultimate_classifier: Classifier,
