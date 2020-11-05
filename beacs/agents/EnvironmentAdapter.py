@@ -32,8 +32,8 @@ class EnvironmentAdapter:
         Converts environment representation of a state to LCS
         representation.
         """
-        def _noisy_value(s, noise=0.0) -> float:
-            return float(s) + random.uniform(-noise, noise)
+        def _noisy_value(s, noise=0.01) -> float:
+            return float(s) #+ random.uniform(-noise, noise)
         return tuple(map(_noisy_value, phenotype))
 
     @staticmethod

@@ -11,7 +11,8 @@ from beacs.agents.beacs import ClassifiersList, Condition, Configuration, Effect
 def is_state_aliased(
         condition: Condition,
         mark: PMark,
-        p0: Perception
+        p0: Perception,
+        spread: float
     ) -> bool:
     """
     Check if the specification of unchanging components succeed or failed.
@@ -25,6 +26,7 @@ def is_state_aliased(
         Mark of the classifier used to check if the state is aliased
     p0: Perception
         Perception of the state in the previous step
+    spread: float
 
     Returns
     -------
@@ -35,7 +37,7 @@ def is_state_aliased(
         situation = Condition(condition)
         for idx, item in enumerate(condition):
             if item == condition.wildcard:
-                situation[idx] = UBR(next(iter(mark[idx])), next(iter(mark[idx])))
+                situation[idx] = UBR(next(iter(mark[idx])), next(iter(mark[idx])), spread)
         return situation.does_match(p0)
     return False
 

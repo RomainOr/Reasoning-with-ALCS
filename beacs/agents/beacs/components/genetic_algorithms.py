@@ -131,30 +131,58 @@ def directed_mutation(
         Indicates if the system uses a behavioral action set
     """
     for idx in range(len(cl1.condition)):
-        rand = random.random()
-        if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] == cl2.cfg.classifier_wildcard and \
-              rand < mu:
-            cl1.generalize_condition_attribute(idx)
-            continue
+        rand_cl1 = random.random()
+        rand_cl2 = random.random()
+        # Both attributes are generalized, skip
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
-              rand < mu:
-            cl2.generalize_condition_attribute(idx)
+            cl2.condition[idx] == cl2.cfg.classifier_wildcard :
             continue
+        # One attribute is generalized, try to generalize the other
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
-              rand < mu:
-            if cl1.condition[idx].does_intersect_with(cl2.condition[idx]):
-                if random.random() < 0.5 :
-                    cl1.condition[idx].widen_with_ubr(cl2.condition[idx])
-                    if not is_behavioral_action_set: cl2.generalize_condition_attribute(idx)
-                else:
-                    cl2.condition[idx].widen_with_ubr(cl1.condition[idx])
-                    if not is_behavioral_action_set: cl1.generalize_condition_attribute(idx)
-            elif not is_behavioral_action_set:
+            cl2.condition[idx] == cl2.cfg.classifier_wildcard:
+            if rand_cl1 < mu:
+                cl1.generalize_condition_attribute(idx)
+            continue
+        # One attribute is generalized, try to generalize the other
+        if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
+            cl2.condition[idx] != cl2.cfg.classifier_wildcard:
+            if rand_cl2 < mu:
+                cl2.generalize_condition_attribute(idx)
+            continue
+        # Both attributes are generalized, try to generalize both
+        # but first it depends on the presence of behavioral sequences
+        if is_behavioral_action_set:
+            cl1.condition[idx].widen_with_ubr(cl2.condition[idx])
+            cl2.condition[idx].widen_with_ubr(cl1.condition[idx])
+        # then if both attributes are the same
+        elif cl1.condition[idx] == cl2.condition[idx]:
+            if rand_cl1 < mu:
                 cl1.condition[idx].widen_with_spread()
+            if rand_cl2 < mu:
                 cl2.condition[idx].widen_with_spread()
+        # else case
+        elif cl1.condition[idx] != cl2.condition[idx]:
+            if cl1.condition[idx].subsumes(cl2.condition[idx]):
+                if rand_cl1 < mu:
+                    cl1.condition[idx].widen_with_spread()
+                if rand_cl2 < mu:
+                    cl2.generalize_condition_attribute(idx)
+            elif cl2.condition[idx].subsumes(cl1.condition[idx]):
+                if rand_cl1 < mu:
+                    cl1.generalize_condition_attribute(idx)
+                if rand_cl2 < mu:
+                    cl2.condition[idx].widen_with_spread()
+            else:
+                if random.random() < 0.5 :
+                    if rand_cl1 < mu:
+                        cl1.condition[idx].widen_with_ubr(cl2.condition[idx])
+                    if rand_cl2 < mu:
+                        cl2.generalize_condition_attribute(idx)
+                else:
+                    if rand_cl2 < mu:
+                        cl2.condition[idx].widen_with_ubr(cl1.condition[idx])
+                    if rand_cl1 < mu:
+                        cl1.generalize_condition_attribute(idx)
 
 
 def generalizing_mutation(

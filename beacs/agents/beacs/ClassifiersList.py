@@ -318,6 +318,14 @@ class ClassifiersList(TypedList):
             child1.q /= 2
             child2.q /= 2
 
+            # Update anticipation of child
+            for cl in [child1, child2]:
+                for idx in range(cl.cfg.classifier_length):
+                    if cl.condition[idx] != cl.condition.wildcard and \
+                        cl.anticipation[0][idx] != cl.anticipation.wildcard and \
+                          cl.condition[idx].subsumes(cl.anticipation[0][idx]):
+                        cl.condition[idx] = cl.condition.wildcard
+
             # We are interested only in classifiers with specialized condition
             unique_children = {cl for cl in [child1, child2] if cl.specificity > 0 and cl.does_match(p0)}
 

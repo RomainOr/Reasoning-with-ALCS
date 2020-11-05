@@ -158,7 +158,7 @@ class Classifier:
                         break
                 if change_anticipated:
                     if new_cls.condition[idx] == new_cls.condition.wildcard or p1[idx] not in new_cls.condition[idx]:
-                        new_cls.anticipation[0][idx] = UBR(p1[idx] - new_cls.cfg.spread/2., p1[idx] + new_cls.cfg.spread/2.)
+                        new_cls.anticipation[0][idx] = UBR(p1[idx] - new_cls.cfg.spread/2., p1[idx] + new_cls.cfg.spread/2., new_cls.cfg.spread)
         else:
             for idx in range(len(new_cls.anticipation[0])):
                 if isinstance(old_cls.anticipation[0][idx], UBR):
@@ -283,7 +283,17 @@ class Classifier:
         bool
             True if classifier is more general than other
         """
-        return self.condition.specificity <= other.condition.specificity
+        if self.condition.specificity < other.condition.specificity:
+            return True
+        if self.condition.specificity > other.condition.specificity:
+            return False
+        result = 0.
+        for idx in range(self.cfg.classifier_length):
+            if self.condition[idx] != self.condition.wildcard:
+                result += self.condition[idx].spread
+            if other.condition[idx] != other.condition.wildcard:
+                result -= other.condition[idx].spread
+        return result >= 0.
 
 
     def is_specializable(
@@ -493,8 +503,8 @@ class Classifier:
         """
         for idx, _ in enumerate(situation):
             if previous_situation[idx] != situation[idx] and self.anticipation[0][idx] == self.cfg.classifier_wildcard:
-                self.anticipation[0][idx] = UBR(situation[idx] - self.cfg.spread/2., situation[idx] + self.cfg.spread/2.)
-                self.condition[idx] = UBR(previous_situation[idx] - self.cfg.spread/2., previous_situation[idx] + self.cfg.spread/2.)
+                self.anticipation[0][idx] = UBR(situation[idx] - self.cfg.spread/2., situation[idx] + self.cfg.spread/2., self.cfg.spread)
+                self.condition[idx] = UBR(previous_situation[idx] - self.cfg.spread/2., previous_situation[idx] + self.cfg.spread/2., self.cfg.spread)
 
 
     def specialize_with_condition(
@@ -517,6 +527,13 @@ class Classifier:
         Generalizes one attribute in the condition at idx.
         """
         self.condition.generalize(idx)
+
+
+    def generalize_anticipation_attribute(self, idx):
+        """
+        Generalizes one attribute in the anticipation at idx.
+        """
+        self.anticipation[0].generalize(idx)
 
 
     def generalize_unchanging_condition_attribute(self):

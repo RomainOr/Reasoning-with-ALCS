@@ -97,6 +97,21 @@ class Effect(AbstractPerception):
         return all(_item_anticipate_change(self[idx], p0[idx], p1[idx], self.wildcard) for idx in range(len(p0)))
 
 
+    def generalize(
+            self,
+            position: int
+        ):
+        """
+        Generalizes the condition at the given position.
+
+        Parameters
+        ----------
+        position: int
+            Index to update
+        """
+        self[position] = self.wildcard
+
+
     def subsumes(self, other: Effect) -> bool:
         for ei, oi in zip(self, other):
             if isinstance(ei, UBR) and isinstance(oi, UBR):

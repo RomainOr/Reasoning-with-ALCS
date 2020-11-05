@@ -10,9 +10,10 @@ import random
 
 class UBR:
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, s0):
         self.x = x
         self.y = y
+        self.initial_spread = s0
 
     @property
     def lower_bound(self) -> float:
@@ -28,7 +29,7 @@ class UBR:
 
     @classmethod
     def copy(cls, old) -> UBR:
-        return cls(old.x, old.y)
+        return cls(old.x, old.y, old.initial_spread)
 
     def does_intersect_with(self, other) -> bool:
         return self.upper_bound >= other.lower_bound and other.upper_bound >= self.lower_bound
@@ -41,10 +42,10 @@ class UBR:
             self.y = max_upper_bound
 
     def widen_with_spread(self):
-        growth = random.uniform(-self.spread, self.spread)
-        amount = random.random()
-        self.x += growth * amount
-        self.y += growth * (1. - amount)
+        growth = random.uniform(0.,max(self.spread, self.initial_spread))
+        amount_x_y = random.random()
+        self.x -= growth * amount_x_y
+        self.y += growth * (1. - amount_x_y)
 
     def subsumes(self, other: UBR) -> bool:
         return self.lower_bound <= other.lower_bound and \
@@ -63,4 +64,4 @@ class UBR:
         return hash((self.lower_bound, self.upper_bound))
 
     def __str__(self):
-        return '[' + str(self.lower_bound) + ';' + str(self.upper_bound) + ']'
+        return "[{:.2f}; {:.2f}]".format(self.lower_bound, self.upper_bound)

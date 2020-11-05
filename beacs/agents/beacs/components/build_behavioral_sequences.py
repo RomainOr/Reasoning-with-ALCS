@@ -44,7 +44,7 @@ def updated_passthrough(
                     change_anticipated = True
                     break
         if change_anticipated :
-            child_effect[i] = UBR(perception[i] - spread/2., perception[i] + spread/2.)
+            child_effect[i] = UBR(perception[i] - spread/2., perception[i] + spread/2., spread)
         else :
             change_anticipated = penultimate_effect[0][i] != child_effect.wildcard
             if penultimate_effect.is_enhanced():
@@ -53,7 +53,7 @@ def updated_passthrough(
                         change_anticipated = True
                         break
             if change_anticipated :
-                child_effect[i] = UBR(perception[i] - spread/2., perception[i] + spread/2.)
+                child_effect[i] = UBR(perception[i] - spread/2., perception[i] + spread/2., spread)
     # Refining effect
     for idx in range(len(child_effect)):
         if child_effect[idx] != child_effect.wildcard and child_condition[idx] != child_condition.wildcard:
