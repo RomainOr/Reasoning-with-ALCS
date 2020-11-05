@@ -14,7 +14,8 @@ def updated_passthrough(
         penultimate_effect, 
         last_effect, 
         perception,
-        child_condition
+        child_condition,
+        spread
     ):
     """
     Passthrough operator defined by Stolzmann that we have refined.
@@ -32,29 +33,31 @@ def updated_passthrough(
         The current perception to refine the effect component of the child
     child_condition
         Condition component to remove unnecessary specification of effect attributes
+    spread
+        Initial spread when new UBR are created
     """
     for i in range(len(child_effect)):
         change_anticipated = last_effect[0][i] != child_effect.wildcard
         if last_effect.is_enhanced():
             for effect in last_effect.effect_list:
-                if effect[i] != effect.wildcard and effect[i] == perception[i]:
+                if effect[i] != effect.wildcard and perception[i] in effect[i]:
                     change_anticipated = True
                     break
         if change_anticipated :
-            child_effect[i] = UBR(perception[i], perception[i])
+            child_effect[i] = UBR(perception[i] - spread/2., perception[i] + spread/2.)
         else :
             change_anticipated = penultimate_effect[0][i] != child_effect.wildcard
             if penultimate_effect.is_enhanced():
                 for effect in penultimate_effect.effect_list:
-                    if effect[i] != effect.wildcard and effect[i] == perception[i]:
+                    if effect[i] != effect.wildcard and perception[i] in effect[i]:
                         change_anticipated = True
                         break
             if change_anticipated :
-                child_effect[i] = UBR(perception[i], perception[i])
+                child_effect[i] = UBR(perception[i] - spread/2., perception[i] + spread/2.)
     # Refining effect
     for idx in range(len(child_effect)):
-        if child_effect[idx] != child_effect.wildcard:
-            if child_condition[idx] == (child_effect[idx]):
+        if child_effect[idx] != child_effect.wildcard and child_condition[idx] != child_condition.wildcard:
+            if child_condition[idx].subsumes(child_effect[idx]):
                 child_effect[idx] = child_effect.wildcard
 
 def create_behavioral_classifier(
@@ -112,6 +115,6 @@ def create_behavioral_classifier(
             # Thus, we garantee the creation of a classifier that can be used within the environment.
             child.condition = penultimate_classifier.condition
             # Passthrough operation on child effect
-            updated_passthrough(child.anticipation[0], penultimate_classifier.anticipation, cl.anticipation, p1, child.condition)
+            updated_passthrough(child.anticipation[0], penultimate_classifier.anticipation, cl.anticipation, p1, child.condition, child.cfg.spread)
             return child
     return None

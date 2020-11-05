@@ -4,7 +4,7 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from beacs import Perception
+from beacs import Perception, UBR
 from beacs.agents.beacs import ClassifiersList, Condition, Configuration, Effect, PMark
 
 
@@ -35,7 +35,7 @@ def is_state_aliased(
         situation = Condition(condition)
         for idx, item in enumerate(condition):
             if item == condition.wildcard:
-                situation[idx] = ''.join(str(s) for s in mark[idx])
+                situation[idx] = UBR(next(iter(mark[idx])), next(iter(mark[idx])))
         return situation.does_match(p0)
     return False
 

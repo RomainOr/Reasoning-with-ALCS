@@ -7,7 +7,7 @@
 import random
 from typing import Callable, Dict
 
-from beacs import Perception
+from beacs import Perception, UBR
 from beacs.agents.beacs.components.subsumption import find_subsumers
 
 
@@ -108,10 +108,11 @@ def roulette_wheel_selection(
     return parent1, parent2
 
 
-def behavioral_mutation(
+def directed_mutation(
         cl1,
         cl2,
-        mu: float
+        mu: float,
+        is_behavioral_action_set
     ) -> None:
     """
     Executes a particular mutation in the behavioral classifiers.
@@ -126,19 +127,34 @@ def behavioral_mutation(
         Second behavioral classifier
     mu
         Mutation rate
+    is_behavioral_action_set
+        Indicates if the system uses a behavioral action set
     """
-    # NOTE refine with UBR ?
     for idx in range(len(cl1.condition)):
+        rand = random.random()
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] == cl2.cfg.classifier_wildcard and \
-              random.random() < mu:
+              rand < mu:
             cl1.generalize_condition_attribute(idx)
             continue
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
-              random.random() < mu:
+              rand < mu:
             cl2.generalize_condition_attribute(idx)
             continue
+        if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
+            cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
+              rand < mu:
+            if cl1.condition[idx].does_intersect_with(cl2.condition[idx]):
+                if random.random() < 0.5 :
+                    cl1.condition[idx].widen_with_ubr(cl2.condition[idx])
+                    if not is_behavioral_action_set: cl2.generalize_condition_attribute(idx)
+                else:
+                    cl2.condition[idx].widen_with_ubr(cl1.condition[idx])
+                    if not is_behavioral_action_set: cl1.generalize_condition_attribute(idx)
+            elif not is_behavioral_action_set:
+                cl1.condition[idx].widen_with_spread()
+                cl2.condition[idx].widen_with_spread()
 
 
 def generalizing_mutation(
@@ -159,10 +175,47 @@ def generalizing_mutation(
     mu
         Mutation rate
     """
-    # NOTE refine with UBR ?
     for idx, cond in enumerate(cl.condition):
         if cond != cl.cfg.classifier_wildcard and random.random() < mu:
             cl.generalize_condition_attribute(idx)
+
+
+def one_point_crossover(
+        parent,
+        donor
+    ) -> None:
+    """
+    Executes one-point crossover using condition parts of two classifiers.
+    Condition in both classifiers are changed depending on UBR attribute.
+
+    Parameters
+    ----------
+    parent
+        Classifier
+    donor
+        Classifier
+    """
+    ridx = random.choice(range(parent.cfg.classifier_length))
+    if isinstance(parent.condition[ridx], UBR) and isinstance(donor.condition[ridx], UBR):
+        #swap alleles of the UBR attribute
+        allele_parent = parent.condition[ridx].y
+        allele_donor = donor.condition[ridx].y
+        parent.condition[ridx].y = allele_donor
+        donor.condition[ridx].y = allele_parent
+        #swap the rest if possible
+        if ridx+1 < parent.cfg.classifier_length:
+            for idx in range(ridx+1, parent.cfg.classifier_length):
+                chromosome_parent = parent.condition[idx]
+                chromosome_donor = donor.condition[idx]
+                parent.condition[idx] = chromosome_donor
+                donor.condition[idx] = chromosome_parent
+    else:
+        #swap directly from idx
+        for idx in range(ridx, parent.cfg.classifier_length):
+            chromosome_parent = parent.condition[idx]
+            chromosome_donor = donor.condition[idx]
+            parent.condition[idx] = chromosome_donor
+            donor.condition[idx] = chromosome_parent
 
 
 def two_point_crossover(
@@ -180,8 +233,6 @@ def two_point_crossover(
     donor
         Classifier
     """
-    # NOTE refine with UBR ? One-point crossover : pros and cons
-
     sample_list = sorted(random.sample(range(0, parent.cfg.classifier_length + 1), 2))
     left = sample_list[0]
     right = sample_list[1]

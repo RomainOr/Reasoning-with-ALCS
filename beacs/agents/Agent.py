@@ -113,7 +113,7 @@ class Agent:
                 m = basic_metrics(current_trial, steps_in_trial, reward)
                 user_metrics = self.get_cfg().user_metrics_collector_fcn
                 if user_metrics is not None:
-                    m.update(user_metrics(self.get_population(), env))
+                    m.update(user_metrics(self.get_population(), env, self.get_cfg()))
                 metrics.append(m)
 
             current_trial += 1

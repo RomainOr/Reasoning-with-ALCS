@@ -1,3 +1,5 @@
+import random
+
 class EnvironmentAdapter:
     """
     Sometimes the observation returned by the OpenAI Gym environment
@@ -30,7 +32,9 @@ class EnvironmentAdapter:
         Converts environment representation of a state to LCS
         representation.
         """
-        return phenotype
+        def _noisy_value(s, noise=0.0) -> float:
+            return float(s) + random.uniform(-noise, noise)
+        return tuple(map(_noisy_value, phenotype))
 
     @staticmethod
     def to_env_action(lcs_action):

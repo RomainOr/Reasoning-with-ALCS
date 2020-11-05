@@ -97,7 +97,7 @@ class Classifier:
     def __repr__(self):
         return f"{self.condition} {self.action} {str(self.behavioral_sequence)} {str(self.anticipation)} ({str(self.mark)})\n" \
             f"q: {self.q:<6.4} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} err: {self.err:<6.4}\n" \
-            f"exp: {self.exp:<5} num: {self.num} ee: {self.ee} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \
+            f"exp: {self.exp:<5} num: {self.num} ee: {self.ee} PAI_state: {', '.join(str(attr) for attr in self.pai_state)}\n" \
             f"tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n" \
 
 
@@ -129,7 +129,6 @@ class Classifier:
             New copied classifier - Hard copy
         """
         new_cls = cls(
-            condition=Condition(old_cls.condition, old_cls.cfg.classifier_wildcard),
             action=old_cls.action,
             behavioral_sequence=old_cls.behavioral_sequence,
             quality=old_cls.q,
@@ -143,6 +142,13 @@ class Classifier:
             tav=old_cls.tav,
             pai_state=old_cls.pai_state
         )
+        # Condition copied
+        for idx in range(len(new_cls.condition)):
+            if isinstance(old_cls.condition[idx], UBR):
+                new_cls.condition[idx] = UBR.copy(old_cls.condition[idx])
+            else:
+                new_cls.condition[idx] = old_cls.condition[idx]
+        # Effect contrained reconstruction
         if old_cls.is_enhanced():
             for idx in range(len(new_cls.anticipation[0])):
                 change_anticipated = False
@@ -150,11 +156,15 @@ class Classifier:
                     if effect[idx] != effect.wildcard:
                         change_anticipated = True
                         break
-                if change_anticipated and p1[idx] not in new_cls.condition[idx]:
-                    new_cls.anticipation[0][idx] = UBR(p1[idx], p1[idx])
+                if change_anticipated:
+                    if new_cls.condition[idx] == new_cls.condition.wildcard or p1[idx] not in new_cls.condition[idx]:
+                        new_cls.anticipation[0][idx] = UBR(p1[idx] - new_cls.cfg.spread/2., p1[idx] + new_cls.cfg.spread/2.)
         else:
             for idx in range(len(new_cls.anticipation[0])):
-                new_cls.anticipation[0][idx] = old_cls.anticipation[0][idx]
+                if isinstance(old_cls.anticipation[0][idx], UBR):
+                    new_cls.anticipation[0][idx] = UBR.copy(old_cls.anticipation[0][idx])
+                else:
+                    new_cls.anticipation[0][idx] = old_cls.anticipation[0][idx]
         return new_cls
 
 
@@ -204,7 +214,6 @@ class Classifier:
         Float
             Specificity value
         """
-        # NOTE refine with UBR ?
         return self.condition.specificity
 
 
@@ -274,7 +283,6 @@ class Classifier:
         bool
             True if classifier is more general than other
         """
-        # NOTE refine with UBR ?
         return self.condition.specificity <= other.condition.specificity
 
 
@@ -485,8 +493,8 @@ class Classifier:
         """
         for idx, _ in enumerate(situation):
             if previous_situation[idx] != situation[idx] and self.anticipation[0][idx] == self.cfg.classifier_wildcard:
-                self.anticipation[0][idx] = UBR(situation[idx], situation[idx])
-                self.condition[idx] = UBR(previous_situation[idx], previous_situation[idx])
+                self.anticipation[0][idx] = UBR(situation[idx] - self.cfg.spread/2., situation[idx] + self.cfg.spread/2.)
+                self.condition[idx] = UBR(previous_situation[idx] - self.cfg.spread/2., previous_situation[idx] + self.cfg.spread/2.)
 
 
     def specialize_with_condition(
@@ -551,7 +559,6 @@ class Classifier:
             pai_state = self.pai_state,
             cfg = self.cfg
         )
-        # NOTE refine with UBR ?
         result.condition = Condition(self.condition)
         result.specialize_with_condition(other_classifier.condition)
         result.anticipation = Anticipation.enhanced(

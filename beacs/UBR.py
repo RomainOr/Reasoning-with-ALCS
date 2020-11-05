@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+import random
+
 class UBR:
 
     def __init__(self, x, y):
@@ -24,12 +26,32 @@ class UBR:
     def spread(self) -> float:
         return float(self.upper_bound) - float(self.lower_bound)
 
+    @classmethod
+    def copy(cls, old) -> UBR:
+        return cls(old.x, old.y)
+
+    def does_intersect_with(self, other) -> bool:
+        return self.upper_bound >= other.lower_bound and other.upper_bound >= self.lower_bound
+
+    def widen_with_ubr(self, other):
+        if not self.subsumes(other):
+            min_lower_bound = min(self.lower_bound, other.lower_bound)
+            max_upper_bound = max(self.upper_bound, other.upper_bound)
+            self.x = min_lower_bound
+            self.y = max_upper_bound
+
+    def widen_with_spread(self):
+        growth = random.uniform(-self.spread, self.spread)
+        amount = random.random()
+        self.x += growth * amount
+        self.y += growth * (1. - amount)
+
     def subsumes(self, other: UBR) -> bool:
         return self.lower_bound <= other.lower_bound and \
             other.upper_bound <= self.upper_bound
 
     def __contains__(self, x):
-        return self.lower_bound <= x <= self.upper_bound
+        return self.lower_bound <= x and x <= self.upper_bound
 
     def __eq__(self, o) -> bool:
         if not isinstance(o, UBR):
@@ -41,4 +63,4 @@ class UBR:
         return hash((self.lower_bound, self.upper_bound))
 
     def __str__(self):
-        return '[' + self.lower_bound + ';' + self.upper_bound + ']'
+        return '[' + str(self.lower_bound) + ';' + str(self.upper_bound) + ']'

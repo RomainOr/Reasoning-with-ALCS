@@ -60,7 +60,11 @@ class Condition(AbstractPerception):
         """
         for idx, new_el in enumerate(other):
             if new_el != self.wildcard:
-                self[idx] = new_el
+                if self[idx] == self.wildcard:
+                    self[idx] = new_el
+                else:
+                    if self[idx].subsumes(new_el):
+                        self[idx] = new_el
 
 
     def generalize(
@@ -75,10 +79,7 @@ class Condition(AbstractPerception):
         position: int
             Index to update
         """
-        if isinstance(self[position], UBR):
-            self[position] = self.wildcard
-        else:
-            self[position] = self.wildcard
+        self[position] = self.wildcard
 
 
     def generalize_specific_attribute_randomly(

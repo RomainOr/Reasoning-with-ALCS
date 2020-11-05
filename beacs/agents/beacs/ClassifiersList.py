@@ -303,17 +303,12 @@ class ClassifiersList(TypedList):
             child2 = Classifier.copy_from(parent2, p0, p1, time)
 
             if do_ga:
-                # Execute mutation
-                if is_behavioral_action_set:
-                    ga.behavioral_mutation(child1, child2, mu)
-                else:
-                    ga.generalizing_mutation(child1, mu)
-                    ga.generalizing_mutation(child2, mu)
+                ga.directed_mutation(child1, child2, mu, is_behavioral_action_set)
 
                 # Execute cross-over
                 if random.random() < chi and not is_behavioral_action_set:
                     if child1.anticipation == child2.anticipation:
-                        ga.two_point_crossover(child1, child2)
+                        ga.one_point_crossover(child1, child2)
 
                         # Update quality and reward
                         child1.q = child2.q = float(sum([child1.q, child2.q]) / 2)
@@ -324,7 +319,7 @@ class ClassifiersList(TypedList):
             child2.q /= 2
 
             # We are interested only in classifiers with specialized condition
-            unique_children = {cl for cl in [child1, child2] if cl.specificity > 0}
+            unique_children = {cl for cl in [child1, child2] if cl.specificity > 0 and cl.does_match(p0)}
 
             ga.delete_classifiers(
                 population,

@@ -36,12 +36,14 @@ def population_metrics(
 
 def _maze_metrics(
         pop,
-        env
+        env,
+        cfg
     ) -> dict:
 
     def _maze_knowledge(
             population,
-            environment
+            environment,
+            configuration
         ) -> float:
         transitions = environment.env.get_all_possible_transitions()
         # Take into consideration only reliable classifiers
@@ -50,15 +52,15 @@ def _maze_metrics(
         nr_correct = 0
         # For all possible destinations from each path cell
         for start, action, end in transitions:
-            p0 = environment.env.maze.perception(*start)
-            p1 = environment.env.maze.perception(*end)
+            p0 = configuration.environment_adapter.to_genotype(environment.env.maze.perception(*start))
+            p1 = configuration.environment_adapter.to_genotype(environment.env.maze.perception(*end))
             if any([True for cl in reliable_classifiers
                     if cl.does_predict_successfully(p0, action, p1)]):
                 nr_correct += 1
         return nr_correct / len(transitions) * 100.0
 
     metrics = {
-        'knowledge': _maze_knowledge(pop, env)
+        'knowledge': _maze_knowledge(pop, env, cfg)
     }
     # Add basic population metrics
     metrics.update(population_metrics(pop, env))
@@ -67,12 +69,14 @@ def _maze_metrics(
 
 def _how_many_peps_match_non_aliased_states(
         pop,
-        env
+        env,
+        cfg
     ) -> int:
     counter = 0
     non_aliased_perceptions = env.env.get_all_non_aliased_states()
     enhanced_classifiers = [cl for cl in pop if cl.is_reliable() and cl.is_enhanced()]
     for percept in non_aliased_perceptions:
+        percept = cfg.environment_adapter.to_genotype(percept)
         for cl in enhanced_classifiers:
             if cl.does_match(percept):
                 counter += 1
@@ -118,7 +122,7 @@ def _state_of_population(
 def _enhanced_effect_error(
         population,
         environment,
-        classifier_length,
+        cfg,
         random_attribute_length
     ) -> float:
     theoritical_probabilities = environment.env.get_theoritical_probabilities()
@@ -127,6 +131,7 @@ def _enhanced_effect_error(
     error_new_pep = 0.
     # For all possible destinations from each path cell
     for perception, action_and_probabiltiies in theoritical_probabilities.items():
+        perception = cfg.environment_adapter.to_genotype(perception)
         for action, probabilities_and_states in action_and_probabiltiies.items():
             # Try to find a suitable one, even if it is unreliable
             unreliable_classifiers = [cl for cl in population if cl.does_match(perception) and cl.action ==  action and cl.behavioral_sequence is None]
@@ -158,7 +163,7 @@ def _enhanced_effect_error(
                     for key in theoritical_prob_of_attribute:
                         error_old_pep += abs(theoritical_prob_of_attribute[key] - old_effect_attribute.get(key, 0.0))
                         error_new_pep += abs(theoritical_prob_of_attribute[key] - new_effect_attribute.get(key, 0.0))
-                for ra in range(classifier_length-random_attribute_length, classifier_length):
+                for ra in range(cfg.classifier_length-random_attribute_length, cfg.classifier_length):
                     # First, effect refinement
                     old_effect_attribute, new_effect_attribute = most_experienced_classifier.anticipation.getEffectAttribute(perception,ra)
                     # We consider here the probabilities are defined as 50% to get 1 and 50% to get 0. Could be automated and linked to environmental properties
@@ -181,9 +186,9 @@ def _enhanced_effect_error(
                     for key in theoritical_prob_of_attribute:
                         error_old_pep += abs(theoritical_prob_of_attribute[key])
                         error_new_pep += abs(theoritical_prob_of_attribute[key])
-                for ra in range(classifier_length-random_attribute_length, classifier_length):
+                for ra in range(cfg.classifier_length-random_attribute_length, cfg.classifier_length):
                     theoritical_prob_of_attribute = {1:0.5, 0:0.5}
                     for key in theoritical_prob_of_attribute:
                         error_old_pep += abs(theoritical_prob_of_attribute[key])
                         error_new_pep += abs(theoritical_prob_of_attribute[key])
-    return error_old_pep * 100 / (len(theoritical_probabilities)*8*classifier_length), error_new_pep * 100 / (len(theoritical_probabilities)*8*classifier_length)
+    return error_old_pep * 100 / (len(theoritical_probabilities)*8*cfg.classifier_length), error_new_pep * 100 / (len(theoritical_probabilities)*8*cfg.classifier_length)

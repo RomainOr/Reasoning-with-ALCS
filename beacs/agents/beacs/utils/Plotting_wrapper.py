@@ -68,7 +68,7 @@ def build_fitness_matrix(env, population, cfg):
     for index, x in np.ndenumerate(original):
         # Path - best classfier fitness
         if x == 0:
-            perception = env.env.maze.perception(index[1], index[0])
+            perception = cfg.environment_adapter.to_genotype(env.env.maze.perception(index[1], index[0]))
             best_cl = find_best_classifier(population, perception, cfg)
             if best_cl:
                 fitness[index] = max(best_cl.fitness, fitness[index])
@@ -104,7 +104,7 @@ def build_action_matrix(env, population, cfg, fitness_matrix):
     for index, x in np.ndenumerate(original):
         # Path - best classfier fitness
         if x == 0:
-            perception = env.env.maze.perception(index[1], index[0])
+            perception = cfg.environment_adapter.to_genotype(env.env.maze.perception(index[1], index[0]))
             best_cl = find_best_classifier(population, perception, cfg)
             if best_cl:
                 if action[index].find(ACTION_LOOKUP[best_cl.action]) == -1:

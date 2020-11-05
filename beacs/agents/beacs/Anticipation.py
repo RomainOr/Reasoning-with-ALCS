@@ -183,8 +183,15 @@ class Anticipation():
         bool
             True if self subsumes other
         """
-        # NOTE to refine for UBR
-        return set(other.effect_list) <= set(self.effect_list)
+        for oi in other.effect_list:
+            is_subsumed = False
+            for ei in self.effect_list:
+                if ei.subsumes(oi):
+                    is_subsumed = True
+            if not is_subsumed:
+                return False
+        return True
+        #return set(other.effect_list) <= set(self.effect_list)
 
 
     def update_anticipation_counter(
@@ -230,7 +237,6 @@ class Anticipation():
         tuple
             The respective probabilities
         """
-        # NOTE to refine for UBR
         total_counter = float(sum(self.effect_counter))
         result = {}
         for idx, effect in enumerate(self.effect_list):

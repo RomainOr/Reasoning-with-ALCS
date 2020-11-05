@@ -33,7 +33,8 @@ class Configuration:
             theta_as: int=20,
             mu: float=0.3,
             chi: float=0.8,
-            bs_max: int=0) -> None:
+            bs_max: int=0,
+            spread: float=0.1) -> None:
         """
         Creates the configuration object used during training the beacs agent.
 
@@ -82,7 +83,8 @@ class Configuration:
             GA crossover probability
         bs_max
             maximal length of behavioral sequence
-
+        spread
+            Spread of initial UBR
         """
         self.classifier_length = classifier_length
         self.number_of_possible_actions = number_of_possible_actions
@@ -106,6 +108,7 @@ class Configuration:
         self.mu = mu
         self.chi = chi
         self.bs_max = bs_max
+        self.spread = spread
 
 
     def __str__(self):
