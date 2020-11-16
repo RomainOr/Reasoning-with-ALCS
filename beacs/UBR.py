@@ -41,6 +41,13 @@ class UBR:
             self.x = min_lower_bound
             self.y = max_upper_bound
 
+    def reduce_with_ubr(self, other):
+        if not self.subsumes(other):
+            max_lower_bound = max(self.lower_bound, other.lower_bound)
+            min_upper_bound = min(self.upper_bound, other.upper_bound)
+            self.x = max_lower_bound
+            self.y = min_upper_bound
+
     def widen_with_spread(self):
         growth = random.uniform(0.,max(self.spread, self.initial_spread))
         amount_x_y = random.random()
@@ -64,4 +71,4 @@ class UBR:
         return hash((self.lower_bound, self.upper_bound))
 
     def __str__(self):
-        return "[{:.2f}; {:.2f}]".format(self.lower_bound, self.upper_bound)
+        return "[{:.3f}; {:.3f}]".format(self.lower_bound, self.upper_bound)

@@ -118,7 +118,8 @@ class Anticipation():
     def is_specializable(
             self,
             p0: Perception,
-            p1: Perception
+            p1: Perception,
+            spread
         ) -> bool:
         """
         Determines if the effect part can be modified to anticipate
@@ -137,13 +138,14 @@ class Anticipation():
             True if specializable
         """
         index = self.effect_counter.index(max(self.effect_counter))
-        return self.effect_list[index].is_specializable(p0, p1)
+        return self.effect_list[index].is_specializable(p0, p1, spread)
 
 
     def does_anticipate_correctly(
             self,
             p0: Perception,
-            p1: Perception
+            p1: Perception, 
+            spread
         ) -> bool:
         """
         Determines if the effect list anticipates correctly changes from `p0` to `p1`.
@@ -161,7 +163,7 @@ class Anticipation():
             True the anticipation is correct
         """
         for effect in self.effect_list:
-            if effect.does_anticipate_correctly(p0, p1):
+            if effect.does_anticipate_correctly(p0, p1, spread):
                 return True
         return False
 
@@ -197,7 +199,8 @@ class Anticipation():
     def update_anticipation_counter(
             self,
             p0: Perception,
-            p1: Perception
+            p1: Perception,
+            spread
         ) -> None:
         """
         Updates the counter of respective effect when it correctly anticipates.
@@ -210,7 +213,7 @@ class Anticipation():
             Current perception
         """
         for idx, effect in enumerate(self.effect_list):
-            if effect.does_anticipate_correctly(p0, p1):
+            if effect.does_anticipate_correctly(p0, p1,spread):
                 self.effect_counter[idx] += 1
                 break
 

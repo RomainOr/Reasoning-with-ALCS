@@ -16,7 +16,7 @@ from beacs.agents.beacs import Configuration, Condition, Anticipation, Effect, P
 class Classifier:
 
     __slots__ = ['condition', 'action', 'behavioral_sequence', 'anticipation', 'mark', 'q', 'ra', 'rb',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'pai_state', 'err']
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'trc', 'cfg', 'ee', 'pai_state', 'err']
 
     # In paper it's advised to set experience and reward of newly generated
     # classifier to 0. However in original code these values are initialized
@@ -36,6 +36,7 @@ class Classifier:
             talp: int=0,
             tga: int=0,
             tbseq: int=0,
+            trc: int=0,
             tav: float=0.0,
             pai_state: Optional[Perception] = None,
             cfg: Optional[Configuration] = None
@@ -68,6 +69,7 @@ class Classifier:
         self.talp = talp
         self.tga = tga
         self.tbseq = tbseq
+        self.trc = trc
         self.tav = tav
         self.ee = False
         if pai_state:
@@ -138,6 +140,7 @@ class Classifier:
             cfg=old_cls.cfg,
             tga=time,
             tbseq=time,
+            trc=time,
             talp=time,
             tav=old_cls.tav,
             pai_state=old_cls.pai_state
@@ -158,13 +161,19 @@ class Classifier:
                         break
                 if change_anticipated:
                     if new_cls.condition[idx] == new_cls.condition.wildcard or p1[idx] not in new_cls.condition[idx]:
-                        new_cls.anticipation[0][idx] = UBR(p1[idx] - new_cls.cfg.spread/2., p1[idx] + new_cls.cfg.spread/2., new_cls.cfg.spread)
+                        new_cls.anticipation[0][idx] = UBR(p1[idx] - new_cls.cfg.spread, p1[idx] + new_cls.cfg.spread, 2. * new_cls.cfg.spread)
         else:
             for idx in range(len(new_cls.anticipation[0])):
                 if isinstance(old_cls.anticipation[0][idx], UBR):
                     new_cls.anticipation[0][idx] = UBR.copy(old_cls.anticipation[0][idx])
                 else:
                     new_cls.anticipation[0][idx] = old_cls.anticipation[0][idx]
+        #Safety check and other
+        for idx in range(new_cls.cfg.classifier_length):
+            if new_cls.anticipation[0][idx] != new_cls.cfg.classifier_wildcard and \
+                new_cls.condition[idx] != new_cls.cfg.classifier_wildcard and \
+                    new_cls.condition[idx].subsumes(new_cls.anticipation[0][idx]):
+                new_cls.anticipation[0][idx] = new_cls.cfg.classifier_wildcard
         return new_cls
 
 
@@ -287,13 +296,12 @@ class Classifier:
             return True
         if self.condition.specificity > other.condition.specificity:
             return False
-        result = 0.
         for idx in range(self.cfg.classifier_length):
-            if self.condition[idx] != self.condition.wildcard:
-                result += self.condition[idx].spread
-            if other.condition[idx] != other.condition.wildcard:
-                result -= other.condition[idx].spread
-        return result >= 0.
+            if self.condition[idx] != self.condition.wildcard and other.condition[idx] == other.condition.wildcard:
+                return False
+            if self.condition[idx] != self.condition.wildcard and other.condition[idx] != other.condition.wildcard and not self.condition[idx].subsumes(other.condition[idx]):
+                return False
+        return True
 
 
     def is_specializable(
@@ -317,7 +325,7 @@ class Classifier:
         bool
             True if specializable
         """
-        return self.anticipation.is_specializable(p0, p1)
+        return self.anticipation.is_specializable(p0, p1, self.cfg.spread)
 
 
     def does_anticipate_change(self) -> bool:
@@ -375,7 +383,7 @@ class Classifier:
         bool
             True if classifier's effect pat anticipates correctly
         """
-        return self.anticipation.does_anticipate_correctly(previous_situation, situation)
+        return self.anticipation.does_anticipate_correctly(previous_situation, situation, self.cfg.spread)
 
 
     def does_predict_successfully(
@@ -481,7 +489,7 @@ class Classifier:
         p1: Perception
             Current perception
         """
-        self.anticipation.update_anticipation_counter(p0,p1)
+        self.anticipation.update_anticipation_counter(p0,p1,self.cfg.spread)
 
 
     def specialize(
@@ -502,9 +510,30 @@ class Classifier:
             Perception related to a state following the action
         """
         for idx, _ in enumerate(situation):
-            if previous_situation[idx] != situation[idx] and self.anticipation[0][idx] == self.cfg.classifier_wildcard:
-                self.anticipation[0][idx] = UBR(situation[idx] - self.cfg.spread/2., situation[idx] + self.cfg.spread/2., self.cfg.spread)
-                self.condition[idx] = UBR(previous_situation[idx] - self.cfg.spread/2., previous_situation[idx] + self.cfg.spread/2., self.cfg.spread)
+            if abs(previous_situation[idx] - situation[idx]) > 2. * self.cfg.spread and self.anticipation[0][idx] == self.cfg.classifier_wildcard:
+                self.anticipation[0][idx] = UBR(situation[idx] - self.cfg.spread, situation[idx] + self.cfg.spread, 2. * self.cfg.spread)
+                self.condition[idx] = UBR(previous_situation[idx] - self.cfg.spread, previous_situation[idx] + self.cfg.spread, 2. * self.cfg.spread)
+                continue
+            if abs(previous_situation[idx] - situation[idx]) > self.cfg.spread and self.anticipation[0][idx] == self.cfg.classifier_wildcard:
+                if self.condition[idx] == self.cfg.classifier_wildcard:
+                    improved_spread = abs(previous_situation[idx] - situation[idx])
+                    self.condition[idx] = UBR(previous_situation[idx] - improved_spread, previous_situation[idx] + improved_spread, 2. * improved_spread)
+                else:
+                    self.condition[idx].widen_with_ubr(UBR(previous_situation[idx],previous_situation[idx], 0.))
+                continue
+            if abs(previous_situation[idx] - situation[idx]) > self.cfg.spread and abs(previous_situation[idx] - situation[idx]) <= 2. * self.cfg.spread and self.anticipation[0][idx] != self.cfg.classifier_wildcard:
+                if self.condition[idx] == self.cfg.classifier_wildcard:
+                    improved_spread = abs(previous_situation[idx] - situation[idx])
+                    self.condition[idx] = UBR(previous_situation[idx] - improved_spread, previous_situation[idx] + improved_spread, 2. * improved_spread)
+                else:
+                    self.condition[idx].widen_with_ubr(UBR(previous_situation[idx],previous_situation[idx], 0.))
+                self.anticipation[0][idx].widen_with_ubr(UBR(situation[idx], situation[idx], 0.))
+        #Safety check and other
+        for idx in range(self.cfg.classifier_length):
+            if self.anticipation[0][idx] != self.cfg.classifier_wildcard and \
+                self.condition[idx] != self.cfg.classifier_wildcard and \
+                    self.condition[idx].subsumes(self.anticipation[0][idx]):
+                self.anticipation[0][idx] = self.cfg.classifier_wildcard
 
 
     def specialize_with_condition(
@@ -573,6 +602,7 @@ class Classifier:
             talp = time,
             tga = time,
             tbseq = time,
+            trc = time,
             pai_state = self.pai_state,
             cfg = self.cfg
         )

@@ -36,7 +36,8 @@ class Effect(AbstractPerception):
     def is_specializable(
             self,
             p0: Perception,
-            p1: Perception
+            p1: Perception,
+            spread
         ) -> bool:
         """
         Determines if the effect part can be modified to anticipate
@@ -56,7 +57,7 @@ class Effect(AbstractPerception):
         """
         for p0i, p1i, ei in zip(p0, p1, self):
             if ei != self.wildcard:
-                if p1i not in ei or p0i == p1i:
+                if p1i not in ei or abs(p0i-p1i) <= spread:
                     return False
         return True
 
@@ -64,7 +65,8 @@ class Effect(AbstractPerception):
     def does_anticipate_correctly(
         self,
         p0: Perception,
-        p1: Perception
+        p1: Perception,
+        spread
         ) -> bool:
         """
         Determines if the effect anticipates correctly changes from `p0` to `p1`.
@@ -85,16 +87,17 @@ class Effect(AbstractPerception):
                 item,
                 p0_item,
                 p1_item,
+                spread,
                 wildcard
             ) -> bool:
             if item == wildcard:
-                if p0_item != p1_item: return False
+                if abs(p0_item-p1_item) > spread: return False
             else:
-                if p0_item == p1_item: return False
+                if abs(p0_item-p1_item) <= spread: return False
                 if p1_item not in item: return False
             # All checks passed
             return True
-        return all(_item_anticipate_change(self[idx], p0[idx], p1[idx], self.wildcard) for idx in range(len(p0)))
+        return all(_item_anticipate_change(self[idx], p0[idx], p1[idx], spread ,self.wildcard) for idx in range(len(p0)))
 
 
     def generalize(

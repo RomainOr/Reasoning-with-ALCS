@@ -20,6 +20,7 @@ class Configuration:
             metrics_trial_frequency: int = 5,
             do_pep: bool = True,
             do_ga: bool=False,
+            do_rc: bool=False,
             beta_alp: float=0.05,
             beta_rl: float=0.05,
             gamma: float=0.95,
@@ -30,6 +31,7 @@ class Configuration:
             theta_exp: int=20,
             theta_ga: int=100,
             theta_bseq: int=1000,
+            theta_rc: int=2,
             theta_as: int=20,
             mu: float=0.3,
             chi: float=0.8,
@@ -55,6 +57,8 @@ class Configuration:
 
         do_ga
             switch *Genetic Generalization* module
+        do_rc
+            switch *Rule Combination* module
         beta_alp
 
         beta_rl
@@ -75,6 +79,8 @@ class Configuration:
 
         theta_bseq
             time before checking PAI states 
+        theta_rc
+            time before rule combination 
         theta_as
 
         mu
@@ -94,6 +100,7 @@ class Configuration:
         self.user_metrics_collector_fcn = user_metrics_collector_fcn
         self.do_pep = do_pep
         self.do_ga = do_ga
+        self.do_rc = do_rc
         self.theta_exp = theta_exp
         self.beta_alp = beta_alp
         self.beta_rl = beta_rl
@@ -104,6 +111,7 @@ class Configuration:
         self.u_max = u_max
         self.theta_ga = theta_ga
         self.theta_bseq = theta_bseq
+        self.theta_rc = theta_rc
         self.theta_as = theta_as
         self.mu = mu
         self.chi = chi

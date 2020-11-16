@@ -44,6 +44,7 @@ def cover(
         action=action, 
         tga=time,
         tbseq=time,
+        trc=time,
         talp=time,
         cfg=cfg
     )

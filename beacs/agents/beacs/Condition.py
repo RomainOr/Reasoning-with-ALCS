@@ -123,10 +123,12 @@ class Condition(AbstractPerception):
             if isinstance(ci, UBR) and isinstance(oi, UBR):
                 if not ci.subsumes(oi): return False
             elif not isinstance(ci, UBR) and isinstance(oi, UBR):
-                return False
+                if ci != self.wildcard: return False
             elif isinstance(ci, UBR) and not isinstance(oi, UBR):
                 if oi == self.wildcard or oi not in ci: return False
             else:
                 if ci != self.wildcard and oi != self.wildcard and ci != oi:
+                    return False
+                if ci != self.wildcard and oi == self.wildcard:
                     return False
         return True

@@ -37,7 +37,7 @@ def is_state_aliased(
         situation = Condition(condition)
         for idx, item in enumerate(condition):
             if item == condition.wildcard:
-                situation[idx] = UBR(next(iter(mark[idx])), next(iter(mark[idx])), spread)
+                situation[idx] = UBR(next(iter(mark[idx])), next(iter(mark[idx])), 0.)
         return situation.does_match(p0)
     return False
 

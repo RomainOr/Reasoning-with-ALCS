@@ -12,6 +12,7 @@ from typing import Optional, List
 
 import beacs.agents.beacs.components.alp as alp
 import beacs.agents.beacs.components.genetic_algorithms as ga
+import beacs.agents.beacs.components.rule_combination as rc
 import beacs.agents.beacs.components.reinforcement_learning as rl
 import beacs.agents.beacs.components.aliasing_detection as pai
 from beacs import Perception, TypedList
@@ -282,7 +283,8 @@ class ClassifiersList(TypedList):
             chi: float,
             theta_as: int,
             theta_exp: int,
-            do_ga: bool
+            do_ga: bool,
+            do_rc: bool
         ) -> None:
 
         if ga.should_apply(action_set, time, theta_ga):
@@ -302,29 +304,24 @@ class ClassifiersList(TypedList):
             child1 = Classifier.copy_from(parent1, p0, p1, time)
             child2 = Classifier.copy_from(parent2, p0, p1, time)
 
+            # Execute Genetic Generalization
             if do_ga:
+                # Execute mutation
                 ga.directed_mutation(child1, child2, mu, is_behavioral_action_set)
-
                 # Execute cross-over
                 if random.random() < chi and not is_behavioral_action_set:
                     if child1.anticipation == child2.anticipation:
                         ga.one_point_crossover(child1, child2)
-
                         # Update quality and reward
                         child1.q = child2.q = float(sum([child1.q, child2.q]) / 2)
                         child1.ra = child2.ra = float(sum([child1.ra, child2.ra]) / 2)
                         child1.rb = child2.rb = float(sum([child1.rb, child2.rb]) / 2)
+            # Execute Rule Combination
+            if do_rc:
+                rc.rule_combination(child1, child2)
 
             child1.q /= 2
             child2.q /= 2
-
-            # Update anticipation of child
-            for cl in [child1, child2]:
-                for idx in range(cl.cfg.classifier_length):
-                    if cl.condition[idx] != cl.condition.wildcard and \
-                        cl.anticipation[0][idx] != cl.anticipation.wildcard and \
-                          cl.condition[idx].subsumes(cl.anticipation[0][idx]):
-                        cl.condition[idx] = cl.condition.wildcard
 
             # We are interested only in classifiers with specialized condition
             unique_children = {cl for cl in [child1, child2] if cl.specificity > 0 and cl.does_match(p0)}
@@ -340,6 +337,51 @@ class ClassifiersList(TypedList):
             # check for subsumers / similar classifiers
             for child in unique_children:
                 ga.add_classifier(
+                    child,
+                    p1,
+                    population,
+                    match_set,
+                    action_set,
+                    theta_exp
+                )
+
+
+    @staticmethod
+    def apply_rc(
+            time: int,
+            population: ClassifiersList,
+            match_set: ClassifiersList,
+            action_set: ClassifiersList,
+            p0: Perception,
+            p1: Perception,
+            theta_rc: int,
+            theta_as: int,
+            theta_exp: int
+        ) -> None:
+        if rc.should_apply(action_set, time, theta_rc):
+            rc.set_timestamps(action_set, time)
+            # Select parents
+            parent1, parent2 = rc.roulette_wheel_selection(
+                action_set, 
+                #lambda cl: pow(cl.q, 3) * cl.num
+                lambda cl: cl.q * cl.exp
+            )
+            child1 = Classifier.copy_from(parent1, p0, p1, time)
+            child2 = Classifier.copy_from(parent2, p0, p1, time)
+            # Apply Rule Combination
+            rc.rule_combination(child1, child2)
+            # We are interested only in classifiers with specialized condition
+            unique_children = {cl for cl in [child1, child2] if cl.specificity > 0 and cl.does_match(p0)}
+            rc.delete_classifiers(
+                population,
+                match_set,
+                action_set,
+                len(unique_children),
+                theta_as
+            )
+            # check for subsumers / similar classifiers
+            for child in unique_children:
+                rc.add_classifier(
                     child,
                     p1,
                     population,

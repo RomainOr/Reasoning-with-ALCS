@@ -14,39 +14,39 @@ from beacs.agents.beacs.components.subsumption import find_subsumers
 def should_apply(
         action_set, 
         time: int, 
-        theta_ga: int
+        theta_rc: int
     ) -> bool:
     """
-    Checks the average last GA application to determine if a GA
+    Checks the average last RC application to determine if a RC
     should be applied.
-    If no classifier is in the current set, no GA is applied!
+    If no classifier is in the current set, no RC is applied!
 
     Parameters
     ----------
     action_set
-        Population of classifiers (with `num` and `tga` properties)
+        Population of classifiers (with `num` and `trc` properties)
     time: int
         Current epoch
-    theta_ga: int
-        The GA application threshold (θga ∈ N) controls the GA frequency.
-        A GA is applied in an action set if the average delay of the last GA
-        application of the classifiers in the set is greater than θga.
+    theta_rc: int
+        The RC application threshold (θrc ∈ N) controls the RC frequency.
+        A RC is applied in an action set if the average delay of the last RC
+        application of the classifiers in the set is greater than θrc.
 
     Returns
     -------
     bool
-        True if GA should be applied, False otherwise
+        True if RC should be applied, False otherwise
     """
     if action_set is None or not action_set:
         return False
 
-    overall_time = sum(cl.tga * cl.num for cl in action_set)
+    overall_time = sum(cl.trc * cl.num for cl in action_set)
     overall_num = sum(cl.num for cl in action_set)
 
     if overall_num == 0:
         return False
 
-    if time - (overall_time / overall_num) > theta_ga:
+    if time - (overall_time / overall_num) > theta_rc:
         return True
 
     return False
@@ -57,9 +57,9 @@ def set_timestamps(
         epoch: int
     ) -> None:
     """
-    Sets the GA time stamps to the current time to control
-    the GA application frequency.
-    Each classifier `tga` property in population is updated with current
+    Sets the RC time stamps to the current time to control
+    the RC application frequency.
+    Each classifier `trc` property in population is updated with current
     epoch
 
     Parameters
@@ -70,7 +70,7 @@ def set_timestamps(
         Current epoch
     """
     for cl in action_set:
-        cl.tga = epoch
+        cl.trc = epoch
 
 
 def roulette_wheel_selection(
@@ -108,16 +108,12 @@ def roulette_wheel_selection(
     return parent1, parent2
 
 
-def directed_mutation(
+def rule_combination(
         cl1,
-        cl2,
-        mu: float,
-        is_behavioral_action_set
+        cl2
     ) -> None:
     """
     Executes a particular mutation in the behavioral classifiers.
-    Specified attributes in classifier conditions are randomly
-    generalized with `mu` probability depending on the other child.
 
     Parameters
     ----------
@@ -125,160 +121,53 @@ def directed_mutation(
         First behavioral classifier
     cl2
         Second behavioral classifier
-    mu
-        Mutation rate
-    is_behavioral_action_set
-        Indicates if the system uses a behavioral action set
     """
-    for idx in range(len(cl1.condition)):
-        rand_cl1 = random.random()
-        rand_cl2 = random.random()
+    for idx in range(cl1.cfg.classifier_length):
         # Both attributes are generalized, skip
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] == cl2.cfg.classifier_wildcard :
+            if cl1.anticipation[0][idx] != cl1.cfg.classifier_wildcard and cl2.anticipation[0][idx] != cl2.cfg.classifier_wildcard and cl1.anticipation[0][idx].does_intersect_with(cl2.anticipation[0][idx]):
+                cl1.anticipation[0][idx].widen_with_ubr(cl2.anticipation[0][idx])
+                cl2.anticipation[0][idx].widen_with_ubr(cl1.anticipation[0][idx])
+                continue
             continue
-        # One attribute is generalized, try to generalize the other
+        # One attribute is generalized
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] == cl2.cfg.classifier_wildcard:
-            if rand_cl1 < mu:
-                cl1.generalize_condition_attribute(idx)
+            if cl1.anticipation[0][idx] == cl1.cfg.classifier_wildcard and cl2.anticipation[0][idx] != cl2.cfg.classifier_wildcard and cl2.anticipation[0][idx].does_intersect_with(cl1.condition[idx]):
+                cl1.anticipation[0][idx] = UBR.copy(cl1.condition[idx])
+                cl1.anticipation[0][idx].widen_with_ubr(cl2.anticipation[0][idx])
+                continue
+            if cl1.anticipation[0][idx] != cl1.cfg.classifier_wildcard and cl2.anticipation[0][idx] != cl2.cfg.classifier_wildcard and cl1.anticipation[0][idx].does_intersect_with(cl2.anticipation[0][idx]):
+                cl1.anticipation[0][idx].widen_with_ubr(cl2.anticipation[0][idx])
+                cl2.anticipation[0][idx].widen_with_ubr(cl1.anticipation[0][idx])
+                continue
             continue
-        # One attribute is generalized, try to generalize the other
+        # One attribute is generalized
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] != cl2.cfg.classifier_wildcard:
-            if rand_cl2 < mu:
-                cl2.generalize_condition_attribute(idx)
+            if cl1.anticipation[0][idx] != cl1.cfg.classifier_wildcard and cl2.anticipation[0][idx] == cl2.cfg.classifier_wildcard and cl1.anticipation[0][idx].does_intersect_with(cl2.condition[idx]):
+                cl2.anticipation[0][idx] = UBR.copy(cl2.condition[idx])
+                cl2.anticipation[0][idx].widen_with_ubr(cl1.anticipation[0][idx])
+                continue
+            if cl1.anticipation[0][idx] != cl1.cfg.classifier_wildcard and cl2.anticipation[0][idx] != cl2.cfg.classifier_wildcard and cl1.anticipation[0][idx].does_intersect_with(cl2.anticipation[0][idx]):
+                cl1.anticipation[0][idx].widen_with_ubr(cl2.anticipation[0][idx])
+                cl2.anticipation[0][idx].widen_with_ubr(cl1.anticipation[0][idx])
+                continue
             continue
-        # Both attributes are generalized, try to generalize both
-        # but first it depends on the presence of behavioral sequences
-        if is_behavioral_action_set:
-            if rand_cl1 < mu:
-                cl1.condition[idx].widen_with_ubr(cl2.condition[idx])
-            if rand_cl2 < mu:
-                cl2.condition[idx].widen_with_ubr(cl1.condition[idx])
-            continue
-        # then if both attributes are the same
-        if cl1.condition[idx] == cl2.condition[idx]:
-            if rand_cl1 < mu:
-                cl1.condition[idx].widen_with_spread()
-            if rand_cl2 < mu:
-                cl2.condition[idx].widen_with_spread()
-        # else case
-        elif cl1.condition[idx] != cl2.condition[idx]:
-            if cl1.condition[idx].subsumes(cl2.condition[idx]):
-                if rand_cl1 < mu:
-                    cl1.condition[idx].widen_with_spread()
-                if rand_cl2 < mu:
-                    cl2.generalize_condition_attribute(idx)
-            elif cl2.condition[idx].subsumes(cl1.condition[idx]):
-                if rand_cl1 < mu:
-                    cl1.generalize_condition_attribute(idx)
-                if rand_cl2 < mu:
-                    cl2.condition[idx].widen_with_spread()
-            else:
-                if rand_cl2 < mu:
-                    cl2.condition[idx].widen_with_spread()
-                if rand_cl1 < mu:
-                    cl1.condition[idx].widen_with_ubr(cl2.condition[idx])
-
-    # Update anticipation of child
-    for cl in [cl1, cl2]:
-        for idx in range(cl.cfg.classifier_length):
-            if cl.condition[idx] != cl.condition.wildcard and \
-                cl.anticipation[0][idx] != cl.anticipation.wildcard and \
-                    cl.condition[idx].subsumes(cl.anticipation[0][idx]):
-                cl.anticipation[0][idx] = cl.condition.wildcard
-
-
-def generalizing_mutation(
-        cl,
-        mu: float
-    ) -> None:
-    """
-    Executes the generalizing mutation in the classifier.
-    Specified attributes in classifier conditions are randomly
-    generalized with `mu` probability.
-
-    Parameters
-    ----------
-    cl1
-        First behavioral classifier
-    cl2
-        Second behavioral classifier
-    mu
-        Mutation rate
-    """
-    for idx, cond in enumerate(cl.condition):
-        if cond != cl.cfg.classifier_wildcard and random.random() < mu:
-            cl.generalize_condition_attribute(idx)
-
-
-def one_point_crossover(
-        parent,
-        donor
-    ) -> None:
-    """
-    Executes one-point crossover using condition parts of two classifiers.
-    Condition in both classifiers are changed depending on UBR attribute.
-
-    Parameters
-    ----------
-    parent
-        Classifier
-    donor
-        Classifier
-    """
-    ridx = random.choice(range(parent.cfg.classifier_length))
-    if isinstance(parent.condition[ridx], UBR) and isinstance(donor.condition[ridx], UBR):
-        #swap alleles of the UBR attribute
-        allele_parent = parent.condition[ridx].y
-        allele_donor = donor.condition[ridx].y
-        parent.condition[ridx].y = allele_donor
-        donor.condition[ridx].y = allele_parent
-        #swap the rest if possible
-        if ridx+1 < parent.cfg.classifier_length:
-            for idx in range(ridx+1, parent.cfg.classifier_length):
-                chromosome_parent = parent.condition[idx]
-                chromosome_donor = donor.condition[idx]
-                parent.condition[idx] = chromosome_donor
-                donor.condition[idx] = chromosome_parent
-    else:
-        #swap directly from idx
-        for idx in range(ridx, parent.cfg.classifier_length):
-            chromosome_parent = parent.condition[idx]
-            chromosome_donor = donor.condition[idx]
-            parent.condition[idx] = chromosome_donor
-            donor.condition[idx] = chromosome_parent
-
-
-def two_point_crossover(
-        parent,
-        donor
-    ) -> None:
-    """
-    Executes two-point crossover using condition parts of two classifiers.
-    Condition in both classifiers are changed.
-
-    Parameters
-    ----------
-    parent
-        Classifier
-    donor
-        Classifier
-    """
-    sample_list = sorted(random.sample(range(0, parent.cfg.classifier_length + 1), 2))
-    left = sample_list[0]
-    right = sample_list[1]
-
-    # Extract chromosomes from condition parts
-    chromosome1 = parent.condition[left:right]
-    chromosome2 = donor.condition[left:right]
-
-    # Flip them
-    for idx, el in enumerate(range(left, right)):
-        parent.condition[el] = chromosome2[idx]
-        donor.condition[el] = chromosome1[idx]
-
+        if cl1.condition[idx].does_intersect_with(cl2.condition[idx]):
+            if cl1.anticipation[0][idx] == cl1.cfg.classifier_wildcard and cl2.anticipation[0][idx] != cl2.cfg.classifier_wildcard and cl2.anticipation[0][idx].does_intersect_with(cl1.condition[idx]):
+                cl1.anticipation[0][idx] = UBR.copy(cl1.condition[idx])
+                cl1.anticipation[0][idx].widen_with_ubr(cl2.anticipation[0][idx])
+                continue
+            if cl1.anticipation[0][idx] != cl1.cfg.classifier_wildcard and cl2.anticipation[0][idx] == cl2.cfg.classifier_wildcard and cl1.anticipation[0][idx].does_intersect_with(cl2.condition[idx]):
+                cl2.anticipation[0][idx] = UBR.copy(cl2.condition[idx])
+                cl2.anticipation[0][idx].widen_with_ubr(cl1.anticipation[0][idx])
+                continue
+            if cl1.anticipation[0][idx] != cl1.cfg.classifier_wildcard and cl2.anticipation[0][idx] != cl2.cfg.classifier_wildcard and cl1.anticipation[0][idx].does_intersect_with(cl2.anticipation[0][idx]):
+                cl1.anticipation[0][idx].widen_with_ubr(cl2.anticipation[0][idx])
+                cl2.anticipation[0][idx].widen_with_ubr(cl1.anticipation[0][idx])
+                continue
 
 def add_classifier(
         cl, 

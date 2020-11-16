@@ -106,8 +106,21 @@ class BEACS(Agent):
                     self.cfg.chi,
                     self.cfg.theta_as,
                     self.cfg.theta_exp,
-                    self.cfg.do_ga
+                    self.cfg.do_ga,
+                    self.cfg.do_rc
                 )
+                if self.cfg.do_rc:
+                    ClassifiersList.apply_rc(
+                        time + steps,
+                        self.population,
+                        match_set,
+                        action_set,
+                        prev_state,
+                        state,
+                        self.cfg.theta_rc,
+                        self.cfg.theta_as,
+                        self.cfg.theta_exp
+                    )
 
             # Record the previous match set
             previous_match_set = match_set
@@ -167,8 +180,21 @@ class BEACS(Agent):
                     self.cfg.chi,
                     self.cfg.theta_as,
                     self.cfg.theta_exp,
-                    self.cfg.do_ga
+                    self.cfg.do_ga,
+                    self.cfg.do_rc
                 )
+                if self.cfg.do_rc:
+                    ClassifiersList.apply_rc(
+                        time + steps,
+                        self.population,
+                        match_set,
+                        action_set,
+                        prev_state,
+                        state,
+                        self.cfg.theta_rc,
+                        self.cfg.theta_as,
+                        self.cfg.theta_exp
+                    )
 
             steps += 1
         return TrialMetrics(steps, last_reward)

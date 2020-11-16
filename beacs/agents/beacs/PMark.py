@@ -101,11 +101,11 @@ class PMark():
         if nr1 > 0:
             possible_idx = [pi for pi, p in enumerate(p0) if p not in self[pi] and len(self[pi]) > 0]
             rand_idx = random.choice(possible_idx)
-            diff[rand_idx] = UBR(p0[rand_idx] - self.cfg.spread/2., p0[rand_idx] + self.cfg.spread/2., self.cfg.spread)
+            diff[rand_idx] = UBR(p0[rand_idx] - self.cfg.spread, p0[rand_idx] + self.cfg.spread, 2. * self.cfg.spread)
         elif nr2 > 0:
             for idx, item in enumerate(self):
                 if len(item) > 1:
-                    diff[idx] = UBR(p0[idx] - self.cfg.spread/2., p0[idx] + self.cfg.spread/2., self.cfg.spread)
+                    diff[idx] = UBR(p0[idx] - self.cfg.spread, p0[idx] + self.cfg.spread, 2. * self.cfg.spread)
         return diff
 
 
@@ -131,7 +131,7 @@ class PMark():
             if len(s) == 0:
                 return self.cfg.classifier_wildcard
             else:
-                return "{" + ", ".join(str(x) for x in s) + "}"
+                return "{" + ", ".join("{:.3f}".format(x) for x in s) + "}"
 
         if self.is_marked():
             return "".join(compact_set_str(x) for x in self)
