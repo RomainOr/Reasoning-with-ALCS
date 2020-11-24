@@ -65,6 +65,16 @@ def _maze_metrics(
     return metrics
 
 
+def _cartpole_metrics(
+        pop,
+        env
+    ) -> dict:
+    metrics = {}
+    # Add basic population metrics
+    metrics.update(population_metrics(pop, env))
+    return metrics
+
+
 def _how_many_peps_match_non_aliased_states(
         pop,
         env

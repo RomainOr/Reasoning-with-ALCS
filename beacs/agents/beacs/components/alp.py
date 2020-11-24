@@ -83,24 +83,23 @@ def expected_case(
 
     child = cl.copy_from(cl, p0, p1, time)
 
-    no_spec = len(cl.specified_unchanging_attributes)
-    no_spec_new = diff.specificity
-    if no_spec >= cl.cfg.u_max:
-        while no_spec >= cl.cfg.u_max:
-            cl.generalize_unchanging_condition_attribute()
-            no_spec -= 1
-
-        while no_spec + no_spec_new > cl.cfg.u_max:
-            if random() < 0.5:
-                diff.generalize_specific_attribute_randomly()
-                no_spec_new -= 1
+    spec = cl.specificity
+    spec_new = diff.specificity
+    if spec >= child.cfg.u_max:
+        while spec >= child.cfg.u_max:
+            child.generalize_specific_attribute_randomly()
+            spec -= 1
+        while spec + spec_new > child.cfg.u_max:
+            if spec > 0 and random() < 0.5:
+                child.generalize_specific_attribute_randomly()
+                spec -= 1
             else:
-                if cl.generalize_unchanging_condition_attribute():
-                    no_spec -= 1
+                diff.generalize_specific_attribute_randomly()
+                spec_new -= 1
     else:
-        while no_spec + no_spec_new > cl.cfg.u_max:
+        while spec + spec_new > child.cfg.u_max:
             diff.generalize_specific_attribute_randomly()
-            no_spec_new -= 1
+            spec_new -= 1
 
     child.condition.specialize_with_condition(diff)
 

@@ -62,9 +62,9 @@ class Effect(AbstractPerception):
 
 
     def does_anticipate_correctly(
-        self,
-        p0: Perception,
-        p1: Perception
+            self,
+            p0: Perception,
+            p1: Perception
         ) -> bool:
         """
         Determines if the effect anticipates correctly changes from `p0` to `p1`.

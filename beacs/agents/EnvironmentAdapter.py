@@ -17,7 +17,7 @@ class EnvironmentAdapter:
     """
 
     @staticmethod
-    def to_lcs_action(env_action):
+    def to_lcs_action(env, env_action):
         """
         Converts environment representation of an action to LCS
         representation.
@@ -25,7 +25,7 @@ class EnvironmentAdapter:
         return env_action
 
     @staticmethod
-    def to_genotype(phenotype):
+    def to_genotype(env, phenotype):
         """
         Converts environment representation of a state to LCS
         representation.
@@ -33,7 +33,7 @@ class EnvironmentAdapter:
         return phenotype
 
     @staticmethod
-    def to_env_action(lcs_action):
+    def to_env_action(env, lcs_action):
         """
         Converts LCS representation of an action to environment
         representation.
@@ -41,7 +41,7 @@ class EnvironmentAdapter:
         return lcs_action
 
     @staticmethod
-    def to_phenotype(genotype):
+    def to_phenotype(env, genotype):
         """
         Converts LCS representation of a state to environment
         representation.

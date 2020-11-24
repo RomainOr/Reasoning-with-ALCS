@@ -178,30 +178,20 @@ class Classifier:
 
 
     @property
-    def specified_unchanging_attributes(self) -> List[int]:
+    def specified_condition_attributes(self) -> List[int]:
         """
-        Determines the number of specified unchanging attributes in
-        the classifier. An unchanging attribute is one that is anticipated
-        not to change in the effect part.
+        Determines the position of specified attributes in the
+        classifier condition.
 
         Returns
         -------
         List[int]
-            List specified unchanging attributes indices
+            List of indices of specified attributes in condition
         """
         indices = []
         for idx, ci in enumerate(self.condition):
-            if self.effect.is_enhanced():
-                to_append = False
-                for effect in self.effect.effect_list:
-                    if ci != self.condition.wildcard and effect[idx] == ci:
-                        to_append = True
-                        break
-                if to_append:
-                    indices.append(idx)
-            else:
-                if ci != self.condition.wildcard and self.effect[0][idx] == self.effect.wildcard:
-                    indices.append(idx)
+            if ci != self.condition.wildcard:
+                indices.append(idx)
         return indices
 
 
@@ -453,30 +443,12 @@ class Classifier:
                 self.condition[idx] = previous_situation[idx]
 
 
-    def generalize_unchanging_condition_attribute(
-            self,
-            randomfunc: Callable=random.choice
-        ) -> bool:
+    def generalize_specific_attribute_randomly(self):
         """
-        Generalizes one randomly unchanging attribute in the condition.
-        An unchanging attribute is one that is anticipated not to change
-        in the effect part.
-
-        Parameters
-        ----------
-        randomfunc: Callable
-            Function returning attribute index to generalize
-
-        Returns
-        -------
-        bool
-            True if attribute was generalized, False otherwise
+        Generalizes one randomly attribute in the condition.
         """
-        if len(self.specified_unchanging_attributes) > 0:
-            ridx = randomfunc(self.specified_unchanging_attributes)
-            self.condition.generalize(ridx)
-            return True
-        return False
+        ridx = random.choice(self.specified_condition_attributes)
+        self.condition.generalize(ridx)
 
 
     def merge_with(

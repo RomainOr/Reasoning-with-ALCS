@@ -59,7 +59,7 @@ class BEACS(Agent):
         # Initial conditions
         steps = 0
         raw_state = env.reset()
-        state = self.cfg.environment_adapter.to_genotype(raw_state)
+        state = self.cfg.environment_adapter.to_genotype(env, raw_state)
         last_reward = 0
         prev_state = Perception.empty()
         previous_match_set = ClassifiersList()
@@ -119,20 +119,20 @@ class BEACS(Agent):
             # Create action set
             action_set = match_set.form_action_set(action_classifier)
             # Use environment adapter
-            iaction = self.cfg.environment_adapter.to_lcs_action(action_classifier.action)
+            iaction = self.cfg.environment_adapter.to_lcs_action(env, action_classifier.action)
             # Do the action
             prev_state = state
             raw_state, last_reward, done, _ = env.step(iaction)
-            state = self.cfg.environment_adapter.to_genotype(raw_state)
+            state = self.cfg.environment_adapter.to_genotype(env, raw_state)
 
             # Enter the if condition only if we have chosen a behavioral classifier
-            if action_classifier.behavioral_sequence :
+            if not done and action_classifier.behavioral_sequence :
                 # Initialize the message list usefull to decrease quality of classifiers containing looping sequences
                 for act in action_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
-                    iaction = self.cfg.environment_adapter.to_lcs_action(act)
+                    iaction = self.cfg.environment_adapter.to_lcs_action(env, act)
                     raw_state, last_reward, done, _ = env.step(iaction)
-                    state = self.cfg.environment_adapter.to_genotype(raw_state)
+                    state = self.cfg.environment_adapter.to_genotype(env, raw_state)
                     if done:
                         break
                     steps += 1
@@ -183,7 +183,7 @@ class BEACS(Agent):
         # Initial conditions
         steps = 0
         raw_state = env.reset()
-        state = self.cfg.environment_adapter.to_genotype(raw_state)
+        state = self.cfg.environment_adapter.to_genotype(env, raw_state)
         last_reward = 0
         action_set = ClassifiersList()
         done = False
@@ -191,40 +191,36 @@ class BEACS(Agent):
         while not done:
 
             # Compute in one run the matching set, the best matching classifier and the best matching fitness associated to the previous classifier
-            match_set, best_classifier, max_fitness_ra, max_fitness_rb = self.population.form_match_set(state)
+            match_set, _, max_fitness_ra, max_fitness_rb = self.population.form_match_set(state)
 
             if steps > 0:
-                # TODO : Update experience of classifier to get clues about their usage
-                for cl in action_set:
-                    cl.increase_experience()
                 # Apply algorithms
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, max_fitness_ra, max_fitness_rb, self.cfg.beta_rl, self.cfg.gamma
                 )
 
+            # Choose classifier
+            best_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
             # Create action set
             action_set = match_set.form_action_set(best_classifier)
             # Use environment adapter
-            iaction = self.cfg.environment_adapter.to_lcs_action(best_classifier.action)
+            iaction = self.cfg.environment_adapter.to_lcs_action(env, best_classifier.action)
             # Do the action
             raw_state, last_reward, done, _ = env.step(iaction)
-            state = self.cfg.environment_adapter.to_genotype(raw_state)
+            state = self.cfg.environment_adapter.to_genotype(env, raw_state)
 
             # Enter the if condition only if we have chosen a behavioral classifier
-            if best_classifier.behavioral_sequence :
+            if not done and best_classifier.behavioral_sequence :
                 for act in best_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
-                    iaction = self.cfg.environment_adapter.to_lcs_action(act)
+                    iaction = self.cfg.environment_adapter.to_lcs_action(env, act)
                     raw_state, last_reward, done, _ = env.step(iaction)
-                    state = self.cfg.environment_adapter.to_genotype(raw_state)
+                    state = self.cfg.environment_adapter.to_genotype(env, raw_state)
                     if done:
                         break
                     steps += 1
 
             if done:
-                # TODO : Update experience of classifier to get clues about their usage
-                for cl in action_set:
-                    cl.increase_experience()
                 # Apply algorithms
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, 0., 0., self.cfg.beta_rl, self.cfg.gamma

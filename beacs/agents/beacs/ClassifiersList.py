@@ -55,14 +55,14 @@ class ClassifiersList(TypedList):
             if cl.condition.does_match(situation):
                 matching.append(cl)
                 # TODO : Based on hypothesis that a change should be anticipted
-                if cl.does_anticipate_change():
-                    if cl.q*cl.ra > max_fitness_ra:
-                        max_fitness_ra = cl.q*cl.ra
-                    if cl.q*cl.rb > max_fitness_rb:
-                        max_fitness_rb = cl.q*cl.rb
-                    if cl.fitness > best_fitness:
-                        best_classifier = cl
-                        best_fitness = cl.fitness
+                #if cl.does_anticipate_change():
+                if cl.q*cl.ra > max_fitness_ra:
+                    max_fitness_ra = cl.q*cl.ra
+                if cl.q*cl.rb > max_fitness_rb:
+                    max_fitness_rb = cl.q*cl.rb
+                if cl.fitness > best_fitness:
+                    best_classifier = cl
+                    best_fitness = cl.fitness
         return ClassifiersList(*matching), best_classifier, max_fitness_ra, max_fitness_rb
 
 
