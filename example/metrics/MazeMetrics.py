@@ -5,18 +5,6 @@
 """
 
 
-def basic_metrics(
-    trial: int,
-    steps: int, 
-    reward: int
-    ) -> dict:
-    return {
-        'trial': trial,
-        'steps_in_trial': steps,
-        'reward': reward
-    }
-
-
 def population_metrics(
         population,
         environment
@@ -65,16 +53,6 @@ def _maze_metrics(
     return metrics
 
 
-def _cartpole_metrics(
-        pop,
-        env
-    ) -> dict:
-    metrics = {}
-    # Add basic population metrics
-    metrics.update(population_metrics(pop, env))
-    return metrics
-
-
 def _how_many_peps_match_non_aliased_states(
         pop,
         env
@@ -115,14 +93,6 @@ def _when_full_knowledge_is_achieved(metrics) -> tuple:
         if trial['knowledge'] == 100:
             last_trial_when_full_knowledge = trial['trial']
     return first_trial_when_full_knowledge, stable_trial_when_full_knowledge, last_trial_when_full_knowledge
-
-
-def _state_of_population(
-        metrics,
-        trial, 
-        step
-    ) -> dict:
-    return metrics[trial//step - 1]
 
 
 def _enhanced_effect_error(

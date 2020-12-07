@@ -7,6 +7,8 @@
 # General
 from __future__ import unicode_literals
 
+from Example.Metrics.PlottingWrapper import plot_classifiers, plot_steps
+
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -156,32 +158,6 @@ def plot_knowledge(df, metrics_trial_frequency_explore, number_of_exploit_steps,
     ax.set_ylabel("Knowledge [%]", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylim([0, 105])
 
-def plot_steps(df, metrics_trial_frequency_explore, number_of_exploit_steps, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12):
-    if ax is None:
-        ax = plt.gca()
-    explore_df = df.query("phase == 'explore'")
-    exploit_df = df.query("phase == 'exploit'")
-    explore_df.plot(y='steps_in_trial', ax=ax, c='blue', linewidth=0.5, legend=False)
-    exploit_df.plot(y='steps_in_trial', ax=ax, c='red', linewidth=0.5, legend=False)
-    if number_of_exploit_steps:
-        ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0], ymin=0, ymax=max(exploit_df['steps_in_trial'])+1, colors='black', linestyle='dashed')
-        ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0]+number_of_exploit_steps[1], ymin=0, ymax=max(exploit_df['steps_in_trial'])+1, colors='black', linestyle='dashed')
-    ax.set_title("Steps", fontsize=TITLE_TEXT_SIZE)
-    ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
-    ax.set_ylabel("Steps", fontsize=AXIS_TEXT_SIZE)
-
-def plot_classifiers(df, metrics_trial_frequency_explore, number_of_exploit_steps, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12, LEGEND_TEXT_SIZE=14):
-    if ax is None:
-        ax = plt.gca()
-    explore_df = df.query("phase == 'explore'")
-    explore_df.plot(y='numerosity', ax=ax, c='blue')
-    explore_df.plot(y='population', ax=ax, c='green')
-    explore_df.plot(y='reliable', ax=ax, c='red')
-    ax.set_title("Classifiers", fontsize=TITLE_TEXT_SIZE)
-    ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
-    ax.set_ylabel("Classifiers", fontsize=AXIS_TEXT_SIZE)
-    ax.legend(fontsize=LEGEND_TEXT_SIZE)
-
 def plot_performance(agent, maze, metrics_df, cfg, env_name, metrics_trial_frequency_explore, number_of_exploit_steps):
     plt.figure(figsize=(13, 10), dpi=100)
     plt.suptitle(f'BEACS Performance in {env_name} environment', fontsize=32)
@@ -194,33 +170,3 @@ def plot_performance(agent, maze, metrics_df, cfg, env_name, metrics_trial_frequ
     ax4 = plt.subplot(224)
     plot_steps(metrics_df,metrics_trial_frequency_explore, number_of_exploit_steps, ax4)
     plt.subplots_adjust(top=0.86, wspace=0.3, hspace=0.3)
-
-def plot_cartpole_performance(agent, cartpole_env, metrics_df, cfg, env_name, metrics_trial_frequency_explore, number_of_exploit_steps):
-    plt.figure(figsize=(13, 10), dpi=100)
-    plt.suptitle(f'BEACS Performance in {env_name} environment', fontsize=32)
-    ax1 = plt.subplot(221)
-    plot_classifiers(metrics_df,metrics_trial_frequency_explore, number_of_exploit_steps, ax1)
-    ax2 = plt.subplot(222)
-    plot_steps(metrics_df,metrics_trial_frequency_explore, number_of_exploit_steps, ax2)
-    plt.subplots_adjust(top=0.86, wspace=0.3, hspace=0.3)
-
-def plot_average_cartpole_performance(trials):
-    average_scores=[]
-    solved = -1
-    solved_averaged = 0.
-    for i in range(len(trials)-100):
-        check_solved = trials[i:i+100]
-        average = float(sum(check_solved) / 100)
-        average_scores.append(average)
-        if average >= 195.0 and solved == -1:
-            solved = 100+1+i
-            solved_averaged = average
-    if solved > 0 :
-        print("Solved requirements at episode {} : average {} for {} episodes".format(
-            solved, solved_averaged, 100))
-    y = [i for i in range(100,100+len(average_scores))]
-    plt.plot(y, average_scores)
-    plt.ylabel('Average Scores')
-    plt.xlabel('Episodes')
-    plt.grid(True)
-    plt.show()
