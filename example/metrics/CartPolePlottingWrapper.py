@@ -7,7 +7,7 @@
 # General
 from __future__ import unicode_literals
 
-from Example.Metrics.PlottingWrapper import plot_classifiers, plot_steps
+from example.metrics.PlottingWrapper import plot_classifiers, plot_steps
 
 import numpy as np
 import pandas as pd
