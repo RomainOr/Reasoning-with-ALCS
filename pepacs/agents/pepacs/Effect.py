@@ -155,3 +155,33 @@ class Effect(AbstractPerception):
 
     def __str__(self):
         return ''.join(str(attr) for attr in self)
+    
+    
+    def getEffectAttribute(
+            self,
+            perception,
+            index: int
+        ) -> tuple:
+        """
+        Computes from raw observations the probability to get each effect attribute
+        for a position in the anticipation.
+
+        Parameters
+        ----------
+        perception
+            Related anticipation
+        index: int
+            Position in the anticipation
+
+        Returns
+        -------
+        tuple
+            The respective probabilities
+        """
+        if isinstance(self[index], ProbabilityEnhancedAttribute):
+            return {int(k):v for k,v in self[index].items()}, {int(k):v for k,v in self[index].items()}
+        else:
+            if self[index] == self.wildcard:
+                return {int(perception[index]):1.0}, {int(perception[index]):1.0}
+            else:
+                return {int(self[index]):1.0}, {int(self[index]):1.0}

@@ -152,9 +152,9 @@ class PEPACS(Agent):
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, best_fitness, self.cfg.beta_rl, self.cfg.gamma
                 )
-
+                
             # Create action set
-            action_set = match_set.form_action_set(best_classifier)
+            action_set = match_set.form_action_set(best_classifier.action)
             # Use environment adapter
             iaction = self.cfg.environment_adapter.to_lcs_action(best_classifier.action)
             # Do the action
