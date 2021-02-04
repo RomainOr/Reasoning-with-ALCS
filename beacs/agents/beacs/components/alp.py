@@ -70,6 +70,7 @@ def expected_case(
 
     if cl.is_enhanced():
         cl.effect.update_effect_detailled_counter(p0, p1)
+        is_aliasing_detected = True
 
     if is_state_aliased(cl.condition, cl.mark, p0):
         if cl.cfg.do_pep: cl.ee = True
