@@ -34,7 +34,7 @@ class BEACS(Agent):
 
     def zip_population(
             self,
-            does_anticipate_change:bool = True,
+            does_anticipate_change:bool=False,
             is_reliable:bool=False
         ):
         # Remove multiple occurence of same classifiers
@@ -47,6 +47,17 @@ class BEACS(Agent):
         if is_reliable:
             pop = [cl for cl in self.population if cl.is_reliable()]
             self.population = ClassifiersList(*pop)
+        # Removing subsumed classifiers
+        classifiers_to_keep = []
+        for cl in self.population:
+            to_keep = True
+            for other in self.population:
+                if cl != other and other.subsumes(cl):
+                    to_keep = False
+                    break
+            if to_keep:
+                classifiers_to_keep.append(cl)
+        self.population = ClassifiersList(*classifiers_to_keep)
 
 
     def _run_trial_explore(

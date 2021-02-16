@@ -112,9 +112,8 @@ class ClassifiersList(TypedList):
         if len(candidates) < 2:
             return
         for candidate in candidates:
-            candidates2 = [cl for cl in candidates if cl.mark == candidate.mark and cl.effect != candidate.effect]
-            if len(candidates2) > 0:
-                merger = random.choice(candidates2)
+            candidates2 = [cl for cl in candidates if cl.mark == candidate.mark and not cl.effect.subsumes(candidate.effect)]
+            for merger in candidates2:
                 new_classifier = candidate.merge_with(merger, time)
                 add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
 

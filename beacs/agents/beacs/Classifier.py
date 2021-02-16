@@ -489,3 +489,12 @@ class Classifier:
             self.effect, 
             other_classifier.effect)
         return result
+    
+    def subsumes(self, other):
+        if self.condition.subsumes(other.condition) and \
+                self.action == other.action and \
+                self.behavioral_sequence == other.behavioral_sequence and \
+                self.effect.subsumes(other.effect) and \
+                self.q >= other.q:
+            return True
+        return False

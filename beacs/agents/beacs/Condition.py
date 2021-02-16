@@ -138,4 +138,9 @@ class Condition(AbstractPerception):
         bool
             True if self subsumes other
         """
-        return self.does_match(other)
+        for ci, oi in zip(self, other):
+            if ci != self.wildcard and oi != self.wildcard and ci != oi:
+                return False
+            if ci != self.wildcard and oi == self.wildcard:
+                return False
+        return True

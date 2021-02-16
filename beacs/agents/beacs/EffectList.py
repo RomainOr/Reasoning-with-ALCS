@@ -231,4 +231,4 @@ class EffectList():
                 result[int(perception[index])] = result.get(int(perception[index]), 0) + self.effect_detailled_counter[idx] / total_counter
             else:
                 result[int(effect[index])] = result.get(int(effect[index]), 0) + self.effect_detailled_counter[idx] / total_counter
-        return result, result
+        return result
