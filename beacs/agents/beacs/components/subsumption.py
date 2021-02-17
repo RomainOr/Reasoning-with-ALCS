@@ -9,8 +9,7 @@ from typing import List
 
 def find_subsumers(
         cl,
-        population,
-        theta_exp: int
+        population
     ) -> List:
     """
     Looks for subsumers of `cl` inside `population`.
@@ -21,8 +20,6 @@ def find_subsumers(
         Classifier
     population:
         Population of classifiers
-    theta_exp: int
-        Subsumption experience threshold
 
     Returns
     -------
@@ -30,14 +27,13 @@ def find_subsumers(
         List of subsumers (classifiers) sorted by specificity (most general
         are first)
     """
-    subsumers = [sub for sub in population if does_subsume(sub, cl, theta_exp)]
+    subsumers = [sub for sub in population if does_subsume(sub, cl)]
     return sorted(subsumers, key=lambda cl: cl.condition.specificity)
 
 
 def does_subsume(
         cl,
-        other_cl,
-        theta_exp: int
+        other_cl
     ) -> bool:
     """
     Returns if a classifier `cl` subsumes `other_cl` classifier.
@@ -50,46 +46,17 @@ def does_subsume(
         Subsumer classifier
     other_cl:
         Other classifier
-    theta_exp: int
-        Experience threshold
 
     Returns
     -------
     bool
         True if `other_cl` classifier is subsumed
     """
-    if is_subsumer(cl, theta_exp) and \
+    if cl.is_subsumer_criteria_satisfied(other_cl) and \
         cl.is_more_general(other_cl) and \
             cl.action == other_cl.action and \
                 cl.behavioral_sequence == other_cl.behavioral_sequence and \
                     cl.effect.subsumes(other_cl.effect):
         return True
-
-    return False
-
-
-def is_subsumer(
-        cl,
-        theta_exp: int
-    ) -> bool:
-    """
-    Determines whether the classifier satisfies the subsumer criteria.
-
-    Parameters
-    ----------
-    cl:
-        Classifier
-    theta_exp: int
-        Experience threshold to be considered as experienced
-
-    Returns
-    -------
-    bool
-        True is classifier can be considered as subsumer
-    """
-    if cl.exp > theta_exp:
-        if cl.is_reliable():
-            if not cl.is_marked():
-                return True
 
     return False

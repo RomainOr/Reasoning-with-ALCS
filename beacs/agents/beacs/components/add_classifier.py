@@ -4,8 +4,7 @@ from beacs.agents.beacs.components.subsumption import does_subsume
 def add_classifier(
         child, 
         population,
-        new_list,
-        theta_exp: int
+        new_list
     ) -> None:
     """
     Looks for subsuming / similar classifiers in the population of classifiers
@@ -22,14 +21,12 @@ def add_classifier(
         List of classifiers
     new_list:
         A list of newly created classifiers in this ALP run
-    theta_exp: int
-        Experience threshold for subsumption
     """
     old_cl = None
 
     # Look if there is a classifier that subsumes the insertion candidate
     for cl in population:
-        if does_subsume(cl, child, theta_exp):
+        if does_subsume(cl, child):
             if old_cl is None or cl.is_more_general(old_cl):
                 old_cl = cl
                 break

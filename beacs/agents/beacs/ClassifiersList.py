@@ -54,7 +54,6 @@ class ClassifiersList(TypedList):
         for cl in self:
             if cl.condition.does_match(situation):
                 matching.append(cl)
-                # TODO : Based on hypothesis that a change should be anticipted
                 if cl.does_anticipate_change():
                     if cl.q*cl.ra > max_fitness_ra:
                         max_fitness_ra = cl.q*cl.ra
@@ -115,7 +114,7 @@ class ClassifiersList(TypedList):
             candidates2 = [cl for cl in candidates if cl.mark == candidate.mark and not cl.effect.subsumes(candidate.effect)]
             for merger in candidates2:
                 new_classifier = candidate.merge_with(merger, time)
-                add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
+                add_classifier(new_classifier, action_set, new_list)
 
 
     @staticmethod
@@ -158,7 +157,7 @@ class ClassifiersList(TypedList):
             for candidate in potential_cls_for_pai:
                 new_cl = create_behavioral_classifier(penultimate_classifier, candidate, p1, p0, time)
                 if new_cl:
-                    add_classifier(new_cl, pop_for_addition, new_list, cfg.theta_exp)
+                    add_classifier(new_cl, pop_for_addition, new_list)
 
 
     @staticmethod
@@ -229,14 +228,14 @@ class ClassifiersList(TypedList):
             idx += 1
 
             if new_cl is not None:
-                add_classifier(new_cl, action_set, new_list, cfg.theta_exp)
+                add_classifier(new_cl, action_set, new_list)
 
         # No classifier anticipated correctly - generate new one through covering
         # only if we are not in the case of behavioral sequences
         if not was_expected_case:
             if (len(action_set) > 0 and action_set[0].behavioral_sequence is None) or len(action_set) == 0:
                 new_cl = alp.cover(p0, action, p1, time, cfg)
-                add_classifier(new_cl, action_set, new_list, cfg.theta_exp)
+                add_classifier(new_cl, action_set, new_list)
 
         if cfg.do_pep:
             ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, time, cfg)
@@ -280,7 +279,6 @@ class ClassifiersList(TypedList):
             mu: float,
             chi: float,
             theta_as: int,
-            theta_exp: int,
             do_ga: bool
         ) -> None:
 
@@ -298,16 +296,15 @@ class ClassifiersList(TypedList):
                 lambda cl: pow(cl.q, 3) * cl.num
             )
 
+            enhanced_trace_cl1 = ga.build_enhanced_trace(parent1)
+            enhanced_trace_cl2 = ga.build_enhanced_trace(parent2)
+
             child1 = Classifier.copy_from(parent1, p0, p1, time)
             child2 = Classifier.copy_from(parent2, p0, p1, time)
 
             if do_ga:
                 # Execute mutation
-                if is_behavioral_action_set:
-                    ga.behavioral_mutation(child1, child2, mu)
-                else:
-                    ga.generalizing_mutation(child1, mu)
-                    ga.generalizing_mutation(child2, mu)
+                ga.mutation(child1, enhanced_trace_cl1, child2, enhanced_trace_cl2, mu)
 
                 # Execute cross-over
                 if random.random() < chi and not is_behavioral_action_set:
@@ -341,8 +338,7 @@ class ClassifiersList(TypedList):
                     p1,
                     population,
                     match_set,
-                    action_set,
-                    theta_exp
+                    action_set
                 )
 
 

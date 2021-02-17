@@ -220,16 +220,16 @@ class Classifier:
         return self.effect.is_enhanced()
 
 
-    def is_reliable(self) -> bool:
+    def is_experienced(self) -> bool:
         """
-        Checks whether the classifier is reliable.
+        Checks whether the classifier is enough experienced.
 
         Returns
         -------
         bool
-            True if the classifier is reliable
+            True if the classifier is enough experienced
         """
-        return self.q > self.cfg.theta_r
+        return self.exp > self.cfg.theta_exp
 
 
     def is_inadequate(self) -> bool:
@@ -244,7 +244,19 @@ class Classifier:
         return self.q < self.cfg.theta_i
 
 
-    def is_marked(self):
+    def is_reliable(self) -> bool:
+        """
+        Checks whether the classifier is reliable.
+
+        Returns
+        -------
+        bool
+            True if the classifier is reliable
+        """
+        return self.q > self.cfg.theta_r
+
+
+    def is_marked(self) -> bool:
         """
         Checks whether the classifier is marked.
 
@@ -267,7 +279,7 @@ class Classifier:
         Parameters
         ----------
         other: Classifier
-            Cther classifier to compare
+            Other classifier to compare
 
         Returns
         -------
@@ -275,6 +287,29 @@ class Classifier:
             True if classifier is more general than other
         """
         return self.condition.specificity <= other.condition.specificity
+
+
+    def is_subsumer_criteria_satisfied(self, other) -> bool:
+        """
+        Determines whether the classifier satisfies the subsumer criteria.
+
+        Parameters
+        ----------
+        other: Classifier
+            Other classifier to compare
+
+        Returns
+        -------
+        bool
+            True if the classifier satisfies the subsumer criteria.
+        """
+        if self.is_experienced():
+            if self.is_reliable():
+                if not self.is_marked():
+                    return True
+                if self.is_marked() and other.is_marked() and self.mark == other.mark:
+                    return True
+        return False
 
 
     def does_anticipate_change(self) -> bool:
@@ -495,6 +530,6 @@ class Classifier:
                 self.action == other.action and \
                 self.behavioral_sequence == other.behavioral_sequence and \
                 self.effect.subsumes(other.effect) and \
-                self.q >= other.q:
+                self.is_reliable() and self.is_experienced():
             return True
         return False

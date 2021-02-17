@@ -165,7 +165,7 @@ def is_perceptual_aliasing_state(
             return False
     #Check that all these classifiers are enough experienced
     for i in range(nbr_of_actions):
-        if most_experienced_classifiers[i].exp <= cfg.theta_exp :
+        if not most_experienced_classifiers[i].is_experienced() :
             return False
     #Approximate the number of expected transitions and the reachable states
     reachable_states = {}

@@ -110,60 +110,80 @@ def roulette_wheel_selection(
     return parent1, parent2
 
 
-def behavioral_mutation(
+def build_enhanced_trace(cl) -> list:
+    enhanced_trace_cl = []
+    if cl.is_enhanced():
+        for idx in range(cl.cfg.classifier_length):
+            no_change_anticipated = True
+            for effect in cl.effect.effect_list:
+                if effect[idx] != effect.wildcard:
+                    no_change_anticipated = False
+                    break
+            enhanced_trace_cl.append(no_change_anticipated)
+    else:
+        for idx in range(cl.cfg.classifier_length):
+            enhanced_trace_cl.append(True)
+    return enhanced_trace_cl
+
+
+def mutation(
         cl1,
+        enhanced_trace_cl1,
         cl2,
+        enhanced_trace_cl2,
         mu: float
     ) -> None:
     """
-    Executes a particular mutation in the behavioral classifiers.
-    Specified attributes in classifier conditions are randomly
-    generalized with `mu` probability depending on the other child.
+    Executes a particular mutation depending on the classifiers
 
     Parameters
     ----------
     cl1
         First behavioral classifier
+    enhanced_trace_cl1
+        Trace computed by ...
     cl2
         Second behavioral classifier
+    enhanced_trace_cl2
+        Trace computed by ...
     mu
         Mutation rate
     """
     for idx in range(len(cl1.condition)):
+        if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
+            cl2.condition[idx] == cl2.cfg.classifier_wildcard:
+            continue
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] == cl2.cfg.classifier_wildcard and \
-              random.random() < mu:
+            cl2.condition[idx] == cl2.cfg.classifier_wildcard :#and \
+                #random.random() < mu:
             cl1.condition.generalize(idx)
             continue
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
-              random.random() < mu:
+            cl2.condition[idx] != cl2.cfg.classifier_wildcard:# and \
+                #random.random() < mu:
             cl2.condition.generalize(idx)
             continue
-
-
-def generalizing_mutation(
-        cl,
-        mu: float
-    ) -> None:
-    """
-    Executes the generalizing mutation in the classifier.
-    Specified attributes in classifier conditions are randomly
-    generalized with `mu` probability.
-
-    Parameters
-    ----------
-    cl1
-        First behavioral classifier
-    cl2
-        Second behavioral classifier
-    mu
-        Mutation rate
-    """
-    # TODO : Inductive principles to check
-    for idx, cond in enumerate(cl.condition):
-        if cond != cl.cfg.classifier_wildcard and random.random() < mu:
-            cl.condition.generalize(idx)
+        if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
+            cl1.behavioral_sequence is None and \
+                cl1.is_enhanced() and enhanced_trace_cl1[idx]:# and \
+                    #random.random() < mu:
+            cl1.condition.generalize(idx)
+            continue
+        if cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
+            cl2.behavioral_sequence is None and \
+                cl2.is_enhanced() and enhanced_trace_cl2[idx]:# and \
+                    #random.random() < mu:
+            cl2.condition.generalize(idx)
+            continue
+        if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
+            cl1.behavioral_sequence is None and \
+                random.random() < mu:
+            cl1.condition.generalize(idx)
+            continue
+        if cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
+            cl2.behavioral_sequence is None and \
+                random.random() < mu:
+            cl2.condition.generalize(idx)
 
 
 def two_point_crossover(
@@ -181,7 +201,7 @@ def two_point_crossover(
     donor
         Classifier
     """
-    # TODO : Inductive principles to check
+    # TODO : Two point or one point crossover to compare
     left, right = sorted(np.random.choice(
         range(0, parent.cfg.classifier_length + 1), 2, replace=False))
 
@@ -200,8 +220,7 @@ def add_classifier(
         p: Perception,
         population, 
         match_set, 
-        action_set,
-        theta_exp: int
+        action_set
     )-> None:
     """
     Finds subsumer/similar classifier, if present - increase its numerosity,
@@ -219,11 +238,9 @@ def add_classifier(
         Match set
     action_set:
         Action set
-    theta_exp: int
-        Subsumption experience threshold
     """
     # Find_subsumers computes subsumer or classifier that are equal
-    subsumers = find_subsumers(cl, action_set, theta_exp)
+    subsumers = find_subsumers(cl, action_set)
     # Check if subsumers exist, meaning that old_cl is mandatory not None
     if len(subsumers) == 0:
         old_cl = next(filter(lambda other: cl == other, action_set), None)
@@ -265,7 +282,6 @@ def delete_classifiers(
         The action set size threshold (θas ∈ N) specifies
         the maximal number of classifiers in an action set.
     """
-    # TODO : Inductive principles to check
     while (insize + sum(cl.num for cl in action_set)) > theta_as:
         cl_del = None
 
@@ -310,7 +326,6 @@ def _is_preferred_to_delete(
     bool
         True if `cl` is "worse" than `cl_del`. False otherwise
     """
-    # TODO : Inductive principles to check
     if cl.q - cl_del.q < -0.1:
         return True
 

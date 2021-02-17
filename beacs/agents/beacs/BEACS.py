@@ -47,6 +47,9 @@ class BEACS(Agent):
         if is_reliable:
             pop = [cl for cl in self.population if cl.is_reliable()]
             self.population = ClassifiersList(*pop)
+        # Keep all experimented classifiers
+        pop = [cl for cl in self.population if cl.is_experienced()]
+        self.population = ClassifiersList(*pop)
         # Removing subsumed classifiers
         classifiers_to_keep = []
         for cl in self.population:
@@ -116,7 +119,6 @@ class BEACS(Agent):
                     self.cfg.mu,
                     self.cfg.chi,
                     self.cfg.theta_as,
-                    self.cfg.theta_exp,
                     self.cfg.do_ga
                 )
 
@@ -177,7 +179,6 @@ class BEACS(Agent):
                     self.cfg.mu,
                     self.cfg.chi,
                     self.cfg.theta_as,
-                    self.cfg.theta_exp,
                     self.cfg.do_ga
                 )
 
