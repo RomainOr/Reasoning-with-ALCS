@@ -150,38 +150,35 @@ def mutation(
         Mutation rate
     """
     for idx in range(len(cl1.condition)):
+        #
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] == cl2.cfg.classifier_wildcard:
             continue
+        #
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] == cl2.cfg.classifier_wildcard :#and \
-                #random.random() < mu:
+            cl2.condition[idx] == cl2.cfg.classifier_wildcard :
             cl1.condition.generalize(idx)
             continue
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] != cl2.cfg.classifier_wildcard:# and \
-                #random.random() < mu:
+            cl2.condition[idx] != cl2.cfg.classifier_wildcard:
             cl2.condition.generalize(idx)
             continue
+        #
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
             cl1.behavioral_sequence is None and \
-                cl1.is_enhanced() and enhanced_trace_cl1[idx]:# and \
-                    #random.random() < mu:
+                cl1.is_enhanced() and enhanced_trace_cl1[idx]:
             cl1.condition.generalize(idx)
-            continue
         if cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
             cl2.behavioral_sequence is None and \
-                cl2.is_enhanced() and enhanced_trace_cl2[idx]:# and \
-                    #random.random() < mu:
+                cl2.is_enhanced() and enhanced_trace_cl2[idx]:
             cl2.condition.generalize(idx)
-            continue
+        #
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
-            cl1.behavioral_sequence is None and \
+            cl1.behavioral_sequence is None and not cl1.is_enhanced() and \
                 random.random() < mu:
             cl1.condition.generalize(idx)
-            continue
         if cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
-            cl2.behavioral_sequence is None and \
+            cl2.behavioral_sequence is None and not cl2.is_enhanced() and \
                 random.random() < mu:
             cl2.condition.generalize(idx)
 
