@@ -310,7 +310,8 @@ class Classifier:
                 if self.is_marked() and other.is_marked() and self.mark == other.mark:
                     return True
         return False
-
+    
+    
 
     def does_anticipate_change(self) -> bool:
         """
@@ -530,6 +531,6 @@ class Classifier:
                 self.action == other.action and \
                 self.behavioral_sequence == other.behavioral_sequence and \
                 self.effect.subsumes(other.effect) and \
-                self.is_reliable() and self.is_experienced():
+                self.is_subsumer_criteria_satisfied(other):
             return True
         return False
