@@ -156,29 +156,22 @@ def mutation(
             continue
         #
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] == cl2.cfg.classifier_wildcard :
+            cl2.condition[idx] == cl2.cfg.classifier_wildcard and \
+                random.random() < mu:
             cl1.condition.generalize(idx)
             continue
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] != cl2.cfg.classifier_wildcard:
+            cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
+                random.random() < mu:
             cl2.condition.generalize(idx)
             continue
         #
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
-            cl1.behavioral_sequence is None and \
-                cl1.is_enhanced() and enhanced_trace_cl1[idx]:
-            cl1.condition.generalize(idx)
-        if cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
-            cl2.behavioral_sequence is None and \
-                cl2.is_enhanced() and enhanced_trace_cl2[idx]:
-            cl2.condition.generalize(idx)
-        #
-        if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
-            cl1.behavioral_sequence is None and not cl1.is_enhanced() and \
+            cl1.behavioral_sequence is None and enhanced_trace_cl1[idx] and \
                 random.random() < mu:
             cl1.condition.generalize(idx)
         if cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
-            cl2.behavioral_sequence is None and not cl2.is_enhanced() and \
+            cl2.behavioral_sequence is None and enhanced_trace_cl2[idx] and \
                 random.random() < mu:
             cl2.condition.generalize(idx)
 
@@ -198,7 +191,6 @@ def two_point_crossover(
     donor
         Classifier
     """
-    # TODO : Two point or one point crossover to compare
     left, right = sorted(np.random.choice(
         range(0, parent.cfg.classifier_length + 1), 2, replace=False))
 

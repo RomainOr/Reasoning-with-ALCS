@@ -232,3 +232,7 @@ class EffectList():
             else:
                 result[int(effect[index])] = result.get(int(effect[index]), 0) + self.effect_detailled_counter[idx] / total_counter
         return result
+
+
+    def sum_effect_counter(self):
+        return float(sum(self.effect_detailled_counter))
