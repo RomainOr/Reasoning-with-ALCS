@@ -286,9 +286,9 @@ class ClassifiersList(TypedList):
             ga.set_timestamps(action_set, time)
 
             # Variable to manage behavioral classifiers
-            is_behavioral_action_set = False
-            if action_set[0].behavioral_sequence:
-                is_behavioral_action_set = True
+            #is_behavioral_action_set = False
+            #if action_set[0].behavioral_sequence:
+            #    is_behavioral_action_set = True
 
             # Select parents
             parent1, parent2 = ga.roulette_wheel_selection(
@@ -307,7 +307,7 @@ class ClassifiersList(TypedList):
                 ga.mutation(child1, enhanced_trace_cl1, child2, enhanced_trace_cl2, mu)
 
                 # Execute cross-over
-                if random.random() < chi and not is_behavioral_action_set:
+                if random.random() < chi:
                     if child1.effect == child2.effect:
                         ga.two_point_crossover(child1, child2)
 

@@ -156,14 +156,14 @@ def mutation(
             continue
         #
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] == cl2.cfg.classifier_wildcard and \
-                random.random() < mu:
-            cl1.condition.generalize(idx)
+            cl2.condition[idx] == cl2.cfg.classifier_wildcard:
+            if random.random() < mu:
+                cl1.condition.generalize(idx)
             continue
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
-                random.random() < mu:
-            cl2.condition.generalize(idx)
+            cl2.condition[idx] != cl2.cfg.classifier_wildcard:
+            if random.random() < mu:
+                cl2.condition.generalize(idx)
             continue
         #
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \

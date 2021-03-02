@@ -289,7 +289,7 @@ class Classifier:
         return self.condition.specificity <= other.condition.specificity
 
 
-    def is_subsumer_criteria_satisfied(self, other, check_experience=True) -> bool:
+    def is_subsumer_criteria_satisfied(self, other, hard_check=True) -> bool:
         """
         Determines whether the classifier satisfies the subsumer criteria.
 
@@ -303,14 +303,14 @@ class Classifier:
         bool
             True if the classifier satisfies the subsumer criteria.
         """
-        if check_experience:
+        if hard_check:
             if self.is_reliable() and self.is_experienced():
                 if not self.is_marked():
                     return True
                 if self.is_marked() and other.is_marked() and self.mark == other.mark:
                     return True
         else: 
-            if self.is_reliable():
+            if self.is_reliable() or (self.q > other.q):
                 if not self.is_marked():
                     return True
                 if self.is_marked() and other.is_marked() and self.mark == other.mark:

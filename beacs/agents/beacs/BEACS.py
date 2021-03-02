@@ -58,6 +58,15 @@ class BEACS(Agent):
             if to_keep:
                 classifiers_to_keep.append(cl)
         self.population = ClassifiersList(*classifiers_to_keep)
+        # Removing behavioral classifiers
+        classifiers_to_keep = []
+        for cl in self.population:
+            to_keep = True
+            if cl.behavioral_sequence is not None and (not cl.is_experienced() or not cl.is_reliable()):
+                to_keep = False
+            if to_keep:
+                classifiers_to_keep.append(cl)
+        self.population = ClassifiersList(*classifiers_to_keep)
 
 
     def _run_trial_explore(
