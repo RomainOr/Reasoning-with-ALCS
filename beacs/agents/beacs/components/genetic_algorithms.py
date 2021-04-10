@@ -139,13 +139,13 @@ def mutation(
     Parameters
     ----------
     cl1
-        First behavioral classifier
+        First classifier
     enhanced_trace_cl1
         Trace computed by ...
     cl2
-        Second behavioral classifier
+        Second classifier
     enhanced_trace_cl2
-        Trace computed by ...
+        Trace computed by build_enhanced_trace()
     mu
         Mutation rate
     """
@@ -157,12 +157,12 @@ def mutation(
         #
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] == cl2.cfg.classifier_wildcard:
-            if random.random() < mu:
+            if random.random() < mu and enhanced_trace_cl1[idx]:
                 cl1.condition.generalize(idx)
             continue
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] != cl2.cfg.classifier_wildcard:
-            if random.random() < mu:
+            if random.random() < mu and enhanced_trace_cl2[idx]:
                 cl2.condition.generalize(idx)
             continue
         #
