@@ -64,6 +64,8 @@ class BEACS(Agent):
             to_keep = True
             if cl.behavioral_sequence is not None and (not cl.is_experienced() or not cl.is_reliable()):
                 to_keep = False
+            if cl.behavioral_sequence is not None and (not cl.does_anticipate_change() and len(cl.effect)==1):
+                to_keep = False
             if to_keep:
                 classifiers_to_keep.append(cl)
         self.population = ClassifiersList(*classifiers_to_keep)
@@ -124,8 +126,7 @@ class BEACS(Agent):
                     self.cfg.theta_ga,
                     self.cfg.mu,
                     self.cfg.chi,
-                    self.cfg.theta_as,
-                    self.cfg.do_ga
+                    self.cfg.theta_as
                 )
 
             # Record the previous match set
@@ -184,8 +185,7 @@ class BEACS(Agent):
                     self.cfg.theta_ga,
                     self.cfg.mu,
                     self.cfg.chi,
-                    self.cfg.theta_as,
-                    self.cfg.do_ga
+                    self.cfg.theta_as
                 )
 
             steps += 1

@@ -111,18 +111,14 @@ def roulette_wheel_selection(
 
 
 def build_enhanced_trace(cl) -> list:
-    enhanced_trace_cl = []
+    enhanced_trace_cl = [True] * cl.cfg.classifier_length
     if cl.is_enhanced():
         for idx in range(cl.cfg.classifier_length):
-            no_change_anticipated = True
+            symbols = []
             for effect in cl.effect.effect_list:
-                if effect[idx] != effect.wildcard:
-                    no_change_anticipated = False
-                    break
-            enhanced_trace_cl.append(no_change_anticipated)
-    else:
-        for idx in range(cl.cfg.classifier_length):
-            enhanced_trace_cl.append(True)
+                if effect[idx] not in symbols:
+                    symbols.append(effect[idx])
+            enhanced_trace_cl[idx] = (cl.effect.wildcard not in symbols) or (len(symbols)==1)
     return enhanced_trace_cl
 
 

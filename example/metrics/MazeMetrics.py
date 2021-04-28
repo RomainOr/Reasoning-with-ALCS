@@ -33,7 +33,7 @@ def _maze_metrics(
         ) -> float:
         transitions = environment.env.get_all_possible_transitions()
         # Take into consideration only reliable classifiers
-        reliable_classifiers = [cl for cl in population if cl.is_reliable()]
+        reliable_classifiers = [cl for cl in population if cl.is_reliable() and cl.behavioral_sequence is None]
         # Count how many transitions are anticipated correctly
         nr_correct = 0
         # For all possible destinations from each path cell
