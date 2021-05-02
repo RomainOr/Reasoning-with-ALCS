@@ -68,8 +68,8 @@ def expected_case(
     """
     is_aliasing_detected = False
 
-    #if cl.is_enhanced() and cl.is_reliable() and cl.is_experienced():
-    #    is_aliasing_detected = True
+    if cl.is_enhanced() and cl.aliased_state == p0:
+        is_aliasing_detected = True
 
     if is_state_aliased(cl.condition, cl.mark, p0):
         if cl.cfg.do_pep: cl.ee = True

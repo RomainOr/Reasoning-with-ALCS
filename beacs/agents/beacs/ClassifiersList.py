@@ -104,6 +104,7 @@ class ClassifiersList(TypedList):
     def apply_enhanced_effect_part_check(
             action_set: ClassifiersList,
             new_list: ClassifiersList,
+            p0: Perception,
             time: int,
             cfg: Configuration
         ) -> None:
@@ -113,7 +114,7 @@ class ClassifiersList(TypedList):
         for i, cl1 in enumerate(candidates):
             for cl2 in candidates[i:]:
                 if cl1.mark == cl2.mark and not cl1.effect.subsumes(cl2.effect) and not cl2.effect.subsumes(cl1.effect):
-                    new_classifier = cl1.merge_with(cl2, time)
+                    new_classifier = cl1.merge_with(cl2, p0, time)
                     add_classifier(new_classifier, action_set, new_list)
 
 
@@ -144,12 +145,10 @@ class ClassifiersList(TypedList):
                 if pai.is_perceptual_aliasing_state(most_experienced_classifiers, p0, cfg) > 0:
                     # Add if needed the new pai state in memory
                     if p0 not in pai_states_memory:
-                        #print("Add", p0, "in", pai_states_memory,'\n')
                         pai_states_memory.append(p0)
                 else:
                     # Remove if needed the pai state from memory and delete all behavioral classifiers created for this state
                     if p0 in pai_states_memory:
-                        #print("Remove", p0, "in", pai_states_memory,'\n')
                         pai_states_memory.remove(p0)
                         behavioral_classifiers_to_delete = [cl for cl in population if cl.pai_state == p0]
                         for cl in behavioral_classifiers_to_delete:
@@ -244,7 +243,7 @@ class ClassifiersList(TypedList):
                 add_classifier(new_cl, action_set, new_list)
 
         if cfg.do_pep:
-            ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, time, cfg)
+            ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
 
         if cfg.bs_max > 0 and penultimate_classifier is not None and len(potential_cls_for_pai) > 0:
             ClassifiersList.apply_perceptual_aliasing_issue_management(population, previous_match_set, match_set, action_set, penultimate_classifier, potential_cls_for_pai, new_list, p0, p1, time, pai_states_memory, cfg)

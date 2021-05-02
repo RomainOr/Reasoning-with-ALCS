@@ -16,7 +16,7 @@ from beacs.agents.beacs import Configuration, Condition, EffectList, Effect, PMa
 class Classifier:
 
     __slots__ = ['condition', 'action', 'behavioral_sequence', 'effect', 'mark', 'q', 'ra', 'rb',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'pai_state', 'err']
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'aliased_state', 'pai_state', 'err']
 
     # In paper it's advised to set experience and reward of newly generated
     # classifier to 0. However in original code these values are initialized
@@ -37,6 +37,7 @@ class Classifier:
             tga: int=0,
             tbseq: int=0,
             tav: float=0.0,
+            aliased_state: Optional[Perception] = None,
             pai_state: Optional[Perception] = None,
             cfg: Optional[Configuration] = None
         ) -> None:
@@ -70,6 +71,10 @@ class Classifier:
         self.tbseq = tbseq
         self.tav = tav
         self.ee = False
+        if aliased_state:
+            self.aliased_state = aliased_state
+        else:
+            self.aliased_state = Perception.empty()
         if pai_state:
             self.pai_state = pai_state
         else:
@@ -137,6 +142,7 @@ class Classifier:
             tbseq=time,
             talp=time,
             tav=old_cls.tav,
+            aliased_state=old_cls.aliased_state,
             pai_state=old_cls.pai_state
         )
         new_cls.effect.effect_list = []
@@ -468,8 +474,9 @@ class Classifier:
 
     def merge_with(
             self,
-            other_classifier,
-            time
+            other_classifier: Classifier,
+            aliased_state: Perception,
+            time: int
         ) -> Classifier:
         """
         Merges two classifier in an enhanced one.
@@ -478,6 +485,8 @@ class Classifier:
         ----------
         other_classifier: Classifier
             Classifier to merge with the self one
+        aliased_state: Perception
+            Perception related to the aliased state
         time: int
             Current epoch
 
@@ -492,6 +501,7 @@ class Classifier:
         result.rb = (self.rb + other_classifier.rb) / 2.0
         result.condition.specialize_with_condition(other_classifier.condition)
         result.effect.enhance(other_classifier.effect, self.cfg.classifier_length)
+        result.aliased_state = aliased_state
         return result
     
     def subsumes(self, other):
