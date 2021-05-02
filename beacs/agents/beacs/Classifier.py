@@ -26,7 +26,7 @@ class Classifier:
             condition: Union[Condition, str, None] = None,
             action: Optional[int] = None,
             behavioral_sequence: Optional[List[int]] = None,
-            effect: Optional[EffectList] = None,
+            effect: Optional[Effect] = None,
             quality: float=0.5,
             rewarda: float=0.,
             rewardb: float=0.,
@@ -57,7 +57,7 @@ class Classifier:
         self.condition = _build_perception_string(Condition, condition)
         self.action = action
         self.behavioral_sequence = behavioral_sequence
-        self.effect = EffectList(_build_perception_string(Effect, effect), self.cfg.classifier_wildcard)
+        self.effect = EffectList(_build_perception_string(Effect, effect), self.cfg.classifier_length, self.cfg.classifier_wildcard)
         self.mark = PMark(cfg=self.cfg)
         self.q = quality
         self.ra = rewarda
@@ -95,7 +95,7 @@ class Classifier:
 
 
     def __repr__(self):
-        return f"{self.condition} {self.action} {str(self.behavioral_sequence)} {str(self.effect)} ({str(self.mark)})\n" \
+        return f"{self.condition} {self.action} {str(self.behavioral_sequence)} {str(self.effect)} ({str(self.mark)} {str(self.effect.enhanced_trace_ga)})\n" \
             f"q: {self.q:<6.4} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} err: {self.err:<6.4}\n" \
             f"exp: {self.exp:<5} num: {self.num} ee: {self.ee} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \
             f"tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n" \
@@ -105,8 +105,6 @@ class Classifier:
     def copy_from(
             cls,
             old_cls: Classifier,
-            p0: Perception,
-            p1: Perception,
             time: int
         ) -> Classifier:
         """
@@ -118,8 +116,6 @@ class Classifier:
         ----------
         old_cls: Classifier
             Classifier to copy from
-        p: Perception
-            Current perception to refine effect component
         time: int
             Current epoch
 
@@ -143,18 +139,14 @@ class Classifier:
             tav=old_cls.tav,
             pai_state=old_cls.pai_state
         )
-        if old_cls.is_enhanced():
-            for idx in range(len(new_cls.effect[0])):
-                change_anticipated = False
-                for effect in old_cls.effect.effect_list:
-                    if effect[idx] != effect.wildcard:
-                        change_anticipated = True
-                        break
-                if change_anticipated and p1[idx] != new_cls.condition[idx]:
-                    new_cls.effect[0][idx] = p1[idx]
-        else:
-            for idx in range(len(new_cls.effect[0])):
-                new_cls.effect[0][idx] = old_cls.effect[0][idx]
+        new_cls.effect.effect_list = []
+        for oeffect in old_cls.effect:
+            effect_to_append = Effect.empty(new_cls.cfg.classifier_length)
+            for i in range(new_cls.cfg.classifier_length):
+                effect_to_append[i] = oeffect[i]
+            new_cls.effect.effect_list.append(effect_to_append)
+        new_cls.effect.effect_detailled_counter = old_cls.effect.effect_detailled_counter[:]
+        new_cls.effect.enhanced_trace_ga = old_cls.effect.enhanced_trace_ga[:]
         return new_cls
 
 
@@ -175,24 +167,6 @@ class Classifier:
         if self.behavioral_sequence:
             return self.q * (max_r - diff * len(self.behavioral_sequence) / self.cfg.bs_max)
         return self.q * max_r
-
-
-    @property
-    def specified_condition_attributes(self) -> List[int]:
-        """
-        Determines the position of specified attributes in the
-        classifier condition.
-
-        Returns
-        -------
-        List[int]
-            List of indices of specified attributes in condition
-        """
-        indices = []
-        for idx, ci in enumerate(self.condition):
-            if ci != self.condition.wildcard:
-                indices.append(idx)
-        return indices
 
 
     @property
@@ -489,8 +463,7 @@ class Classifier:
         """
         Generalizes one randomly attribute in the condition.
         """
-        ridx = random.choice(self.specified_condition_attributes)
-        self.condition.generalize(ridx)
+        self.condition.generalize_specific_attribute_randomly()
 
 
     def merge_with(
@@ -513,23 +486,12 @@ class Classifier:
         Classifier
             New enhanced classifier
         """
-        result = Classifier(
-            action = self.action,
-            behavioral_sequence=self.behavioral_sequence,
-            quality = max((self.q + other_classifier.q) / 2.0, 0.5),
-            rewarda = (self.ra + other_classifier.ra) / 2.0,
-            rewardb = (self.rb + other_classifier.rb) / 2.0,
-            talp = time,
-            tga = time,
-            tbseq = time,
-            pai_state = self.pai_state,
-            cfg = self.cfg
-        )
-        result.condition = Condition(self.condition)
+        result = Classifier.copy_from(self, time)
+        result.q = max((self.q + other_classifier.q) / 2.0, 0.5)
+        result.ra = (self.ra + other_classifier.ra) / 2.0
+        result.rb = (self.rb + other_classifier.rb) / 2.0
         result.condition.specialize_with_condition(other_classifier.condition)
-        result.effect = EffectList.enhanced_effect(
-            self.effect, 
-            other_classifier.effect)
+        result.effect.enhance(other_classifier.effect, self.cfg.classifier_length)
         return result
     
     def subsumes(self, other):

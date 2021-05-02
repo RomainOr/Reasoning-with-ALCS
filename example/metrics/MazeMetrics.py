@@ -40,8 +40,8 @@ def _maze_metrics(
         for start, action, end in transitions:
             p0 = environment.env.maze.perception(*start)
             p1 = environment.env.maze.perception(*end)
-            if any([True for cl in reliable_classifiers
-                    if cl.does_predict_successfully(p0, action, p1)]):
+            if any(True for cl in reliable_classifiers
+                    if cl.does_predict_successfully(p0, action, p1)):
                 nr_correct += 1
         return nr_correct / len(transitions) * 100.0
 

@@ -91,7 +91,7 @@ class Condition(AbstractPerception):
             Function for choosing which ID to generalize from the list of
             available ones
         """
-        specific_ids = [ci for ci, c in enumerate(self) if c != self.wildcard]
+        specific_ids = [i for i, c in enumerate(self) if c != self.wildcard]
         if len(specific_ids) > 0:
             ridx = func(specific_ids)
             self.generalize(ridx)

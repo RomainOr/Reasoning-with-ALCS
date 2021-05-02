@@ -47,7 +47,7 @@ class BEACS(Agent):
         if is_reliable:
             pop = [cl for cl in self.population if cl.is_reliable()]
             self.population = ClassifiersList(*pop)
-        # Removing subsumed classifiers
+        # Removing subsumed classifiers and unwanted behavioral classifiers
         classifiers_to_keep = []
         for cl in self.population:
             to_keep = True
@@ -55,16 +55,11 @@ class BEACS(Agent):
                 if cl != other and other.subsumes(cl):
                     to_keep = False
                     break
-            if to_keep:
-                classifiers_to_keep.append(cl)
-        self.population = ClassifiersList(*classifiers_to_keep)
-        # Removing behavioral classifiers
-        classifiers_to_keep = []
-        for cl in self.population:
-            to_keep = True
-            if cl.behavioral_sequence is not None and (not cl.is_experienced() or not cl.is_reliable()):
+            if to_keep and cl.behavioral_sequence is not None and \
+                (not cl.is_experienced() or not cl.is_reliable()):
                 to_keep = False
-            if cl.behavioral_sequence is not None and (not cl.does_anticipate_change() and len(cl.effect)==1):
+            if to_keep and cl.behavioral_sequence is not None and \
+                not cl.does_anticipate_change() and len(cl.effect)==1:
                 to_keep = False
             if to_keep:
                 classifiers_to_keep.append(cl)

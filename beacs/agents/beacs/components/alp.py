@@ -68,9 +68,8 @@ def expected_case(
     """
     is_aliasing_detected = False
 
-    if cl.is_enhanced():
-        cl.effect.update_effect_detailled_counter(p0, p1)
-        is_aliasing_detected = True
+    #if cl.is_enhanced() and cl.is_reliable() and cl.is_experienced():
+    #    is_aliasing_detected = True
 
     if is_state_aliased(cl.condition, cl.mark, p0):
         if cl.cfg.do_pep: cl.ee = True
@@ -81,7 +80,7 @@ def expected_case(
         cl.increase_quality()
         return is_aliasing_detected, None
 
-    child = cl.copy_from(cl, p0, p1, time)
+    child = cl.copy_from(cl, time)
 
     spec = cl.specificity
     spec_new = diff.specificity
@@ -126,7 +125,7 @@ def unexpected_case(
     cl.set_mark(p0)
     if not cl.effect.is_specializable(p0, p1):
         return None
-    child = cl.copy_from(cl, p0, p1, time)
+    child = cl.copy_from(cl, time)
     child.specialize(p0, p1)
     if child.q < 0.5:
         child.q = 0.5

@@ -110,23 +110,9 @@ def roulette_wheel_selection(
     return parent1, parent2
 
 
-def build_enhanced_trace(cl) -> list:
-    enhanced_trace_cl = [True] * cl.cfg.classifier_length
-    if cl.is_enhanced():
-        for idx in range(cl.cfg.classifier_length):
-            symbols = []
-            for effect in cl.effect.effect_list:
-                if effect[idx] not in symbols:
-                    symbols.append(effect[idx])
-            enhanced_trace_cl[idx] = (cl.effect.wildcard not in symbols) or (len(symbols)==1)
-    return enhanced_trace_cl
-
-
 def mutation(
         cl1,
-        enhanced_trace_cl1,
         cl2,
-        enhanced_trace_cl2,
         mu: float
     ) -> None:
     """
@@ -136,12 +122,8 @@ def mutation(
     ----------
     cl1
         First classifier
-    enhanced_trace_cl1
-        Trace computed by ...
     cl2
         Second classifier
-    enhanced_trace_cl2
-        Trace computed by build_enhanced_trace()
     mu
         Mutation rate
     """
@@ -153,21 +135,21 @@ def mutation(
         #
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] == cl2.cfg.classifier_wildcard:
-            if random.random() < mu and enhanced_trace_cl1[idx]:
+            if random.random() < mu and cl1.effect.enhanced_trace_ga[idx]:
                 cl1.condition.generalize(idx)
             continue
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] != cl2.cfg.classifier_wildcard:
-            if random.random() < mu and enhanced_trace_cl2[idx]:
+            if random.random() < mu and cl2.effect.enhanced_trace_ga[idx]:
                 cl2.condition.generalize(idx)
             continue
         #
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
-            cl1.behavioral_sequence is None and enhanced_trace_cl1[idx] and \
+            cl1.behavioral_sequence is None and cl1.effect.enhanced_trace_ga[idx] and \
                 random.random() < mu:
             cl1.condition.generalize(idx)
         if cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
-            cl2.behavioral_sequence is None and enhanced_trace_cl2[idx] and \
+            cl2.behavioral_sequence is None and cl2.effect.enhanced_trace_ga[idx] and \
                 random.random() < mu:
             cl2.condition.generalize(idx)
 
