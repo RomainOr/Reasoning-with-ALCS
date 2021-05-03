@@ -134,12 +134,16 @@ class ClassifiersList(TypedList):
             cfg: Configuration
         ) -> None:
         # First, try to detect if it is time to detect a pai state - no need to compute this every time
-        match_set_no_bseq = [cl for cl in previous_match_set if cl.behavioral_sequence is None and (not cl.is_marked() or cl.mark.corresponds_to(p0))]
-        if pai.should_pai_detection_apply(match_set_no_bseq, time, cfg.theta_bseq):
+        knowledge_from_match_set = [cl for cl in previous_match_set if
+            cl.behavioral_sequence is None and
+            (not cl.is_marked() or cl.mark.corresponds_to(p0)) and 
+            (cl.aliased_state == Perception.empty() or cl.aliased_state == p0)
+        ]
+        if pai.should_pai_detection_apply(knowledge_from_match_set, time, cfg.theta_bseq):
             # We set the related timestamp t_bseq of the classifiers in the match set
-            pai.set_pai_detection_timestamps(match_set_no_bseq, time)
+            pai.set_pai_detection_timestamps(knowledge_from_match_set, time)
             # We check we have enough information from classifiers in the matching set to do the detection
-            enough_information, most_experienced_classifiers = pai.enough_information_to_try_PAI_detection(match_set_no_bseq, cfg)
+            enough_information, most_experienced_classifiers = pai.enough_information_to_try_PAI_detection(knowledge_from_match_set, cfg)
             if enough_information:
             # The system tries to determine is it suffers from the perceptual aliasing issue
                 if pai.is_perceptual_aliasing_state(most_experienced_classifiers, p0, cfg) > 0:

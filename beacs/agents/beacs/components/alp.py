@@ -64,7 +64,7 @@ def expected_case(
 
     Returns
     ----------
-    New classifier or None
+    Bool related to aliasing, New classifier or None
     """
     is_aliasing_detected = False
 
