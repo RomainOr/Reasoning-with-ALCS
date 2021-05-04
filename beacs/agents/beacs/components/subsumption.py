@@ -52,7 +52,7 @@ def does_subsume(
     bool
         True if `other_cl` classifier is subsumed
     """
-    if cl.is_subsumer_criteria_satisfied(other_cl) and \
+    if cl.is_hard_subsumer_criteria_satisfied(other_cl) and \
         cl.is_more_general(other_cl) and \
             cl.action == other_cl.action and \
                 cl.behavioral_sequence == other_cl.behavioral_sequence and \

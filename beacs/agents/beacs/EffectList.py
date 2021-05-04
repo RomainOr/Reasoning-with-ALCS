@@ -132,7 +132,7 @@ class EffectList():
         bool
             True if specializable
         """
-        return not self.is_enhanced() and self[0].is_specializable(p0, p1)
+        return self.is_enhanced() or (not self.is_enhanced() and self[0].is_specializable(p0, p1))
 
 
     def does_anticipate_correctly(

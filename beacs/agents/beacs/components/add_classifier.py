@@ -38,7 +38,7 @@ def add_classifier(
                 old_cl = cl
                 break
 
-    # Check if there is similar classifier already
+    # Check if there is similar classifier already in the population
     if old_cl is None:
         for cl in population:
             if cl == child:

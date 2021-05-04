@@ -102,8 +102,7 @@ def expected_case(
 
     child.condition.specialize_with_condition(diff)
 
-    if child.q < 0.5:
-        child.q = 0.5
+    child.q = max(0.5, child.q)
 
     return is_aliasing_detected, child
 
@@ -123,10 +122,25 @@ def unexpected_case(
     """
     cl.decrease_quality()
     cl.set_mark(p0)
+    # If nothing can be done, stop specialization of the classifier
     if not cl.effect.is_specializable(p0, p1):
         return None
-    child = cl.copy_from(cl, time)
-    child.specialize(p0, p1)
-    if child.q < 0.5:
-        child.q = 0.5
+    # If the classifier is not enhanced, directly specialize it
+    if not cl.is_enhanced():
+        child = cl.copy_from(cl, time)
+        child.specialize(p0, p1)
+        child.q = max(0.5, child.q)
+        return child
+    # If the classifier is enhanced, try to append a new effect if it is no included in the list of effects
+    child = cover(p0, cl.action, p1, time, cl.cfg)
+    #if not child.effect.subsumes(cl_to_append.effect):
+    #    return child.merge_with(cl_to_append, p0, time)
+    # Otherwise, try to only specialize condition and indicate that item cannot be generalized
+    #child.condition.specialize_with_condition(cl_to_append.condition)
+    for index in range(child.cfg.classifier_length):
+        child.effect.enhanced_trace_ga[index] = cl.effect.enhanced_trace_ga[index]
+    for index in range(child.cfg.classifier_length):
+        if cl.condition[index] == cl.condition.wildcard and child.condition[index] != child.condition.wildcard:
+            cl.effect.enhanced_trace_ga[index] = False
+            child.effect.enhanced_trace_ga[index] = False
     return child
