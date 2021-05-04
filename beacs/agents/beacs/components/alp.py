@@ -135,6 +135,8 @@ def unexpected_case(
     # If the classifier is enhanced, try to append a new effect if it is no included in the list of effects
     child = cover(p0, cl.action, p1, time, cl.cfg)
     child.q = max(0.5, cl.q)
+    child.ra = cl.ra
+    child.rb = cl.rb
     if not cl.effect.subsumes(child.effect):
         return cl.merge_with(child, p0, time)
     # Otherwise, try to only specialize condition and indicate items that cannot be generalized
