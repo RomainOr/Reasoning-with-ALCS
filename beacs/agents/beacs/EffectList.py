@@ -114,7 +114,8 @@ class EffectList():
     def is_specializable(
             self,
             p0: Perception,
-            p1: Perception
+            p1: Perception,
+            cl_aliased_state: Perception
         ) -> bool:
         """
         Determines if the effect part can be modified to anticipate
@@ -132,7 +133,7 @@ class EffectList():
         bool
             True if specializable
         """
-        return self.is_enhanced() or (not self.is_enhanced() and self[0].is_specializable(p0, p1))
+        return (self.is_enhanced() and cl_aliased_state == p0) or (not self.is_enhanced() and self[0].is_specializable(p0, p1))
 
 
     def does_anticipate_correctly(

@@ -24,6 +24,9 @@ class Perception(collections.abc.Sequence):
     def empty(cls):
         return cls([], oktypes=(None,))
 
+    def is_empty(self):
+        return len(self._items) == 0
+
     def __getitem__(self, i):
         return self._items[i]
 

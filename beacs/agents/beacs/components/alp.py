@@ -123,7 +123,7 @@ def unexpected_case(
     cl.decrease_quality()
     cl.set_mark(p0)
     # If nothing can be done, stop specialization of the classifier
-    if not cl.effect.is_specializable(p0, p1):
+    if not cl.effect.is_specializable(p0, p1, cl.aliased_state):
         return None
     # If the classifier is not enhanced, directly specialize it
     if not cl.is_enhanced():
@@ -131,15 +131,16 @@ def unexpected_case(
         child.specialize(p0, p1)
         child.q = max(0.5, child.q)
         return child
+    # Otherwise the classifier is enhanced and p0 corresponds to the aliased state of cl
     # If the classifier is enhanced, try to append a new effect if it is no included in the list of effects
     child = cover(p0, cl.action, p1, time, cl.cfg)
-    #if not child.effect.subsumes(cl_to_append.effect):
-    #    return child.merge_with(cl_to_append, p0, time)
-    # Otherwise, try to only specialize condition and indicate that item cannot be generalized
-    #child.condition.specialize_with_condition(cl_to_append.condition)
+    child.q = max(0.5, cl.q)
+    if not cl.effect.subsumes(child.effect):
+        return cl.merge_with(child, p0, time)
+    # Otherwise, try to only specialize condition and indicate items that cannot be generalized
+    child.condition.specialize_with_condition(cl.condition)
     for index in range(child.cfg.classifier_length):
         child.effect.enhanced_trace_ga[index] = cl.effect.enhanced_trace_ga[index]
-    for index in range(child.cfg.classifier_length):
         if cl.condition[index] == cl.condition.wildcard and child.condition[index] != child.condition.wildcard:
             cl.effect.enhanced_trace_ga[index] = False
             child.effect.enhanced_trace_ga[index] = False
