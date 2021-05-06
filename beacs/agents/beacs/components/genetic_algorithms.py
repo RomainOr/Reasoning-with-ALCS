@@ -250,27 +250,23 @@ def delete_classifiers(
         the maximal number of classifiers in an action set.
     """
     while (insize + sum(cl.num for cl in action_set)) > theta_as:
-        cl_del = None
+        
+        # We must delete at least one
+        set_to_iterate = [cl for cl in action_set.expand()]
+        cl_del = random.choice(set_to_iterate)
+        for cl in set_to_iterate:
+            if random.random() < .3:
+                if _is_preferred_to_delete(cl_del, cl):
+                    cl_del = cl
 
-        while cl_del is None:  # We must delete at least one
-            set_to_iterate = [cl for cl in action_set.expand()]
-            for cl in set_to_iterate:
-                if random.random() < .3:
-                    if cl_del is None:
-                        cl_del = cl
-                    else:
-                        if _is_preferred_to_delete(cl_del, cl):
-                            cl_del = cl
-
-        if cl_del is not None:
-            if cl_del.num > 1:
-                cl_del.num -= 1
-            else:
-                # Removes classifier from population, match set
-                # and current list
-                lists = [x for x in [population, match_set, action_set] if x]
-                for lst in lists:
-                    lst.safe_remove(cl_del)
+        if cl_del.num > 1:
+            cl_del.num -= 1
+        else:
+            # Removes classifier from population, match set
+            # and current list
+            lists = [x for x in [population, match_set, action_set] if x]
+            for lst in lists:
+                lst.safe_remove(cl_del)
 
 
 def _is_preferred_to_delete(
