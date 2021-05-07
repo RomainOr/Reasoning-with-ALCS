@@ -96,6 +96,8 @@ def create_behavioral_classifier(
             child = Classifier(
                 action=penultimate_classifier.action, 
                 behavioral_sequence=[],
+                rewarda=cl.ra,
+                rewardb=cl.rb,
                 tga=time,
                 tbseq=time,
                 talp=time,

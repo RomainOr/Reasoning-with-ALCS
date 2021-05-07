@@ -32,18 +32,21 @@ def _maze_metrics(
             environment
         ) -> float:
         transitions = environment.env.get_all_possible_transitions()
+        env_trans = []
+        for start, action, end in transitions:
+            p0 = environment.env.maze.perception(*start)
+            p1 = environment.env.maze.perception(*end)
+            env_trans.append((p0, action, p1))
         # Take into consideration only reliable classifiers
         reliable_classifiers = [cl for cl in population if cl.is_reliable() and cl.behavioral_sequence is None]
         # Count how many transitions are anticipated correctly
         nr_correct = 0
         # For all possible destinations from each path cell
-        for start, action, end in transitions:
-            p0 = environment.env.maze.perception(*start)
-            p1 = environment.env.maze.perception(*end)
+        for p0, action, p1 in set(env_trans):
             if any(True for cl in reliable_classifiers
                     if cl.does_predict_successfully(p0, action, p1)):
                 nr_correct += 1
-        return nr_correct / len(transitions) * 100.0
+        return nr_correct / len(set(env_trans)) * 100.0
 
     metrics = {
         'knowledge': _maze_knowledge(pop, env)

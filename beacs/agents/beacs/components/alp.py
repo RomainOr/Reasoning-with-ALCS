@@ -142,5 +142,6 @@ def unexpected_case(
     child = cl.copy_from(cl, time)
     for index in range(child.cfg.classifier_length):
         if child.aliased_state[index] != p0[index]:
-            child.condition[index] = p0[index]
+            child.condition[index] = child.aliased_state[index]
             child.effect.enhanced_trace_ga[index] = False
+    return child
