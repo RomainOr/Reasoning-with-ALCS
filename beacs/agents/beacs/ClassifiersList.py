@@ -52,7 +52,7 @@ class ClassifiersList(TypedList):
         max_fitness_ra = 0.
         max_fitness_rb = 0.
         for cl in self:
-            if cl.condition.does_match(situation):
+            if cl.does_match(situation):
                 matching.append(cl)
                 if cl.does_anticipate_change():
                     if cl.q*cl.ra > max_fitness_ra:
@@ -162,11 +162,10 @@ class ClassifiersList(TypedList):
 
         # Create new behavioral classifiers
         if p0 in pai_states_memory and len(potential_cls_for_pai) > 0:
-            pop_for_addition = [cl for cl in population if cl.behavioral_sequence and cl.condition.does_match(penultimate_classifier.condition)]
             for candidate in potential_cls_for_pai:
                 new_cl = create_behavioral_classifier(penultimate_classifier, candidate, p1, p0, time)
                 if new_cl:
-                    add_classifier(new_cl, pop_for_addition, new_list)
+                    add_classifier(new_cl, population, new_list)
 
 
     @staticmethod
@@ -237,10 +236,13 @@ class ClassifiersList(TypedList):
             idx += 1
 
             if new_cl is not None:
-                add_classifier(new_cl, action_set, new_list)
+                if new_cl.does_match(p0):
+                    add_classifier(new_cl, action_set, new_list)
+                else:
+                    add_classifier(new_cl, population, new_list)
 
         # No classifier anticipated correctly - generate new one through covering
-        # only if we are not in the case of behavioral sequences
+        # only if we are not in the case of classifiers having behavioral sequences
         if not was_expected_case:
             if (len(action_set) > 0 and action_set[0].behavioral_sequence is None) or len(action_set) == 0:
                 new_cl = alp.cover(p0, action, p1, time, cfg)
@@ -254,11 +256,11 @@ class ClassifiersList(TypedList):
 
         # Merge classifiers from new_list into self and population
         population.extend(new_list)
-        if match_set is not None:
-            new_matching = [cl for cl in new_list if cl.condition.does_match(p1)]
+        if match_set:
+            new_matching = [cl for cl in new_list if cl.does_match(p1)]
             match_set.extend(new_matching)
         if action_set:
-            new_action_cls = [cl for cl in new_list if cl.action == action_set[0].action and cl.behavioral_sequence == action_set[0].behavioral_sequence]
+            new_action_cls = [cl for cl in new_list if cl.does_match(p0) and cl.action == action_set[0].action and cl.behavioral_sequence == action_set[0].behavioral_sequence]
             action_set.extend(new_action_cls)
 
 

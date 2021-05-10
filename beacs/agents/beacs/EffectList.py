@@ -77,6 +77,12 @@ class EffectList():
                 ei = self.effect_list.index(oeffect)
                 self.effect_detailled_counter[ei] += other.effect_detailled_counter[oi]
         self.enhanced_trace_ga = [True] * length
+        self.update_enhanced_trace_ga(length)
+
+    def update_enhanced_trace_ga(
+            self,
+            length: int
+        ):
         for idx in range(length):
             symbols = []
             for effect in self:
@@ -117,8 +123,10 @@ class EffectList():
             p1: Perception
         ) -> bool:
         """
-        Determines if the effect part can be modified to anticipate
-        changes from `p0` to `p1` correctly by only specializing attributes.
+        Determines if the effect part can be modified to 
+        correctly anticipate changes from `p0` to `p1`.
+        No need to check for enhanced effect : see the same
+        function in classifier.py
 
         Parameters
         ----------
@@ -132,7 +140,7 @@ class EffectList():
         bool
             True if specializable
         """
-        return self.is_enhanced() or self[0].is_specializable(p0, p1)
+        return self[0].is_specializable(p0, p1)
 
 
     def does_anticipate_correctly(

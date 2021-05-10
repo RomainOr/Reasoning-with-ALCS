@@ -294,7 +294,7 @@ def add_classifier(
         else:
             population.append(cl)
             action_set.append(cl)
-            if match_set is not None and cl.condition.does_match(p):
+            if match_set is not None and cl.does_match(p):
                 match_set.append(cl)
     else:
         old_cl = subsumers[0]

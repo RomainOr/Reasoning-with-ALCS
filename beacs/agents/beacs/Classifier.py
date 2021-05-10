@@ -311,7 +311,31 @@ class Classifier:
                 return True
             if self.is_marked() and other.is_marked() and self.mark == other.mark:
                 return True
-        return False
+        return False    
+        
+        
+    def is_specializable(
+            self,
+            p0: Perception,
+            p1: Perception
+        ) -> bool:
+        """
+        Determines if both effect and condition can be modified to
+        correctly anticipate changes from `p0` to `p1`.
+
+        Parameters
+        ----------
+        p0: Perception
+            Previous perception
+        p1: Perception
+            Current perception
+
+        Returns
+        -------
+        bool
+            True if specializable
+        """
+        return self.is_enhanced() or self.effect.is_specializable(p0, p1)
     
 
     def does_anticipate_change(self) -> bool:
@@ -326,7 +350,10 @@ class Classifier:
         return self.effect.specify_change
 
 
-    def does_match(self, situation: Perception) -> bool:
+    def does_match(
+            self,
+            other: Union[Perception, Condition]
+        ) -> bool:
         """
         Returns if the classifier matches the situation.
 
@@ -338,7 +365,7 @@ class Classifier:
         -------
         bool
         """
-        return self.condition.does_match(situation)
+        return self.condition.does_match(other)
 
 
     def does_anticipate_correctly(
@@ -395,7 +422,7 @@ class Classifier:
         bool
             True if classifier makes successful predictions
         """
-        if self.condition.does_match(p0):
+        if self.does_match(p0):
             if self.action == action:
                 if self.does_anticipate_correctly(p0, p1):
                     return True
@@ -463,7 +490,7 @@ class Classifier:
             situation: Perception
         ) -> None:
         """
-        Specializes the effect part where necessary to correctly anticipate
+        Specializes the classifier parts where necessary to correctly anticipate
         the changes from previous_situation to situation.
         Only occurs when a new classifier is produced from scratch or by copy.
 
@@ -474,10 +501,28 @@ class Classifier:
         situation: Perception
             Perception related to a state following the action
         """
-        for idx, _ in enumerate(situation):
-            if previous_situation[idx] != situation[idx] and self.effect[0][idx] == self.cfg.classifier_wildcard:
-                self.effect[0][idx] = situation[idx]
-                self.condition[idx] = previous_situation[idx]
+        length = self.cfg.classifier_length
+        wildcard = self.cfg.classifier_wildcard
+        if not self.is_enhanced():
+            for idx in range(length):
+                if previous_situation[idx] != situation[idx] and self.effect[0][idx] == wildcard:
+                    self.effect[0][idx] = situation[idx]
+                    self.condition[idx] = previous_situation[idx]
+        else:
+            if self.aliased_state != previous_situation:
+                for idx in range(length):
+                    if self.aliased_state[idx] != previous_situation[idx]:
+                        self.condition[idx] = self.aliased_state[idx]
+                        self.effect.enhanced_trace_ga[idx] = False
+            else:
+                new_effect_index = len(self.effect)
+                self.effect.effect_list.append(Effect.empty(length, wildcard))
+                self.effect.effect_detailled_counter.append(1)
+                for idx in range(length):
+                    if previous_situation[idx] != situation[idx]:
+                        self.effect[new_effect_index][idx] = situation[idx]
+                        self.condition[idx] = previous_situation[idx]
+                self.effect.update_enhanced_trace_ga(length)
 
 
     def generalize_specific_attribute_randomly(self):

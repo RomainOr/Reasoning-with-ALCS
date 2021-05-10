@@ -111,7 +111,7 @@ def _enhanced_effect_error(
     for perception, action_and_probabiltiies in theoritical_probabilities.items():
         for action, probabilities_and_states in action_and_probabiltiies.items():
             # Try to find a suitable one, even if it is unreliable
-            unreliable_classifiers = [cl for cl in population if cl.condition.does_match(perception) and cl.action ==  action and cl.behavioral_sequence is None]
+            unreliable_classifiers = [cl for cl in population if cl.does_match(perception) and cl.action ==  action and cl.behavioral_sequence is None]
             if len(unreliable_classifiers) > 0:
                 # Try to promote a reliable classifier
                 reliable_classifiers = [cl for cl in unreliable_classifiers if cl.is_reliable()]

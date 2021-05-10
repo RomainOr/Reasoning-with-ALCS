@@ -37,8 +37,8 @@ def does_subsume(
     ) -> bool:
     """
     Returns if a classifier `cl` subsumes `other_cl` classifier.
-    No need to check condition when does_subsume is only applied 
-    on the matching set or the action set.
+    Condition is checked as this function can be applied on the whole population or in the action set.
+    Called by add_classifier.py and find_subsumers() in genetic_algorithms.py.
 
     Parameters
     ----------
@@ -54,9 +54,10 @@ def does_subsume(
     """
     if cl.is_hard_subsumer_criteria_satisfied(other_cl) and \
         cl.is_more_general(other_cl) and \
-            cl.action == other_cl.action and \
-                cl.behavioral_sequence == other_cl.behavioral_sequence and \
-                    cl.effect.subsumes(other_cl.effect):
+            cl.does_match(other_cl.condition) and \
+                cl.action == other_cl.action and \
+                    cl.behavioral_sequence == other_cl.behavioral_sequence and \
+                        cl.effect.subsumes(other_cl.effect):
         return True
 
     return False

@@ -123,26 +123,10 @@ def unexpected_case(
     cl.decrease_quality()
     cl.set_mark(p0)
     # If nothing can be done, stop specialization of the classifier
-    if not cl.effect.is_specializable(p0, p1):
+    if not cl.is_specializable(p0, p1):
         return None
     # If the classifier is not enhanced, directly specialize it
-    if not cl.is_enhanced():
-        child = cl.copy_from(cl, time)
-        child.specialize(p0, p1)
-        child.q = max(0.5, child.q)
-        return child
-    # If the classifier is enhanced and p0 corresponds to the aliased state of the classifier
-    if cl.aliased_state == p0:
-        child = cover(p0, cl.action, p1, time, cl.cfg)
-        child.q = max(0.5, cl.q)
-        child.ra = cl.ra
-        child.rb = cl.rb
-        return cl.merge_with(child, p0, time)
-    return None
-    # Otherwise try to only specialize it - Sur-generalization
     child = cl.copy_from(cl, time)
-    for index in range(child.cfg.classifier_length):
-        if child.aliased_state[index] != p0[index]:
-            child.condition[index] = child.aliased_state[index]
-            child.effect.enhanced_trace_ga[index] = False
+    child.specialize(p0, p1)
+    child.q = max(0.5, child.q)
     return child
