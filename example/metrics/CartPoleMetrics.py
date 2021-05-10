@@ -30,3 +30,15 @@ def _cartpole_metrics(
     # Add basic population metrics
     metrics.update(population_metrics(pop, env))
     return metrics
+
+
+def _mean_reliable_classifier_specificity(
+        pop,
+        env
+    ) -> int:
+    # TODO : Return values for legacy cl, behavioral cl, enhanced cl, behavioral enhanced cl and all ?
+    reliable_classifiers = [cl for cl in pop if cl.is_reliable()]
+    if len(reliable_classifiers) > 0:
+        return float(sum(cl.specificity for cl in reliable_classifiers)) / len(reliable_classifiers)
+    else:
+        return 1.

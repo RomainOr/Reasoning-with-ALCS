@@ -3,8 +3,11 @@ import math
 from beacs.agents.EnvironmentAdapter import EnvironmentAdapter
 
 #Could fail but should be sufficient with 1, 1, 4, 3 buckets.
-#Best solution achieved with population that fully converged towards 12 classifiers.
+#Best solution achieved with population that fully converged towards 12 classifiers with PEP.
 #Otherwise, use 1, 1, 6, 3.
+
+#Discrtization from https://www.datamachinist.com/reinforcement-learning/part-6-q-learning-for-continuous-state-problems/
+
 buckets=(1, 1, 4, 3,) 
 
 class CartPoleEnvironmentAdapter(EnvironmentAdapter):

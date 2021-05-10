@@ -46,7 +46,7 @@ class EffectList():
 
 
     def __str__(self):
-        return "("+", ".join("{}:#{}".format(str(effect), counter) for effect, counter in zip(self.effect_list, self.effect_detailled_counter)) + ")"
+        return "("+", ".join("{}:{}".format(str(effect), counter) for effect, counter in zip(self.effect_list, self.effect_detailled_counter)) + ")"
 
 
     def enhance(

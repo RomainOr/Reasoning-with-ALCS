@@ -182,49 +182,6 @@ def two_point_crossover(
         donor.condition[el] = chromosome1[idx]
 
 
-def add_classifier(
-        cl, 
-        p: Perception,
-        population, 
-        match_set, 
-        action_set
-    )-> None:
-    """
-    Finds subsumer/similar classifier, if present - increase its numerosity,
-    else add this new classifier
-
-    Parameters
-    ----------
-    cl:
-        Newly created classifier
-    p: Perception
-        Current perception
-    population:
-        Population of classifiers
-    match_set:
-        Match set
-    action_set:
-        Action set
-    """
-    # Find_subsumers computes subsumer or classifier that are equal
-    subsumers = find_subsumers(cl, action_set)
-    # Check if subsumers exist, meaning that old_cl is mandatory not None
-    if len(subsumers) == 0:
-        old_cl = next(filter(lambda other: cl == other, action_set), None)
-        if old_cl:
-            if not old_cl.is_marked():
-                old_cl.num += 1
-        else:
-            population.append(cl)
-            action_set.append(cl)
-            if match_set is not None and cl.condition.does_match(p):
-                match_set.append(cl)
-    else:
-        old_cl = subsumers[0]
-        if not old_cl.is_marked():
-            old_cl.num += 1
-
-
 def delete_classifiers(
         population,
         match_set,
@@ -300,3 +257,46 @@ def _is_preferred_to_delete(
                 return True
 
     return False
+
+
+def add_classifier(
+        cl, 
+        p: Perception,
+        population, 
+        match_set, 
+        action_set
+    )-> None:
+    """
+    Finds subsumer/similar classifier, if present - increase its numerosity,
+    else add this new classifier
+
+    Parameters
+    ----------
+    cl:
+        Newly created classifier
+    p: Perception
+        Current perception
+    population:
+        Population of classifiers
+    match_set:
+        Match set
+    action_set:
+        Action set
+    """
+    # Find_subsumers computes subsumer or classifier that are equal
+    subsumers = find_subsumers(cl, action_set)
+    # Check if subsumers exist, meaning that old_cl is mandatory not None
+    if len(subsumers) == 0:
+        old_cl = next(filter(lambda other: cl == other, action_set), None)
+        if old_cl:
+            if not old_cl.is_marked():
+                old_cl.num += 1
+        else:
+            population.append(cl)
+            action_set.append(cl)
+            if match_set is not None and cl.condition.does_match(p):
+                match_set.append(cl)
+    else:
+        old_cl = subsumers[0]
+        if not old_cl.is_marked():
+            old_cl.num += 1

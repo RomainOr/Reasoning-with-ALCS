@@ -138,6 +138,7 @@ def unexpected_case(
         child.ra = cl.ra
         child.rb = cl.rb
         return cl.merge_with(child, p0, time)
+    return None
     # Otherwise try to only specialize it - Sur-generalization
     child = cl.copy_from(cl, time)
     for index in range(child.cfg.classifier_length):
