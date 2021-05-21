@@ -23,24 +23,23 @@ def add_classifier(
         A list of newly created classifiers in this ALP run
     """
     old_cl = None
+    equal_cl = None
 
     # Look if there is a classifier that subsumes the insertion candidate
     for cl in population:
         if does_subsume(cl, child):
             if old_cl is None or cl.is_more_general(old_cl):
                 old_cl = cl
-                break
+        elif cl == child:
+            equal_cl = cl
+
+    # Check if there is similar classifier already in the population, previously found
+    if old_cl is None:
+        old_cl = equal_cl
 
     # Check if any similar classifier was in this ALP run
     if old_cl is None:
         for cl in new_list:
-            if cl == child:
-                old_cl = cl
-                break
-
-    # Check if there is similar classifier already in the population
-    if old_cl is None:
-        for cl in population:
             if cl == child:
                 old_cl = cl
                 break
