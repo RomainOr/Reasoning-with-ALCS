@@ -125,7 +125,8 @@ class ClassifiersList(TypedList):
     @staticmethod
     def apply_perceptual_aliasing_issue_management(
             population: ClassifiersList,
-            previous_match_set: ClassifiersList,
+            t_2_match_set: ClassifiersList,
+            t_1_match_set: ClassifiersList,
             match_set: ClassifiersList,
             action_set: ClassifiersList,
             penultimate_classifier: Classifier,
@@ -138,7 +139,7 @@ class ClassifiersList(TypedList):
             cfg: Configuration
         ) -> None:
         # First, try to detect if it is time to detect a pai state - no need to compute this every time
-        knowledge_from_match_set = [cl for cl in previous_match_set if
+        knowledge_from_match_set = [cl for cl in t_1_match_set if
             cl.behavioral_sequence is None and
             (not cl.is_marked() or cl.mark.corresponds_to(p0)) and 
             (cl.aliased_state == Perception.empty() or cl.aliased_state == p0)
@@ -169,13 +170,14 @@ class ClassifiersList(TypedList):
             for candidate in potential_cls_for_pai:
                 new_cl = create_behavioral_classifier(penultimate_classifier, candidate, p1, p0, time)
                 if new_cl:
-                    add_classifier(new_cl, population, new_list)
+                    add_classifier(new_cl, t_2_match_set, new_list)
 
 
     @staticmethod
     def apply_alp(
             population: ClassifiersList,
-            previous_match_set: ClassifiersList,
+            t_2_match_set: ClassifiersList,
+            t_1_match_set: ClassifiersList,
             match_set: ClassifiersList,
             action_set: ClassifiersList,
             penultimate_classifier: Classifier,
@@ -194,7 +196,8 @@ class ClassifiersList(TypedList):
         Parameters
         ----------
         population
-        previous_match_set
+        t_2_match_set
+        t_1_match_set
         match_set
         action_set
         penultimate_classifier
@@ -256,7 +259,7 @@ class ClassifiersList(TypedList):
             ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
 
         if cfg.bs_max > 0 and penultimate_classifier is not None and len(potential_cls_for_pai) > 0:
-            ClassifiersList.apply_perceptual_aliasing_issue_management(population, previous_match_set, match_set, action_set, penultimate_classifier, potential_cls_for_pai, new_list, p0, p1, time, pai_states_memory, cfg)
+            ClassifiersList.apply_perceptual_aliasing_issue_management(population, t_2_match_set, t_1_match_set, match_set, action_set, penultimate_classifier, potential_cls_for_pai, new_list, p0, p1, time, pai_states_memory, cfg)
 
         # Merge classifiers from new_list into self and population
         population.extend(new_list)

@@ -316,8 +316,8 @@ class Classifier:
         
     def is_specializable(
             self,
-            p0: Perception,
-            p1: Perception
+            previous_situation: Perception,
+            situation: Perception
         ) -> bool:
         """
         Determines if both effect and condition can be modified to
@@ -325,9 +325,9 @@ class Classifier:
 
         Parameters
         ----------
-        p0: Perception
+        previous_situation: Perception
             Previous perception
-        p1: Perception
+        situation: Perception
             Current perception
 
         Returns
@@ -335,7 +335,7 @@ class Classifier:
         bool
             True if specializable
         """
-        return self.effect.is_specializable(p0, p1)
+        return self.effect.is_specializable(previous_situation, situation)
     
 
     def does_anticipate_change(self) -> bool:

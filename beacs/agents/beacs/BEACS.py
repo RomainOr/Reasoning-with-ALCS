@@ -79,7 +79,8 @@ class BEACS(Agent):
         state = self.cfg.environment_adapter.to_genotype(env, raw_state)
         last_reward = 0
         prev_state = Perception.empty()
-        previous_match_set = ClassifiersList()
+        t_2_match_set = ClassifiersList()
+        t_1_match_set = ClassifiersList()
         match_set = ClassifiersList()
         action_set = ClassifiersList()
         done = False
@@ -97,7 +98,8 @@ class BEACS(Agent):
             if steps > 0:
                 ClassifiersList.apply_alp(
                     self.population,
-                    previous_match_set,
+                    t_2_match_set,
+                    t_1_match_set,
                     match_set,
                     action_set,
                     t_2_activated_classifier,
@@ -125,7 +127,8 @@ class BEACS(Agent):
                 )
 
             # Record the previous match set
-            previous_match_set = match_set
+            t_2_match_set = t_1_match_set
+            t_1_match_set = match_set
             # Choose classifier
             action_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
             # Record last activated classifier
@@ -156,7 +159,8 @@ class BEACS(Agent):
             if done:
                 ClassifiersList.apply_alp(
                     self.population,
-                    previous_match_set,
+                    t_2_match_set,
+                    t_1_match_set,
                     ClassifiersList(),
                     action_set,
                     t_2_activated_classifier,
