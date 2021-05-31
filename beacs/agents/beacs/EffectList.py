@@ -102,7 +102,8 @@ class EffectList():
         bool
             True if the effect list predicts a change
         """
-        return self.is_enhanced() or self[0].specify_change
+        index = self.effect_detailled_counter.index(max(self.effect_detailled_counter))
+        return self[index].specify_change
 
 
     def is_enhanced(self) -> bool:
@@ -140,13 +141,14 @@ class EffectList():
         bool
             True if specializable
         """
-        return self[0].is_specializable(p0, p1)
+        return self.is_enhanced() or self[0].is_specializable(p0, p1)
 
 
     def does_anticipate_correctly(
             self,
             p0: Perception,
-            p1: Perception
+            p1: Perception,
+            update_counters: bool = True
         ) -> bool:
         """
         Determines if the effect list anticipates correctly changes from `p0` to `p1`.
@@ -165,7 +167,8 @@ class EffectList():
         """
         for idx, effect in enumerate(self):
             if effect.does_anticipate_correctly(p0, p1):
-                self.effect_detailled_counter[idx] += 1
+                if self.is_enhanced() and update_counters:
+                    self.effect_detailled_counter[idx] += 1
                 return True
         return False
 

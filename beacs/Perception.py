@@ -34,7 +34,7 @@ class Perception(collections.abc.Sequence):
         return len(self._items)
 
     def __repr__(self):
-        return ' '.join(map(str, self))
+        return ''.join(map(str, self))
 
     def __eq__(self, other):
         if len(self) != len(other):

@@ -72,7 +72,7 @@ def expected_case(
         is_aliasing_detected = True
 
     if is_state_aliased(cl.condition, cl.mark, p0):
-        if cl.cfg.do_pep: cl.ee = True
+        cl.ee = True
         is_aliasing_detected = True
 
     diff = cl.mark.get_differences(p0)

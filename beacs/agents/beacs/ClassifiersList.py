@@ -113,7 +113,11 @@ class ClassifiersList(TypedList):
             return
         for i, cl1 in enumerate(candidates):
             for cl2 in candidates[i:]:
-                if cl1.mark == cl2.mark and not cl1.effect.subsumes(cl2.effect) and not cl2.effect.subsumes(cl1.effect):
+                if cl1.mark == cl2.mark and \
+                not cl1.effect.subsumes(cl2.effect) and \
+                not cl2.effect.subsumes(cl1.effect) and \
+                (cl1.aliased_state == Perception.empty() or cl1.aliased_state == p0) and \
+                (cl2.aliased_state == Perception.empty() or cl2.aliased_state == p0):
                     new_classifier = cl1.merge_with(cl2, p0, time)
                     add_classifier(new_classifier, action_set, new_list)
 

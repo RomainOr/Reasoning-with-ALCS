@@ -335,7 +335,7 @@ class Classifier:
         bool
             True if specializable
         """
-        return self.is_enhanced() or self.effect.is_specializable(p0, p1)
+        return self.effect.is_specializable(p0, p1)
     
 
     def does_anticipate_change(self) -> bool:
@@ -371,7 +371,8 @@ class Classifier:
     def does_anticipate_correctly(
             self,
             previous_situation: Perception,
-            situation: Perception
+            situation: Perception,
+            update_counter: bool = True
         ) -> bool:
         """
         Checks anticipation. While the pass-through symbols in the effect part
@@ -393,7 +394,7 @@ class Classifier:
         bool
             True if classifier's effect pat anticipates correctly
         """
-        return self.effect.does_anticipate_correctly(previous_situation, situation)
+        return self.effect.does_anticipate_correctly(previous_situation, situation, update_counter)
 
 
     def does_predict_successfully(
@@ -424,7 +425,7 @@ class Classifier:
         """
         if self.does_match(p0):
             if self.action == action:
-                if self.does_anticipate_correctly(p0, p1):
+                if self.does_anticipate_correctly(p0, p1, False):
                     return True
         return False
 
