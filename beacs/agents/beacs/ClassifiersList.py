@@ -120,6 +120,7 @@ class ClassifiersList(TypedList):
                 (cl2.aliased_state == Perception.empty() or cl2.aliased_state == p0):
                     new_classifier = cl1.merge_with(cl2, p0, time)
                     add_classifier(new_classifier, action_set, new_list)
+                    break
 
 
     @staticmethod
