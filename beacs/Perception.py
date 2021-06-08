@@ -24,6 +24,9 @@ class Perception(collections.abc.Sequence):
     def empty(cls):
         return cls([], oktypes=(None,))
 
+    def is_empty(self):
+        return len(self._items) == 0
+
     def __getitem__(self, i):
         return self._items[i]
 
@@ -31,7 +34,7 @@ class Perception(collections.abc.Sequence):
         return len(self._items)
 
     def __repr__(self):
-        return ' '.join(map(str, self))
+        return ''.join(map(str, self))
 
     def __eq__(self, other):
         if len(self) != len(other):

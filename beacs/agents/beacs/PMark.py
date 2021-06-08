@@ -135,9 +135,9 @@ class PMark(TypedList):
             elif len(s) == 1:
                 return next(iter(s))  # the only element in set
             else:
-                return "{" + "".join(x for x in s) + "}"
+                return '{' + ''.join(x for x in s) + '}'
 
         if self.is_marked():
-            return "".join(compact_set_str(x) for x in self)
+            return ''.join(compact_set_str(x) for x in self)
         else:
-            return "empty"
+            return 'empty'

@@ -110,60 +110,48 @@ def roulette_wheel_selection(
     return parent1, parent2
 
 
-def behavioral_mutation(
+def mutation(
         cl1,
         cl2,
         mu: float
     ) -> None:
     """
-    Executes a particular mutation in the behavioral classifiers.
-    Specified attributes in classifier conditions are randomly
-    generalized with `mu` probability depending on the other child.
+    Executes a particular mutation depending on the classifiers
 
     Parameters
     ----------
     cl1
-        First behavioral classifier
+        First classifier
     cl2
-        Second behavioral classifier
+        Second classifier
     mu
         Mutation rate
     """
     for idx in range(len(cl1.condition)):
+        #
+        if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
+            cl2.condition[idx] == cl2.cfg.classifier_wildcard:
+            continue
+        #
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] == cl2.cfg.classifier_wildcard and \
-              random.random() < mu:
-            cl1.condition.generalize(idx)
+            cl2.condition[idx] == cl2.cfg.classifier_wildcard:
+            if random.random() < mu and cl1.effect.enhanced_trace_ga[idx]:
+                cl1.condition.generalize(idx)
             continue
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
-              random.random() < mu:
-            cl2.condition.generalize(idx)
+            cl2.condition[idx] != cl2.cfg.classifier_wildcard:
+            if random.random() < mu and cl2.effect.enhanced_trace_ga[idx]:
+                cl2.condition.generalize(idx)
             continue
-
-
-def generalizing_mutation(
-        cl,
-        mu: float
-    ) -> None:
-    """
-    Executes the generalizing mutation in the classifier.
-    Specified attributes in classifier conditions are randomly
-    generalized with `mu` probability.
-
-    Parameters
-    ----------
-    cl1
-        First behavioral classifier
-    cl2
-        Second behavioral classifier
-    mu
-        Mutation rate
-    """
-    # TODO : Inductive principles to check
-    for idx, cond in enumerate(cl.condition):
-        if cond != cl.cfg.classifier_wildcard and random.random() < mu:
-            cl.condition.generalize(idx)
+        #
+        if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
+            cl1.behavioral_sequence is None and cl1.effect.enhanced_trace_ga[idx] and \
+                random.random() < mu:
+            cl1.condition.generalize(idx)
+        if cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
+            cl2.behavioral_sequence is None and cl2.effect.enhanced_trace_ga[idx] and \
+                random.random() < mu:
+            cl2.condition.generalize(idx)
 
 
 def two_point_crossover(
@@ -181,7 +169,6 @@ def two_point_crossover(
     donor
         Classifier
     """
-    # TODO : Inductive principles to check
     left, right = sorted(np.random.choice(
         range(0, parent.cfg.classifier_length + 1), 2, replace=False))
 
@@ -193,52 +180,6 @@ def two_point_crossover(
     for idx, el in enumerate(range(left, right)):
         parent.condition[el] = chromosome2[idx]
         donor.condition[el] = chromosome1[idx]
-
-
-def add_classifier(
-        cl, 
-        p: Perception,
-        population, 
-        match_set, 
-        action_set,
-        theta_exp: int
-    )-> None:
-    """
-    Finds subsumer/similar classifier, if present - increase its numerosity,
-    else add this new classifier
-
-    Parameters
-    ----------
-    cl:
-        Newly created classifier
-    p: Perception
-        Current perception
-    population:
-        Population of classifiers
-    match_set:
-        Match set
-    action_set:
-        Action set
-    theta_exp: int
-        Subsumption experience threshold
-    """
-    # Find_subsumers computes subsumer or classifier that are equal
-    subsumers = find_subsumers(cl, action_set, theta_exp)
-    # Check if subsumers exist, meaning that old_cl is mandatory not None
-    if len(subsumers) == 0:
-        old_cl = next(filter(lambda other: cl == other, action_set), None)
-        if old_cl:
-            if not old_cl.is_marked():
-                old_cl.num += 1
-        else:
-            population.append(cl)
-            action_set.append(cl)
-            if match_set is not None and cl.condition.does_match(p):
-                match_set.append(cl)
-    else:
-        old_cl = subsumers[0]
-        if not old_cl.is_marked():
-            old_cl.num += 1
 
 
 def delete_classifiers(
@@ -265,29 +206,24 @@ def delete_classifiers(
         The action set size threshold (θas ∈ N) specifies
         the maximal number of classifiers in an action set.
     """
-    # TODO : Inductive principles to check
     while (insize + sum(cl.num for cl in action_set)) > theta_as:
-        cl_del = None
+        
+        # We must delete at least one
+        set_to_iterate = [cl for cl in action_set.expand()]
+        cl_del = random.choice(set_to_iterate)
+        for cl in set_to_iterate:
+            if random.random() < .3:
+                if _is_preferred_to_delete(cl_del, cl):
+                    cl_del = cl
 
-        while cl_del is None:  # We must delete at least one
-            set_to_iterate = [cl for cl in action_set.expand()]
-            for cl in set_to_iterate:
-                if random.random() < .3:
-                    if cl_del is None:
-                        cl_del = cl
-                    else:
-                        if _is_preferred_to_delete(cl_del, cl):
-                            cl_del = cl
-
-        if cl_del is not None:
-            if cl_del.num > 1:
-                cl_del.num -= 1
-            else:
-                # Removes classifier from population, match set
-                # and current list
-                lists = [x for x in [population, match_set, action_set] if x]
-                for lst in lists:
-                    lst.safe_remove(cl_del)
+        if cl_del.num > 1:
+            cl_del.num -= 1
+        else:
+            # Removes classifier from population, match set
+            # and current list
+            lists = [x for x in [population, match_set, action_set] if x]
+            for lst in lists:
+                lst.safe_remove(cl_del)
 
 
 def _is_preferred_to_delete(
@@ -310,7 +246,6 @@ def _is_preferred_to_delete(
     bool
         True if `cl` is "worse" than `cl_del`. False otherwise
     """
-    # TODO : Inductive principles to check
     if cl.q - cl_del.q < -0.1:
         return True
 
@@ -322,3 +257,46 @@ def _is_preferred_to_delete(
                 return True
 
     return False
+
+
+def add_classifier(
+        cl, 
+        p: Perception,
+        population, 
+        match_set, 
+        action_set
+    )-> None:
+    """
+    Finds subsumer/similar classifier, if present - increase its numerosity,
+    else add this new classifier
+
+    Parameters
+    ----------
+    cl:
+        Newly created classifier
+    p: Perception
+        Current perception
+    population:
+        Population of classifiers
+    match_set:
+        Match set
+    action_set:
+        Action set
+    """
+    # Find_subsumers computes subsumer or classifier that are equal
+    subsumers = find_subsumers(cl, action_set)
+    # Check if subsumers exist, meaning that old_cl is mandatory not None
+    if len(subsumers) == 0:
+        old_cl = next(filter(lambda other: cl == other, action_set), None)
+        if old_cl:
+            if not old_cl.is_marked():
+                old_cl.num += 1
+        else:
+            population.append(cl)
+            action_set.append(cl)
+            if match_set is not None and cl.does_match(p):
+                match_set.append(cl)
+    else:
+        old_cl = subsumers[0]
+        if not old_cl.is_marked():
+            old_cl.num += 1

@@ -16,7 +16,7 @@ from beacs.agents.beacs import Configuration, Condition, EffectList, Effect, PMa
 class Classifier:
 
     __slots__ = ['condition', 'action', 'behavioral_sequence', 'effect', 'mark', 'q', 'ra', 'rb',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'pai_state', 'err']
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'aliased_state', 'pai_state', 'err']
 
     # In paper it's advised to set experience and reward of newly generated
     # classifier to 0. However in original code these values are initialized
@@ -26,7 +26,7 @@ class Classifier:
             condition: Union[Condition, str, None] = None,
             action: Optional[int] = None,
             behavioral_sequence: Optional[List[int]] = None,
-            effect: Optional[EffectList] = None,
+            effect: Optional[Effect] = None,
             quality: float=0.5,
             rewarda: float=0.,
             rewardb: float=0.,
@@ -37,6 +37,7 @@ class Classifier:
             tga: int=0,
             tbseq: int=0,
             tav: float=0.0,
+            aliased_state: Optional[Perception] = None,
             pai_state: Optional[Perception] = None,
             cfg: Optional[Configuration] = None
         ) -> None:
@@ -57,7 +58,7 @@ class Classifier:
         self.condition = _build_perception_string(Condition, condition)
         self.action = action
         self.behavioral_sequence = behavioral_sequence
-        self.effect = EffectList(_build_perception_string(Effect, effect), self.cfg.classifier_wildcard)
+        self.effect = EffectList(_build_perception_string(Effect, effect), self.cfg.classifier_length, self.cfg.classifier_wildcard)
         self.mark = PMark(cfg=self.cfg)
         self.q = quality
         self.ra = rewarda
@@ -70,6 +71,10 @@ class Classifier:
         self.tbseq = tbseq
         self.tav = tav
         self.ee = False
+        if aliased_state:
+            self.aliased_state = aliased_state
+        else:
+            self.aliased_state = Perception.empty()
         if pai_state:
             self.pai_state = pai_state
         else:
@@ -95,9 +100,10 @@ class Classifier:
 
 
     def __repr__(self):
-        return f"{self.condition} {self.action} {str(self.behavioral_sequence)} {str(self.effect)} ({str(self.mark)})\n" \
+        return f"{self.condition} {self.action} {str(self.behavioral_sequence)} {str(self.effect)}\n" \
             f"q: {self.q:<6.4} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} err: {self.err:<6.4}\n" \
-            f"exp: {self.exp:<5} num: {self.num} ee: {self.ee} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \
+            f"exp: {self.exp:<5} num: {self.num} ee: {self.ee}\n" \
+            f"Mark: {str(self.mark)} Aliased_state: {''.join(str(attr) for attr in self.aliased_state)} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \
             f"tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n" \
 
 
@@ -105,8 +111,6 @@ class Classifier:
     def copy_from(
             cls,
             old_cls: Classifier,
-            p0: Perception,
-            p1: Perception,
             time: int
         ) -> Classifier:
         """
@@ -118,8 +122,6 @@ class Classifier:
         ----------
         old_cls: Classifier
             Classifier to copy from
-        p: Perception
-            Current perception to refine effect component
         time: int
             Current epoch
 
@@ -141,20 +143,17 @@ class Classifier:
             tbseq=time,
             talp=time,
             tav=old_cls.tav,
+            aliased_state=old_cls.aliased_state,
             pai_state=old_cls.pai_state
         )
-        if old_cls.is_enhanced():
-            for idx in range(len(new_cls.effect[0])):
-                change_anticipated = False
-                for effect in old_cls.effect.effect_list:
-                    if effect[idx] != effect.wildcard:
-                        change_anticipated = True
-                        break
-                if change_anticipated and p1[idx] != new_cls.condition[idx]:
-                    new_cls.effect[0][idx] = p1[idx]
-        else:
-            for idx in range(len(new_cls.effect[0])):
-                new_cls.effect[0][idx] = old_cls.effect[0][idx]
+        new_cls.effect.effect_list = []
+        for oeffect in old_cls.effect:
+            effect_to_append = Effect.empty(new_cls.cfg.classifier_length)
+            for i in range(new_cls.cfg.classifier_length):
+                effect_to_append[i] = oeffect[i]
+            new_cls.effect.effect_list.append(effect_to_append)
+        new_cls.effect.effect_detailled_counter = old_cls.effect.effect_detailled_counter[:]
+        new_cls.effect.enhanced_trace_ga = old_cls.effect.enhanced_trace_ga[:]
         return new_cls
 
 
@@ -175,34 +174,6 @@ class Classifier:
         if self.behavioral_sequence:
             return self.q * (max_r - diff * len(self.behavioral_sequence) / self.cfg.bs_max)
         return self.q * max_r
-
-
-    @property
-    def specified_unchanging_attributes(self) -> List[int]:
-        """
-        Determines the number of specified unchanging attributes in
-        the classifier. An unchanging attribute is one that is anticipated
-        not to change in the effect part.
-
-        Returns
-        -------
-        List[int]
-            List specified unchanging attributes indices
-        """
-        indices = []
-        for idx, ci in enumerate(self.condition):
-            if self.effect.is_enhanced():
-                to_append = False
-                for effect in self.effect.effect_list:
-                    if ci != self.condition.wildcard and effect[idx] == ci:
-                        to_append = True
-                        break
-                if to_append:
-                    indices.append(idx)
-            else:
-                if ci != self.condition.wildcard and self.effect[0][idx] == self.effect.wildcard:
-                    indices.append(idx)
-        return indices
 
 
     @property
@@ -230,16 +201,16 @@ class Classifier:
         return self.effect.is_enhanced()
 
 
-    def is_reliable(self) -> bool:
+    def is_experienced(self) -> bool:
         """
-        Checks whether the classifier is reliable.
+        Checks whether the classifier is enough experienced.
 
         Returns
         -------
         bool
-            True if the classifier is reliable
+            True if the classifier is enough experienced
         """
-        return self.q > self.cfg.theta_r
+        return self.exp > self.cfg.theta_exp
 
 
     def is_inadequate(self) -> bool:
@@ -254,7 +225,19 @@ class Classifier:
         return self.q < self.cfg.theta_i
 
 
-    def is_marked(self):
+    def is_reliable(self) -> bool:
+        """
+        Checks whether the classifier is reliable.
+
+        Returns
+        -------
+        bool
+            True if the classifier is reliable
+        """
+        return self.q > self.cfg.theta_r
+
+
+    def is_marked(self) -> bool:
         """
         Checks whether the classifier is marked.
 
@@ -277,7 +260,7 @@ class Classifier:
         Parameters
         ----------
         other: Classifier
-            Cther classifier to compare
+            Other classifier to compare
 
         Returns
         -------
@@ -286,6 +269,74 @@ class Classifier:
         """
         return self.condition.specificity <= other.condition.specificity
 
+
+    def is_hard_subsumer_criteria_satisfied(self, other) -> bool:
+        """
+        Determines whether the classifier satisfies the hard subsumer criteria.
+
+        Parameters
+        ----------
+        other: Classifier
+            Other classifier to compare
+
+        Returns
+        -------
+        bool
+            True if the classifier satisfies the subsumer criteria.
+        """
+        if self.is_reliable() and self.is_experienced():
+            if not self.is_marked():
+                return True
+            if self.is_marked() and other.is_marked() and self.mark == other.mark:
+                return True
+        return False
+
+
+    def is_soft_subsumer_criteria_satisfied(self, other) -> bool:
+        """
+        Determines whether the classifier satisfies the soft subsumer criteria.
+
+        Parameters
+        ----------
+        other: Classifier
+            Other classifier to compare
+
+        Returns
+        -------
+        bool
+            True if the classifier satisfies the subsumer criteria.
+        """
+        if self.is_reliable() or (self.q > other.q):
+            if not self.is_marked():
+                return True
+            if self.is_marked() and other.is_marked() and self.mark == other.mark:
+                return True
+        return False    
+        
+        
+    def is_specializable(
+            self,
+            previous_situation: Perception,
+            situation: Perception
+        ) -> bool:
+        """
+        Determines if both effect and condition can be modified to
+        correctly anticipate changes from `p0` to `p1`.
+
+        Parameters
+        ----------
+        previous_situation: Perception
+            Previous perception
+        situation: Perception
+            Current perception
+
+        Returns
+        -------
+        bool
+            True if specializable
+        """
+        return self.effect.is_specializable(previous_situation, situation)
+    
 
     def does_anticipate_change(self) -> bool:
         """
@@ -299,7 +350,10 @@ class Classifier:
         return self.effect.specify_change
 
 
-    def does_match(self, situation: Perception) -> bool:
+    def does_match(
+            self,
+            other: Union[Perception, Condition]
+        ) -> bool:
         """
         Returns if the classifier matches the situation.
 
@@ -311,13 +365,14 @@ class Classifier:
         -------
         bool
         """
-        return self.condition.does_match(situation)
+        return self.condition.does_match(other)
 
 
     def does_anticipate_correctly(
             self,
             previous_situation: Perception,
-            situation: Perception
+            situation: Perception,
+            update_counter: bool = True
         ) -> bool:
         """
         Checks anticipation. While the pass-through symbols in the effect part
@@ -339,7 +394,7 @@ class Classifier:
         bool
             True if classifier's effect pat anticipates correctly
         """
-        return self.effect.does_anticipate_correctly(previous_situation, situation)
+        return self.effect.does_anticipate_correctly(previous_situation, situation, update_counter)
 
 
     def does_predict_successfully(
@@ -368,9 +423,9 @@ class Classifier:
         bool
             True if classifier makes successful predictions
         """
-        if self.condition.does_match(p0):
+        if self.does_match(p0):
             if self.action == action:
-                if self.does_anticipate_correctly(p0, p1):
+                if self.does_anticipate_correctly(p0, p1, False):
                     return True
         return False
 
@@ -436,7 +491,7 @@ class Classifier:
             situation: Perception
         ) -> None:
         """
-        Specializes the effect part where necessary to correctly anticipate
+        Specializes the classifier parts where necessary to correctly anticipate
         the changes from previous_situation to situation.
         Only occurs when a new classifier is produced from scratch or by copy.
 
@@ -447,42 +502,42 @@ class Classifier:
         situation: Perception
             Perception related to a state following the action
         """
-        for idx, _ in enumerate(situation):
-            if previous_situation[idx] != situation[idx] and self.effect[0][idx] == self.cfg.classifier_wildcard:
-                self.effect[0][idx] = situation[idx]
-                self.condition[idx] = previous_situation[idx]
+        length = self.cfg.classifier_length
+        wildcard = self.cfg.classifier_wildcard
+        if not self.is_enhanced():
+            for idx in range(length):
+                if previous_situation[idx] != situation[idx] and self.effect[0][idx] == wildcard:
+                    self.effect[0][idx] = situation[idx]
+                    self.condition[idx] = previous_situation[idx]
+        else:
+            if self.aliased_state != previous_situation:
+                for idx in range(length):
+                    if self.aliased_state[idx] != previous_situation[idx]:
+                        self.condition[idx] = self.aliased_state[idx]
+                        self.effect.enhanced_trace_ga[idx] = False
+            else:
+                new_effect_index = len(self.effect)
+                self.effect.effect_list.append(Effect.empty(length, wildcard))
+                self.effect.effect_detailled_counter.append(1)
+                for idx in range(length):
+                    if previous_situation[idx] != situation[idx]:
+                        self.effect[new_effect_index][idx] = situation[idx]
+                        self.condition[idx] = previous_situation[idx]
+                self.effect.update_enhanced_trace_ga(length)
 
 
-    def generalize_unchanging_condition_attribute(
-            self,
-            randomfunc: Callable=random.choice
-        ) -> bool:
+    def generalize_specific_attribute_randomly(self):
         """
-        Generalizes one randomly unchanging attribute in the condition.
-        An unchanging attribute is one that is anticipated not to change
-        in the effect part.
-
-        Parameters
-        ----------
-        randomfunc: Callable
-            Function returning attribute index to generalize
-
-        Returns
-        -------
-        bool
-            True if attribute was generalized, False otherwise
+        Generalizes one randomly attribute in the condition.
         """
-        if len(self.specified_unchanging_attributes) > 0:
-            ridx = randomfunc(self.specified_unchanging_attributes)
-            self.condition.generalize(ridx)
-            return True
-        return False
+        self.condition.generalize_specific_attribute_randomly()
 
 
     def merge_with(
             self,
-            other_classifier,
-            time
+            other_classifier: Classifier,
+            aliased_state: Perception,
+            time: int
         ) -> Classifier:
         """
         Merges two classifier in an enhanced one.
@@ -491,6 +546,8 @@ class Classifier:
         ----------
         other_classifier: Classifier
             Classifier to merge with the self one
+        aliased_state: Perception
+            Perception related to the aliased state
         time: int
             Current epoch
 
@@ -499,21 +556,20 @@ class Classifier:
         Classifier
             New enhanced classifier
         """
-        result = Classifier(
-            action = self.action,
-            behavioral_sequence=self.behavioral_sequence,
-            quality = max((self.q + other_classifier.q) / 2.0, 0.5),
-            rewarda = (self.ra + other_classifier.ra) / 2.0,
-            rewardb = (self.rb + other_classifier.rb) / 2.0,
-            talp = time,
-            tga = time,
-            tbseq = time,
-            pai_state = self.pai_state,
-            cfg = self.cfg
-        )
-        result.condition = Condition(self.condition)
+        result = Classifier.copy_from(self, time)
+        result.q = max((self.q + other_classifier.q) / 2.0, 0.5)
+        result.ra = (self.ra + other_classifier.ra) / 2.0
+        result.rb = (self.rb + other_classifier.rb) / 2.0
         result.condition.specialize_with_condition(other_classifier.condition)
-        result.effect = EffectList.enhanced_effect(
-            self.effect, 
-            other_classifier.effect)
+        result.effect.enhance(other_classifier.effect, self.cfg.classifier_length)
+        result.aliased_state = aliased_state
         return result
+    
+    def subsumes(self, other):
+        if self.condition.subsumes(other.condition) and \
+                self.action == other.action and \
+                self.behavioral_sequence == other.behavioral_sequence and \
+                self.effect.subsumes(other.effect) and \
+                self.is_soft_subsumer_criteria_satisfied(other):
+            return True
+        return False

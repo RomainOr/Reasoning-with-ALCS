@@ -5,18 +5,6 @@
 """
 
 
-def basic_metrics(
-    trial: int,
-    steps: int, 
-    reward: int
-    ) -> dict:
-    return {
-        'trial': trial,
-        'steps_in_trial': steps,
-        'reward': reward
-    }
-
-
 def population_metrics(
         population,
         environment
@@ -44,18 +32,21 @@ def _maze_metrics(
             environment
         ) -> float:
         transitions = environment.env.get_all_possible_transitions()
-        # Take into consideration only reliable classifiers
-        reliable_classifiers = [cl for cl in population if cl.is_reliable()]
-        # Count how many transitions are anticipated correctly
-        nr_correct = 0
-        # For all possible destinations from each path cell
+        env_trans = []
         for start, action, end in transitions:
             p0 = environment.env.maze.perception(*start)
             p1 = environment.env.maze.perception(*end)
-            if any([True for cl in reliable_classifiers
-                    if cl.does_predict_successfully(p0, action, p1)]):
+            env_trans.append((p0, action, p1))
+        # Take into consideration only reliable classifiers
+        reliable_classifiers = [cl for cl in population if cl.is_reliable() and cl.behavioral_sequence is None]
+        # Count how many transitions are anticipated correctly
+        nr_correct = 0
+        # For all possible destinations from each path cell
+        for p0, action, p1 in set(env_trans):
+            if any(True for cl in reliable_classifiers
+                    if cl.does_predict_successfully(p0, action, p1)):
                 nr_correct += 1
-        return nr_correct / len(transitions) * 100.0
+        return nr_correct / len(set(env_trans)) * 100.0
 
     metrics = {
         'knowledge': _maze_knowledge(pop, env)
@@ -107,14 +98,6 @@ def _when_full_knowledge_is_achieved(metrics) -> tuple:
     return first_trial_when_full_knowledge, stable_trial_when_full_knowledge, last_trial_when_full_knowledge
 
 
-def _state_of_population(
-        metrics,
-        trial, 
-        step
-    ) -> dict:
-    return metrics[trial//step - 1]
-
-
 def _enhanced_effect_error(
         population,
         environment,
@@ -123,13 +106,12 @@ def _enhanced_effect_error(
     ) -> float:
     theoritical_probabilities = environment.env.get_theoritical_probabilities()
     # Accumulation of difference in probabilities
-    error_old_pep = 0.
-    error_new_pep = 0.
+    error_pep = 0.
     # For all possible destinations from each path cell
     for perception, action_and_probabiltiies in theoritical_probabilities.items():
         for action, probabilities_and_states in action_and_probabiltiies.items():
             # Try to find a suitable one, even if it is unreliable
-            unreliable_classifiers = [cl for cl in population if cl.condition.does_match(perception) and cl.action ==  action and cl.behavioral_sequence is None]
+            unreliable_classifiers = [cl for cl in population if cl.does_match(perception) and cl.action ==  action and cl.behavioral_sequence is None]
             if len(unreliable_classifiers) > 0:
                 # Try to promote a reliable classifier
                 reliable_classifiers = [cl for cl in unreliable_classifiers if cl.is_reliable()]
@@ -144,46 +126,28 @@ def _enhanced_effect_error(
             # If the system succeed to find a classifier, error is computed through the probabilities differences
             if most_experienced_classifier:
                 for direction in prob:
-                    # First, effect refinement
-                    old_effect_attribute, new_effect_attribute = most_experienced_classifier.effect.getEffectAttribute(perception, direction)
+                    # First, get effect attribute
+                    effect_attribute = most_experienced_classifier.effect.getEffectAttribute(perception, direction)
                     theoritical_prob_of_attribute = prob[direction]
-                    if old_effect_attribute == '#':
-                        if most_experienced_classifier.condition[direction] == '#':
-                            old_effect_attribute = {int(perception[direction]):1.0}
-                            new_effect_attribute = {int(perception[direction]):1.0}
-                        else:
-                            old_effect_attribute = {int(most_experienced_classifier.condition[direction]):1.0}
-                            new_effect_attribute = {int(most_experienced_classifier.condition[direction]):1.0}
                     # Second error computation
                     for key in theoritical_prob_of_attribute:
-                        error_old_pep += abs(theoritical_prob_of_attribute[key] - old_effect_attribute.get(key, 0.0))
-                        error_new_pep += abs(theoritical_prob_of_attribute[key] - new_effect_attribute.get(key, 0.0))
+                        error_pep += abs(theoritical_prob_of_attribute[key] - effect_attribute.get(key, 0.0))
                 for ra in range(classifier_length-random_attribute_length, classifier_length):
-                    # First, effect refinement
-                    old_effect_attribute, new_effect_attribute = most_experienced_classifier.effect.getEffectAttribute(perception,ra)
+                    # First, get effect attribute
+                    effect_attribute = most_experienced_classifier.effect.getEffectAttribute(perception,ra)
                     # We consider here the probabilities are defined as 50% to get 1 and 50% to get 0. Could be automated and linked to environmental properties
                     theoritical_prob_of_attribute = {1:0.5, 0:0.5}
-                    if old_effect_attribute == '#':
-                        if most_experienced_classifier.condition[ra] == '#':
-                            old_effect_attribute = {0:1.0, 1:1.0}
-                            new_effect_attribute = {0:1.0, 1:1.0}
-                        else:
-                            old_effect_attribute = {int(most_experienced_classifier.condition[ra]):1.0}
-                            new_effect_attribute = {int(most_experienced_classifier.condition[ra]):1.0}
                     # Second error computation
                     for key in theoritical_prob_of_attribute:
-                        error_old_pep += abs(theoritical_prob_of_attribute[key] - old_effect_attribute.get(key, 0.0))
-                        error_new_pep += abs(theoritical_prob_of_attribute[key] - new_effect_attribute.get(key, 0.0))
+                        error_pep += abs(theoritical_prob_of_attribute[key] - effect_attribute.get(key, 0.0))
             # None case as default case to increase error
             else:
                 for direction in prob:
                     theoritical_prob_of_attribute = prob[direction]
                     for key in theoritical_prob_of_attribute:
-                        error_old_pep += abs(theoritical_prob_of_attribute[key])
-                        error_new_pep += abs(theoritical_prob_of_attribute[key])
+                        error_pep += abs(theoritical_prob_of_attribute[key])
                 for ra in range(classifier_length-random_attribute_length, classifier_length):
                     theoritical_prob_of_attribute = {1:0.5, 0:0.5}
                     for key in theoritical_prob_of_attribute:
-                        error_old_pep += abs(theoritical_prob_of_attribute[key])
-                        error_new_pep += abs(theoritical_prob_of_attribute[key])
-    return error_old_pep * 100 / (len(theoritical_probabilities)*8*classifier_length), error_new_pep * 100 / (len(theoritical_probabilities)*8*classifier_length)
+                        error_pep += abs(theoritical_prob_of_attribute[key])
+    return error_pep * 100 / (len(theoritical_probabilities)*8*classifier_length)

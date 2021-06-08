@@ -34,7 +34,7 @@ class BEACS(Agent):
 
     def zip_population(
             self,
-            does_anticipate_change:bool = True,
+            does_anticipate_change:bool=False,
             is_reliable:bool=False
         ):
         # Remove multiple occurence of same classifiers
@@ -47,6 +47,23 @@ class BEACS(Agent):
         if is_reliable:
             pop = [cl for cl in self.population if cl.is_reliable()]
             self.population = ClassifiersList(*pop)
+        # Removing subsumed classifiers and unwanted behavioral classifiers
+        classifiers_to_keep = []
+        for cl in self.population:
+            to_keep = True
+            for other in self.population:
+                if cl != other and other.subsumes(cl):
+                    to_keep = False
+                    break
+            if to_keep and cl.behavioral_sequence is not None and \
+                (not cl.is_experienced() or not cl.is_reliable()):
+                to_keep = False
+            if to_keep and cl.behavioral_sequence is not None and \
+                not cl.does_anticipate_change() and len(cl.effect)==1:
+                to_keep = False
+            if to_keep:
+                classifiers_to_keep.append(cl)
+        self.population = ClassifiersList(*classifiers_to_keep)
 
 
     def _run_trial_explore(
@@ -59,10 +76,11 @@ class BEACS(Agent):
         # Initial conditions
         steps = 0
         raw_state = env.reset()
-        state = self.cfg.environment_adapter.to_genotype(raw_state)
+        state = self.cfg.environment_adapter.to_genotype(env, raw_state)
         last_reward = 0
         prev_state = Perception.empty()
-        previous_match_set = ClassifiersList()
+        t_2_match_set = ClassifiersList()
+        t_1_match_set = ClassifiersList()
         match_set = ClassifiersList()
         action_set = ClassifiersList()
         done = False
@@ -80,7 +98,8 @@ class BEACS(Agent):
             if steps > 0:
                 ClassifiersList.apply_alp(
                     self.population,
-                    previous_match_set,
+                    t_2_match_set,
+                    t_1_match_set,
                     match_set,
                     action_set,
                     t_2_activated_classifier,
@@ -104,13 +123,12 @@ class BEACS(Agent):
                     self.cfg.theta_ga,
                     self.cfg.mu,
                     self.cfg.chi,
-                    self.cfg.theta_as,
-                    self.cfg.theta_exp,
-                    self.cfg.do_ga
+                    self.cfg.theta_as
                 )
 
             # Record the previous match set
-            previous_match_set = match_set
+            t_2_match_set = t_1_match_set
+            t_1_match_set = match_set
             # Choose classifier
             action_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
             # Record last activated classifier
@@ -119,20 +137,20 @@ class BEACS(Agent):
             # Create action set
             action_set = match_set.form_action_set(action_classifier)
             # Use environment adapter
-            iaction = self.cfg.environment_adapter.to_lcs_action(action_classifier.action)
+            iaction = self.cfg.environment_adapter.to_lcs_action(env, action_classifier.action)
             # Do the action
             prev_state = state
             raw_state, last_reward, done, _ = env.step(iaction)
-            state = self.cfg.environment_adapter.to_genotype(raw_state)
+            state = self.cfg.environment_adapter.to_genotype(env, raw_state)
 
             # Enter the if condition only if we have chosen a behavioral classifier
-            if action_classifier.behavioral_sequence :
+            if not done and action_classifier.behavioral_sequence :
                 # Initialize the message list usefull to decrease quality of classifiers containing looping sequences
                 for act in action_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
-                    iaction = self.cfg.environment_adapter.to_lcs_action(act)
+                    iaction = self.cfg.environment_adapter.to_lcs_action(env, act)
                     raw_state, last_reward, done, _ = env.step(iaction)
-                    state = self.cfg.environment_adapter.to_genotype(raw_state)
+                    state = self.cfg.environment_adapter.to_genotype(env, raw_state)
                     if done:
                         break
                     steps += 1
@@ -141,7 +159,8 @@ class BEACS(Agent):
             if done:
                 ClassifiersList.apply_alp(
                     self.population,
-                    previous_match_set,
+                    t_2_match_set,
+                    t_1_match_set,
                     ClassifiersList(),
                     action_set,
                     t_2_activated_classifier,
@@ -165,9 +184,7 @@ class BEACS(Agent):
                     self.cfg.theta_ga,
                     self.cfg.mu,
                     self.cfg.chi,
-                    self.cfg.theta_as,
-                    self.cfg.theta_exp,
-                    self.cfg.do_ga
+                    self.cfg.theta_as
                 )
 
             steps += 1
@@ -183,7 +200,7 @@ class BEACS(Agent):
         # Initial conditions
         steps = 0
         raw_state = env.reset()
-        state = self.cfg.environment_adapter.to_genotype(raw_state)
+        state = self.cfg.environment_adapter.to_genotype(env, raw_state)
         last_reward = 0
         action_set = ClassifiersList()
         done = False
@@ -191,40 +208,36 @@ class BEACS(Agent):
         while not done:
 
             # Compute in one run the matching set, the best matching classifier and the best matching fitness associated to the previous classifier
-            match_set, best_classifier, max_fitness_ra, max_fitness_rb = self.population.form_match_set(state)
+            match_set, _, max_fitness_ra, max_fitness_rb = self.population.form_match_set(state)
 
             if steps > 0:
-                # TODO : Update experience of classifier to get clues about their usage
-                for cl in action_set:
-                    cl.increase_experience()
                 # Apply algorithms
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, max_fitness_ra, max_fitness_rb, self.cfg.beta_rl, self.cfg.gamma
                 )
 
+            # Choose classifier
+            best_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
             # Create action set
             action_set = match_set.form_action_set(best_classifier)
             # Use environment adapter
-            iaction = self.cfg.environment_adapter.to_lcs_action(best_classifier.action)
+            iaction = self.cfg.environment_adapter.to_lcs_action(env, best_classifier.action)
             # Do the action
             raw_state, last_reward, done, _ = env.step(iaction)
-            state = self.cfg.environment_adapter.to_genotype(raw_state)
+            state = self.cfg.environment_adapter.to_genotype(env, raw_state)
 
             # Enter the if condition only if we have chosen a behavioral classifier
-            if best_classifier.behavioral_sequence :
+            if not done and best_classifier.behavioral_sequence :
                 for act in best_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
-                    iaction = self.cfg.environment_adapter.to_lcs_action(act)
+                    iaction = self.cfg.environment_adapter.to_lcs_action(env, act)
                     raw_state, last_reward, done, _ = env.step(iaction)
-                    state = self.cfg.environment_adapter.to_genotype(raw_state)
+                    state = self.cfg.environment_adapter.to_genotype(env, raw_state)
                     if done:
                         break
                     steps += 1
 
             if done:
-                # TODO : Update experience of classifier to get clues about their usage
-                for cl in action_set:
-                    cl.increase_experience()
                 # Apply algorithms
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, 0., 0., self.cfg.beta_rl, self.cfg.gamma

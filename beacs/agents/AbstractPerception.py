@@ -20,7 +20,7 @@ class AbstractPerception:
             length of perception string
         wildcard: Any
             wildcard symbol
-        oktypes: (str, dict)
+        oktypes: (str)
             tuple of allowed classes to represent perception string
 
         Returns

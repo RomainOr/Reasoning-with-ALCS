@@ -36,7 +36,7 @@ def updated_passthrough(
     for i in range(len(child_effect)):
         change_anticipated = last_effect[0][i] != child_effect.wildcard
         if last_effect.is_enhanced():
-            for effect in last_effect.effect_list:
+            for effect in last_effect:
                 if effect[i] != effect.wildcard and effect[i] == perception[i]:
                     change_anticipated = True
                     break
@@ -45,7 +45,7 @@ def updated_passthrough(
         else :
             change_anticipated = penultimate_effect[0][i] != child_effect.wildcard
             if penultimate_effect.is_enhanced():
-                for effect in penultimate_effect.effect_list:
+                for effect in penultimate_effect:
                     if effect[i] != effect.wildcard and effect[i] == perception[i]:
                         change_anticipated = True
                         break
@@ -96,6 +96,8 @@ def create_behavioral_classifier(
             child = Classifier(
                 action=penultimate_classifier.action, 
                 behavioral_sequence=[],
+                rewarda=cl.ra,
+                rewardb=cl.rb,
                 tga=time,
                 tbseq=time,
                 talp=time,
@@ -109,7 +111,7 @@ def create_behavioral_classifier(
                 child.behavioral_sequence.extend(cl.behavioral_sequence)
             # Passthrough operation on child condition was not used because it can create not relevant classifiers. We prefer setting up the child condition the same as the penultimate activated classifier.
             # Thus, we garantee the creation of a classifier that can be used within the environment.
-            child.condition = penultimate_classifier.condition
+            child.condition.specialize_with_condition(penultimate_classifier.condition)
             # Passthrough operation on child effect
             updated_passthrough(child.effect[0], penultimate_classifier.effect, cl.effect, p1, child.condition)
             return child

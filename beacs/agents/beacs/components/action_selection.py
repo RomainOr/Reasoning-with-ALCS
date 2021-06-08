@@ -194,8 +194,9 @@ def choose_fittest_classifier(
     Classifier
     """
     if len(cll) > 0:
-        # TODO : Based on hypothesis that a change should be anticipted
         anticipated_change = [cl for cl in cll if cl.does_anticipate_change()]
         if len(anticipated_change) > 0:
             return max(anticipated_change, key=lambda cl: cl.fitness)
+        else:
+            return max(cll, key=lambda cl: cl.fitness)
     return choose_random_classifiers(cll, cfg)

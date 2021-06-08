@@ -64,16 +64,15 @@ def expected_case(
 
     Returns
     ----------
-    New classifier or None
+    Bool related to aliasing, New classifier or None
     """
     is_aliasing_detected = False
 
-    if cl.is_enhanced():
-        cl.effect.update_effect_detailled_counter(p0, p1)
+    if cl.is_enhanced() and cl.aliased_state == p0:
         is_aliasing_detected = True
 
     if is_state_aliased(cl.condition, cl.mark, p0):
-        if cl.cfg.do_pep: cl.ee = True
+        cl.ee = True
         is_aliasing_detected = True
 
     diff = cl.mark.get_differences(p0)
@@ -81,31 +80,29 @@ def expected_case(
         cl.increase_quality()
         return is_aliasing_detected, None
 
-    child = cl.copy_from(cl, p0, p1, time)
+    child = cl.copy_from(cl, time)
 
-    no_spec = len(cl.specified_unchanging_attributes)
-    no_spec_new = diff.specificity
-    if no_spec >= cl.cfg.u_max:
-        while no_spec >= cl.cfg.u_max:
-            cl.generalize_unchanging_condition_attribute()
-            no_spec -= 1
-
-        while no_spec + no_spec_new > cl.cfg.u_max:
-            if random() < 0.5:
-                diff.generalize_specific_attribute_randomly()
-                no_spec_new -= 1
+    spec = cl.specificity
+    spec_new = diff.specificity
+    if spec >= child.cfg.u_max:
+        while spec >= child.cfg.u_max:
+            child.generalize_specific_attribute_randomly()
+            spec -= 1
+        while spec + spec_new > child.cfg.u_max:
+            if spec > 0 and random() < 0.5:
+                child.generalize_specific_attribute_randomly()
+                spec -= 1
             else:
-                if cl.generalize_unchanging_condition_attribute():
-                    no_spec -= 1
+                diff.generalize_specific_attribute_randomly()
+                spec_new -= 1
     else:
-        while no_spec + no_spec_new > cl.cfg.u_max:
+        while spec + spec_new > child.cfg.u_max:
             diff.generalize_specific_attribute_randomly()
-            no_spec_new -= 1
+            spec_new -= 1
 
     child.condition.specialize_with_condition(diff)
 
-    if child.q < 0.5:
-        child.q = 0.5
+    child.q = max(0.5, child.q)
 
     return is_aliasing_detected, child
 
@@ -125,10 +122,11 @@ def unexpected_case(
     """
     cl.decrease_quality()
     cl.set_mark(p0)
-    if not cl.effect.is_specializable(p0, p1):
+    # If nothing can be done, stop specialization of the classifier
+    if not cl.is_specializable(p0, p1):
         return None
-    child = cl.copy_from(cl, p0, p1, time)
+    # If the classifier is not enhanced, directly specialize it
+    child = cl.copy_from(cl, time)
     child.specialize(p0, p1)
-    if child.q < 0.5:
-        child.q = 0.5
+    child.q = max(0.5, child.q)
     return child
