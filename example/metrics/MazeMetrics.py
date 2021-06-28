@@ -74,10 +74,14 @@ def _mean_reliable_classifier_specificity(
         pop,
         env
     ) -> int:
-    # TODO : Return values for legacy cl, behavioral cl, enhanced cl, behavioral enhanced cl and all ?
     reliable_classifiers = [cl for cl in pop if cl.is_reliable()]
     if len(reliable_classifiers) > 0:
-        return float(sum(cl.specificity for cl in reliable_classifiers)) / len(reliable_classifiers)
+        mean_reliable_classifier_specificity = float(sum(cl.specificity for cl in reliable_classifiers)) / len(reliable_classifiers)
+        non_behavioral_cl = [cl for cl in reliable_classifiers if not cl.behavioral_sequence]
+        mean_reliable_non_behavioral_classifier_specificity = float(sum(cl.specificity for cl in non_behavioral_cl)) / len(non_behavioral_cl)
+        behavioral_cl = [cl for cl in reliable_classifiers if cl.behavioral_sequence]
+        mean_reliable_behavioral_classifier_specificity = float(sum(cl.specificity for cl in behavioral_cl)) / len(behavioral_cl)
+        return mean_reliable_classifier_specificity, mean_reliable_non_behavioral_classifier_specificity, mean_reliable_behavioral_classifier_specificity
     else:
         return 1.
 
