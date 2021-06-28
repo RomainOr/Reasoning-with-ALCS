@@ -38,7 +38,7 @@ def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metric
 
 def plot_cartpole_performance(agent, cartpole_env, metrics_df, cfg, env_name, metrics_trial_frequency_explore, number_of_exploit_steps):
     plt.figure(figsize=(13, 10), dpi=100)
-    plt.suptitle(f'BEACS Performance in {env_name} environment', fontsize=32)
+    plt.suptitle(f'ALCS Performance in {env_name} environment', fontsize=32)
     ax1 = plt.subplot(221)
     plot_classifiers(metrics_df,metrics_trial_frequency_explore, number_of_exploit_steps, ax1)
     ax2 = plt.subplot(222)

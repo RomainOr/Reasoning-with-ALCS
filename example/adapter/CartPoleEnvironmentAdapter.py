@@ -1,6 +1,6 @@
 import math
 
-from example.adapter import EnvironmentAdapter
+from example.adapter.EnvironmentAdapter import EnvironmentAdapter
 
 #Could fail but should be sufficient with 1, 1, 4, 3 buckets.
 #Best solution achieved with population that fully converged towards 12 classifiers with PEP.
