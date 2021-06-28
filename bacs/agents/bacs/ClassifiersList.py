@@ -222,11 +222,11 @@ class ClassifiersList(TypedList):
             action_set: ClassifiersList,
             reward: int,
             p: float,
-            beta: float,
+            beta_rl: float,
             gamma: float
         ) -> None:
         for cl in action_set:
-            rl.update_classifier(cl, reward, p, beta, gamma)
+            rl.update_classifier(cl, reward, p, beta_rl, gamma)
 
 
     @staticmethod

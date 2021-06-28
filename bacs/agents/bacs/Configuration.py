@@ -19,7 +19,8 @@ class Configuration:
                  user_metrics_collector_fcn: Callable = None,
                  metrics_trial_frequency: int = 5,
                  do_ga: bool=False,
-                 beta: float=0.05,
+                 beta_alp: float=0.05,
+                 beta_rl: float=0.05,
                  gamma: float=0.95,
                  theta_i: float=0.1,
                  theta_r: float=0.9,
@@ -45,7 +46,9 @@ class Configuration:
             to interact with the environment
         do_ga
             switch *Genetic Generalization* module
-        beta
+        beta_alp
+
+        beta_rl
 
         gamma
 
@@ -78,7 +81,8 @@ class Configuration:
         self.user_metrics_collector_fcn = user_metrics_collector_fcn
         self.do_ga = do_ga
         self.theta_exp = theta_exp
-        self.beta = beta
+        self.beta_alp = beta_alp
+        self.beta_rl = beta_rl
         self.gamma = gamma
         self.theta_i = theta_i
         self.theta_r = theta_r
@@ -98,7 +102,8 @@ class Configuration:
             "\n\t- Classifier wildcard: [{}]" \
             "\n\t- Environment adapter function: [{}]" \
             "\n\t- Do GA: [{}]" \
-            "\n\t- Beta: [{}]" \
+            "\n\t- Beta ALP: [{}]" \
+            "\n\t- Beta RL: [{}]" \
             "\n\t- ..." \
             "\n\t- epsilon: [{}]" \
             "\n\t- bs_max: [{}]" \
@@ -108,7 +113,8 @@ class Configuration:
             self.classifier_wildcard,
             self.environment_adapter,
             self.do_ga,
-            self.beta,
+            self.beta_alp,
+            self.beta_rl,
             self.epsilon,
             self.bs_max
         )

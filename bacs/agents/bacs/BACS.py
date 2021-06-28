@@ -28,7 +28,11 @@ class BACS(Agent):
     def get_cfg(self):
         return self.cfg
 
-    def zip_population(self, does_anticipate_change:bool = True, is_reliable:bool=False):
+    def zip_population(
+            self,
+            does_anticipate_change:bool=False,
+            is_reliable:bool=False
+        ):
         # Remove multiple occurence of same classifiers
         self.population = ClassifiersList(*list(dict.fromkeys(self.population)))
         # Keep or not classifiers that anticipate changes
@@ -39,6 +43,24 @@ class BACS(Agent):
         if is_reliable:
             pop = [cl for cl in self.population if cl.is_reliable()]
             self.population = ClassifiersList(*pop)
+        # Removing subsumed classifiers and unwanted behavioral classifiers
+        classifiers_to_keep = []
+        for cl in self.population:
+            to_keep = True
+            for other in self.population:
+                if cl != other and other.subsumes(cl):
+                    to_keep = False
+                    break
+            if to_keep and cl.behavioral_sequence is not None and \
+                (not cl.is_experienced() or not cl.is_reliable()):
+                to_keep = False
+            if to_keep and cl.behavioral_sequence is not None and \
+                not cl.does_anticipate_change() and len(cl.effect)==1:
+                to_keep = False
+            if to_keep:
+                classifiers_to_keep.append(cl)
+        self.population = ClassifiersList(*classifiers_to_keep)
+
 
     def _run_trial_explore(self, env, time, current_trial=None) \
             -> TrialMetrics:
@@ -95,7 +117,7 @@ class BACS(Agent):
                     action_set,
                     last_reward,
                     best_fitness,
-                    self.cfg.beta,
+                    self.cfg.beta_rl,
                     self.cfg.gamma
                 )
                 if self.cfg.do_ga:
@@ -174,7 +196,7 @@ class BACS(Agent):
                     action_set,
                     last_reward,
                     0,
-                    self.cfg.beta,
+                    self.cfg.beta_rl,
                     self.cfg.gamma)
                 if self.cfg.do_ga:
                     ClassifiersList.apply_ga(
@@ -213,7 +235,7 @@ class BACS(Agent):
                     action_set,
                     last_reward,
                     best_fitness,
-                    self.cfg.beta,
+                    self.cfg.beta_rl,
                     self.cfg.gamma)
 
             # Create action set
@@ -238,7 +260,7 @@ class BACS(Agent):
             if done:
                 # Apply algorithms
                 ClassifiersList.apply_reinforcement_learning(
-                    action_set, last_reward, 0, self.cfg.beta, self.cfg.gamma)
+                    action_set, last_reward, 0, self.cfg.beta_rl, self.cfg.gamma)
 
             steps += 1
 

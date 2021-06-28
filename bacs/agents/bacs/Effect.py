@@ -77,10 +77,8 @@ class Effect(AbstractPerception):
         return ''.join(str(attr) for attr in self)
 
 
-    def getEffectAttribute(self, index):
-        for i, attr in enumerate(self):
-            if i == index:
-                if attr == self.wildcard:
-                    return attr, attr
-                else:
-                    return {int(attr):1.0}, {int(attr):1.0}
+    def getEffectAttribute(self, perception, index):
+        if self[index] == self.wildcard:
+            return {int(perception[index]):1.0}
+        else:
+            return {int(self[index]): 1.0}

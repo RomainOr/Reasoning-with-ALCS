@@ -71,15 +71,18 @@ class Condition(AbstractPerception):
             self.generalize(ridx)
 
 
-    def does_match(self, other: Union[Perception, Condition]) -> bool:
+    def does_match(
+            self,
+            other: Union[Perception, Condition]
+        ) -> bool:
         """
-        Check if condition match other list such as perception or another
+        Checks if condition match other list such as perception or another
         condition.
 
         Parameters
         ----------
         other: Union[Perception, Condition]
-            perception or condition object
+            Perception or condition object
 
         Returns
         -------
@@ -89,10 +92,30 @@ class Condition(AbstractPerception):
         for ci, oi in zip(self, other):
             if ci != self.wildcard and oi != self.wildcard and ci != oi:
                 return False
-            #if ci != self.wildcard and oi == self.wildcard:
-            #    return False
         return True
 
 
-    def subsumes(self, other: Condition) -> bool:
-        return self.does_match(other)
+    def subsumes(
+        self,
+        other: Condition
+        ) -> bool:
+        """
+        Determines if the condition subsumes another condition.
+
+        Parameters
+        ----------
+        other: Condition
+            Other condition
+
+        Returns
+        -------
+        bool
+            True if self subsumes other
+        """
+        for ci, oi in zip(self, other):
+            if ci != self.wildcard and oi != self.wildcard and ci != oi:
+                return False
+            if ci != self.wildcard and oi == self.wildcard:
+                return False
+        return True
+

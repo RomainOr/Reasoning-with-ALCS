@@ -184,12 +184,12 @@ class Classifier:
 
 
     def increase_quality(self) -> float:
-        self.q += self.cfg.beta * (1 - self.q)
+        self.q += self.cfg.beta_alp * (1 - self.q)
         return self.q
 
 
     def decrease_quality(self) -> float:
-        self.q -= self.cfg.beta * self.q
+        self.q -= self.cfg.beta_alp * self.q
         return self.q
 
 
@@ -217,7 +217,7 @@ class Classifier:
                 self.condition[idx] = previous_situation[idx]
 
 
-    def predicts_successfully(
+    def does_predict_successfully(
             self,
             p0: Perception,
             action: int,
@@ -298,11 +298,11 @@ class Classifier:
         time: int
             current step
         """
-        if 1. / self.exp > self.cfg.beta:
+        if 1. / self.exp > self.cfg.beta_alp:
             self.tav = (self.tav * self.exp + (time - self.talp)) / (
                 self.exp + 1)
         else:
-            self.tav += self.cfg.beta * ((time - self.talp) - self.tav)
+            self.tav += self.cfg.beta_alp * ((time - self.talp) - self.tav)
         self.talp = time
 
 
@@ -366,3 +366,47 @@ class Classifier:
         bool
         """
         return self.condition.does_match(situation)
+
+
+    def is_experienced(self) -> bool:
+        """
+        Checks whether the classifier is enough experienced.
+
+        Returns
+        -------
+        bool
+            True if the classifier is enough experienced
+        """
+        return self.exp > self.cfg.theta_exp
+
+
+    def is_soft_subsumer_criteria_satisfied(self, other) -> bool:
+        """
+        Determines whether the classifier satisfies the soft subsumer criteria.
+
+        Parameters
+        ----------
+        other: Classifier
+            Other classifier to compare
+
+        Returns
+        -------
+        bool
+            True if the classifier satisfies the subsumer criteria.
+        """
+        if self.is_reliable() or (self.q > other.q):
+            if not self.is_marked():
+                return True
+            if self.is_marked() and other.is_marked() and self.mark == other.mark:
+                return True
+        return False  
+
+
+    def subsumes(self, other):
+        if self.condition.subsumes(other.condition) and \
+                self.action == other.action and \
+                self.behavioral_sequence == other.behavioral_sequence and \
+                self.effect.subsumes(other.effect) and \
+                self.is_soft_subsumer_criteria_satisfied(other):
+            return True
+        return False
