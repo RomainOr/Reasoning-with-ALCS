@@ -6,7 +6,7 @@
 
 from typing import Callable
 
-from pepacs.agents import EnvironmentAdapter
+from example.adapter.EnvironmentAdapter import EnvironmentAdapter
 
 
 class Configuration:

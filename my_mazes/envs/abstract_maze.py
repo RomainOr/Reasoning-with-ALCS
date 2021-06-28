@@ -49,9 +49,13 @@ class AbstractMaze(gym.Env):
         self.action_space = spaces.Discrete(8)
         self.observation_space = MazeObservationSpace(8)
         self.prob_slippery = 0.0
+        self.random_attribute_length = 0
 
     def set_prob_slippery(self, prob: float = 0.0):
         self.prob_slippery = prob
+
+    def set_random_attribute_length(self, l: int = 0):
+        self.random_attribute_length = l
 
     def step(self, action):
         previous_observation = self._observe()
@@ -175,7 +179,11 @@ class AbstractMaze(gym.Env):
         return all_non_aliased_states
 
     def _observe(self):
-        return self.maze.perception(self.pos_x, self.pos_y)
+        n, ne, e, se, s, sw, w, nw =  self.maze.perception(self.pos_x, self.pos_y)
+        if self.random_attribute_length == 1:
+            return n, ne, e, se, s, sw, w, nw, str(random.randint(0, 1))
+        else:
+            return n, ne, e, se, s, sw, w, nw
 
     def _get_reward(self):
         if self.maze.is_reward(self.pos_x, self.pos_y):

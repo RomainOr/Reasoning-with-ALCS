@@ -179,9 +179,9 @@ class Effect(AbstractPerception):
             The respective probabilities
         """
         if isinstance(self[index], ProbabilityEnhancedAttribute):
-            return {int(k):v for k,v in self[index].items()}, {int(k):v for k,v in self[index].items()}
+            return {int(k):v for k,v in self[index].items()}
         else:
             if self[index] == self.wildcard:
-                return {int(perception[index]):1.0}, {int(perception[index]):1.0}
+                return {int(perception[index]):1.0}
             else:
-                return {int(self[index]):1.0}, {int(self[index]):1.0}
+                return {int(self[index]):1.0}

@@ -230,7 +230,7 @@ class Classifier:
                 self.condition[idx] = previous_situation[idx]
 
 
-    def predicts_successfully(
+    def does_predict_successfully(
             self,
             p0: Perception,
             action: int,
@@ -397,3 +397,46 @@ class Classifier:
             other_classifier.effect,
             perception)
         return result
+
+
+    def is_experienced(self) -> bool:
+        """
+        Checks whether the classifier is enough experienced.
+
+        Returns
+        -------
+        bool
+            True if the classifier is enough experienced
+        """
+        return self.exp > self.cfg.theta_exp
+
+
+    def is_soft_subsumer_criteria_satisfied(self, other) -> bool:
+        """
+        Determines whether the classifier satisfies the soft subsumer criteria.
+
+        Parameters
+        ----------
+        other: Classifier
+            Other classifier to compare
+
+        Returns
+        -------
+        bool
+            True if the classifier satisfies the subsumer criteria.
+        """
+        if self.is_reliable() or (self.q > other.q):
+            if not self.is_marked():
+                return True
+            if self.is_marked() and other.is_marked() and self.mark == other.mark:
+                return True
+        return False   
+    
+
+    def subsumes(self, other):
+        if self.condition.subsumes(other.condition) and \
+                self.action == other.action and \
+                self.effect.subsumes(other.effect) and \
+                self.is_soft_subsumer_criteria_satisfied(other):
+            return True
+        return False

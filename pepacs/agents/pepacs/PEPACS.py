@@ -29,8 +29,12 @@ class PEPACS(Agent):
     def get_cfg(self):
         return self.cfg
 
-    def zip_population(self, does_anticipate_change:bool = True, is_reliable:bool=False):
-        # Remove multiple occurence of same classifiers is they exist (Security check)
+    def zip_population(
+            self,
+            does_anticipate_change:bool=False,
+            is_reliable:bool=False
+        ):
+        # Remove multiple occurence of same classifiers
         self.population = ClassifiersList(*list(dict.fromkeys(self.population)))
         # Keep or not classifiers that anticipate changes
         if does_anticipate_change:
@@ -40,9 +44,24 @@ class PEPACS(Agent):
         if is_reliable:
             pop = [cl for cl in self.population if cl.is_reliable()]
             self.population = ClassifiersList(*pop)
-        # Clean enhanced effect if necessary
+        # Removing subsumed classifiers and unwanted behavioral classifiers
+        classifiers_to_keep = []
         for cl in self.population:
-            cl.effect.clean()
+            to_keep = True
+            for other in self.population:
+                if cl != other and other.subsumes(cl):
+                    to_keep = False
+                    break
+            #if to_keep and cl.behavioral_sequence is not None and \
+            #    (not cl.is_experienced() or not cl.is_reliable()):
+            #    to_keep = False
+            #if to_keep and cl.behavioral_sequence is not None and \
+            #    not cl.does_anticipate_change() and len(cl.effect)==1:
+            #    to_keep = False
+            if to_keep:
+                classifiers_to_keep.append(cl)
+        self.population = ClassifiersList(*classifiers_to_keep)
+
 
     def _run_trial_explore(self, env, time, current_trial=None) \
             -> TrialMetrics:
@@ -50,7 +69,7 @@ class PEPACS(Agent):
         # Initial conditions
         steps = 0
         raw_state = env.reset()
-        state = self.cfg.environment_adapter.to_genotype(raw_state)
+        state = self.cfg.environment_adapter.to_genotype(env,raw_state)
         action = env.action_space.sample()
         last_reward = 0
         prev_state = Perception.empty()
@@ -95,11 +114,11 @@ class PEPACS(Agent):
             # Create action set
             action_set = match_set.form_action_set(action)
             # Use environment adapter
-            iaction = self.cfg.environment_adapter.to_lcs_action(action)
+            iaction = self.cfg.environment_adapter.to_lcs_action(env,action)
             # Do the action
             prev_state = state
             raw_state, last_reward, done, _ = env.step(iaction)
-            state = self.cfg.environment_adapter.to_genotype(raw_state)
+            state = self.cfg.environment_adapter.to_genotype(env,raw_state)
 
             if done:
                 ClassifiersList.apply_alp(
@@ -138,7 +157,7 @@ class PEPACS(Agent):
         # Initial conditions
         steps = 0
         raw_state = env.reset()
-        state = self.cfg.environment_adapter.to_genotype(raw_state)
+        state = self.cfg.environment_adapter.to_genotype(env,raw_state)
         last_reward = 0
         action_set = ClassifiersList()
         done = False
@@ -156,10 +175,10 @@ class PEPACS(Agent):
             # Create action set
             action_set = match_set.form_action_set(best_classifier.action)
             # Use environment adapter
-            iaction = self.cfg.environment_adapter.to_lcs_action(best_classifier.action)
+            iaction = self.cfg.environment_adapter.to_lcs_action(env,best_classifier.action)
             # Do the action
             raw_state, last_reward, done, _ = env.step(iaction)
-            state = self.cfg.environment_adapter.to_genotype(raw_state)
+            state = self.cfg.environment_adapter.to_genotype(env,raw_state)
 
             if done:
                 # Apply algorithms
