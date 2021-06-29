@@ -80,14 +80,12 @@ class Classifier:
 
 
     def __repr__(self):
-        return f"{self.condition} " \
-               f"{self.action} " \
-               f"{str(self.effect):16} " \
-               f"{'(' + str(self.mark) + ')':21} \n" \
-               f"q: {self.q:<5.3} " \
-               f"r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
-               f"exp: {self.exp:<3} tga: {self.tga:<5} talp: {self.talp:<5} " \
-               f"tav: {self.tav:<6.3} num: {self.num} ee: {self.ee}"
+        return f"{self.condition} {self.action} {str(self.effect)}\n" \
+            f"q: {self.q:<6.4} r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} \n" \
+            f"exp: {self.exp:<5} num: {self.num} ee: {self.ee}\n" \
+            f"Mark: {str(self.mark)}\n" \
+            f"tga: {self.tga:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n" \
+
 
 
     @classmethod
