@@ -16,7 +16,7 @@ from bacs.agents.bacs import Configuration, Condition, Effect, PMark
 class Classifier:
 
     __slots__ = ['condition', 'action','behavioral_sequence' ,'effect', 'mark', 'q', 'r',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'cfg', 'ee']
+                 'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'cfg']
 
     def __init__(
             self,
@@ -61,7 +61,6 @@ class Classifier:
         self.talp = talp
         self.tga = tga
         self.tav = tav
-        self.ee = False
 
 
     def __eq__(self, other):
@@ -83,15 +82,11 @@ class Classifier:
 
 
     def __repr__(self):
-        return f"{self.condition} " \
-               f"{self.action} " \
-               f"{str(self.behavioral_sequence)} " \
-               f"{str(self.effect):16} " \
-               f"{'(' + str(self.mark) + ')':21} \n" \
-               f"q: {self.q:<5.3} " \
-               f"r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} " \
-               f"exp: {self.exp:<3} tga: {self.tga:<5} talp: {self.talp:<5} " \
-               f"tav: {self.tav:<6.3} num: {self.num} ee: {self.ee}"
+        return f"{self.condition} {self.action} {str(self.behavioral_sequence)} {str(self.effect)}\n" \
+            f"q: {self.q:<6.4} r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} \n" \
+            f"exp: {self.exp:<5} num: {self.num}\n" \
+            f"Mark: {str(self.mark)}\n" \
+            f"tga: {self.tga:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n" \
 
 
     @classmethod
@@ -286,7 +281,7 @@ class Classifier:
         perception: Perception
             current situation
         """
-        self.ee = self.mark.set_mark(perception, self.ee)
+        self.mark.set_mark(perception)
 
 
     def set_alp_timestamp(self, time: int) -> None:

@@ -1,8 +1,6 @@
 from collections import namedtuple
 from typing import Callable, List, Tuple
 
-from ..metrics import basic_metrics
-
 TrialMetrics = namedtuple('TrialMetrics', ['steps', 'reward'])
 
 
@@ -101,6 +99,12 @@ class Agent:
         tuple
             population of classifiers and metrics
         """
+        def _basic_metrics(trial: int, steps: int, reward: int):
+            return {
+                'trial': trial,
+                'steps_in_trial': steps,
+                'reward': reward
+            }
         current_trial = 1
         steps = 0
 
@@ -110,7 +114,7 @@ class Agent:
             steps += steps_in_trial
 
             if current_trial % self.get_cfg().metrics_trial_frequency == 0:
-                m = basic_metrics(current_trial, steps_in_trial, reward)
+                m = _basic_metrics(current_trial, steps_in_trial, reward)
                 user_metrics = self.get_cfg().user_metrics_collector_fcn
                 if user_metrics is not None:
                     m.update(user_metrics(self.get_population(), env))
