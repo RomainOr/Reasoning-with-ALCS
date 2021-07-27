@@ -100,7 +100,7 @@ class Classifier:
 
 
     def __repr__(self):
-        return f"{self.condition} {self.action} {str(self.behavioral_sequence)} {str(self.effect)}\n" \
+        return f"C:{self.condition} A:{self.action} {str(self.behavioral_sequence)} E:{str(self.effect)}\n" \
             f"q: {self.q:<6.4} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} err: {self.err:<6.4}\n" \
             f"exp: {self.exp:<5} num: {self.num} ee: {self.ee}\n" \
             f"Mark: {str(self.mark)} Can_be_generalized: {str(self.effect.enhanced_trace_ga)} Aliased_state: {''.join(str(attr) for attr in self.aliased_state)} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \

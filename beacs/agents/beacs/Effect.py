@@ -98,4 +98,4 @@ class Effect(AbstractPerception):
 
 
     def __str__(self):
-        return ''.join(str(attr) for attr in self)
+        return ' '.join(str(attr) for attr in self)

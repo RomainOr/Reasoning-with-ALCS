@@ -78,6 +78,7 @@ class BEACS(Agent):
         raw_state = env.reset()
         state = self.cfg.environment_adapter.to_genotype(env, raw_state)
         last_reward = 0
+        total_reward = 0
         prev_state = Perception.empty()
         t_2_match_set = ClassifiersList()
         t_1_match_set = ClassifiersList()
@@ -141,6 +142,7 @@ class BEACS(Agent):
             # Do the action
             prev_state = state
             raw_state, last_reward, done, _ = env.step(iaction)
+            total_reward += last_reward
             state = self.cfg.environment_adapter.to_genotype(env, raw_state)
 
             # Enter the if condition only if we have chosen a behavioral classifier
@@ -150,6 +152,7 @@ class BEACS(Agent):
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(env, act)
                     raw_state, last_reward, done, _ = env.step(iaction)
+                    total_reward += last_reward
                     state = self.cfg.environment_adapter.to_genotype(env, raw_state)
                     if done:
                         break
@@ -188,7 +191,7 @@ class BEACS(Agent):
                 )
 
             steps += 1
-        return TrialMetrics(steps, last_reward)
+        return TrialMetrics(steps, total_reward)
 
     def _run_trial_exploit(
             self,
@@ -202,6 +205,7 @@ class BEACS(Agent):
         raw_state = env.reset()
         state = self.cfg.environment_adapter.to_genotype(env, raw_state)
         last_reward = 0
+        total_reward = 0
         action_set = ClassifiersList()
         done = False
 
@@ -224,6 +228,7 @@ class BEACS(Agent):
             iaction = self.cfg.environment_adapter.to_lcs_action(env, best_classifier.action)
             # Do the action
             raw_state, last_reward, done, _ = env.step(iaction)
+            total_reward += last_reward
             state = self.cfg.environment_adapter.to_genotype(env, raw_state)
 
             # Enter the if condition only if we have chosen a behavioral classifier
@@ -232,6 +237,7 @@ class BEACS(Agent):
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(env, act)
                     raw_state, last_reward, done, _ = env.step(iaction)
+                    total_reward += last_reward
                     state = self.cfg.environment_adapter.to_genotype(env, raw_state)
                     if done:
                         break
@@ -245,4 +251,4 @@ class BEACS(Agent):
 
             steps += 1
 
-        return TrialMetrics(steps, last_reward)
+        return TrialMetrics(steps, total_reward)

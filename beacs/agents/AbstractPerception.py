@@ -52,4 +52,4 @@ class AbstractPerception:
         return hash(self._items)
 
     def __repr__(self):
-        return ''.join(map(str, self._items))
+        return ' '.join(map(str, self._items))
