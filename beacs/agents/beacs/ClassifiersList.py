@@ -48,7 +48,7 @@ class ClassifiersList(TypedList):
             The whole set of matching classifiers
         """
         matching = [cl for cl in self if cl.does_match(situation)]
-        matching_with_change_anticipated = (cl for cl in matching if cl.does_anticipate_change())
+        matching_with_change_anticipated = [cl for cl in matching if cl.does_anticipate_change()]
         best_classifier = max(matching_with_change_anticipated,key=attrgetter('fitness'),default=None)
         max_fitness_ra = max((cl.q*cl.ra for cl in matching_with_change_anticipated), default=0.)
         max_fitness_rb = max((cl.q*cl.rb for cl in matching_with_change_anticipated), default=0.)
