@@ -3,7 +3,7 @@ import numpy as np
 from beacs.agents.EnvironmentAdapter import EnvironmentAdapter
 
 
-buckets=(12, 20) 
+buckets=(12, 20)
 
 class MountainCarEnvironmentAdapter(EnvironmentAdapter):
 

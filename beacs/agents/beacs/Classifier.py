@@ -174,6 +174,7 @@ class Classifier:
         if self.behavioral_sequence:
             return self.q * (max_r - diff * len(self.behavioral_sequence) / self.cfg.bs_max)
         return self.q * max_r
+        # Tmp : mountaincar sans qualité pour fitness ?
 
 
     @property

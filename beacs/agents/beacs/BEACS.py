@@ -132,6 +132,7 @@ class BEACS(Agent):
             t_1_match_set = match_set
             # Choose classifier
             action_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
+            # Tmp : Mountaincar -> epsilon degréssif : max(0.01, self.cfg.epsilon-current_trial/10000)
             # Record last activated classifier
             t_2_activated_classifier = t_1_activated_classifier
             t_1_activated_classifier = action_classifier
