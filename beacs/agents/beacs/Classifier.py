@@ -103,7 +103,7 @@ class Classifier:
         return f"C:{self.condition} A:{self.action} {str(self.behavioral_sequence)} E:{str(self.effect)}\n" \
             f"q: {self.q:<6.4} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} err: {self.err:<6.4}\n" \
             f"exp: {self.exp:<5} num: {self.num} ee: {self.ee}\n" \
-            f"Mark: {str(self.mark)} Can_be_generalized: {str(self.effect.enhanced_trace_ga)} Aliased_state: {''.join(str(attr) for attr in self.aliased_state)} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \
+            f"Mark: {str(self.mark)} Aliased_state: {''.join(str(attr) for attr in self.aliased_state)} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \
             f"tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n" \
 
 
@@ -153,7 +153,6 @@ class Classifier:
                 effect_to_append[i] = oeffect[i]
             new_cls.effect.effect_list.append(effect_to_append)
         new_cls.effect.effect_detailled_counter = old_cls.effect.effect_detailled_counter[:]
-        new_cls.effect.enhanced_trace_ga = old_cls.effect.enhanced_trace_ga[:]
         return new_cls
 
 
@@ -515,7 +514,6 @@ class Classifier:
                 for idx in range(length):
                     if self.aliased_state[idx] != previous_situation[idx]:
                         self.condition[idx] = self.aliased_state[idx]
-                        self.effect.enhanced_trace_ga[idx] = False
             else:
                 new_effect_index = len(self.effect)
                 self.effect.effect_list.append(Effect.empty(length, wildcard))
@@ -524,7 +522,6 @@ class Classifier:
                     if previous_situation[idx] != situation[idx]:
                         self.effect[new_effect_index][idx] = situation[idx]
                         self.condition[idx] = previous_situation[idx]
-                self.effect.update_enhanced_trace_ga(length)
 
 
     def generalize_specific_attribute_randomly(self):

@@ -21,11 +21,9 @@ class EffectList():
         if effect:
             self.effect_list = [effect]
             self.effect_detailled_counter = [1]
-            self.enhanced_trace_ga = [True] * length
         else:
             self.effect_list = []
             self.effect_detailled_counter = []
-            self.enhanced_trace_ga = []
         self.wildcard = wildcard
 
 
@@ -76,19 +74,6 @@ class EffectList():
             else:
                 ei = self.effect_list.index(oeffect)
                 self.effect_detailled_counter[ei] += other.effect_detailled_counter[oi]
-        self.enhanced_trace_ga = [True] * length
-        self.update_enhanced_trace_ga(length)
-
-    def update_enhanced_trace_ga(
-            self,
-            length: int
-        ):
-        for idx in range(length):
-            symbols = []
-            for effect in self:
-                if effect[idx] not in symbols:
-                    symbols.append(effect[idx])
-            self.enhanced_trace_ga[idx] = (self.wildcard not in symbols) or (len(symbols)==1)
             
 
     @property
