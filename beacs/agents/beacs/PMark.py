@@ -138,6 +138,6 @@ class PMark(TypedList):
                 return '{' + ' '.join(x for x in s) + '}'
 
         if self.is_marked():
-            return ' '.join(compact_set_str(x) for x in self)
+            return ''.join(compact_set_str(x) for x in self)
         else:
             return 'empty'
