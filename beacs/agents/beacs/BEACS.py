@@ -145,17 +145,23 @@ class BEACS(Agent):
             raw_state, last_reward, done, _ = env.step(iaction)
             total_reward += last_reward
             state = self.cfg.environment_adapter.to_genotype(env, raw_state)
+            
+            if done and action_classifier.behavioral_sequence:
+                action_set = match_set.form_action_set(Classifier(action=action_classifier.action, cfg=self.cfg))
 
             # Enter the if condition only if we have chosen a behavioral classifier
             if not done and action_classifier.behavioral_sequence :
+                bseq_rescue = []
                 # Initialize the message list usefull to decrease quality of classifiers containing looping sequences
                 for act in action_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(env, act)
                     raw_state, last_reward, done, _ = env.step(iaction)
+                    bseq_rescue.append(act)
                     total_reward += last_reward
                     state = self.cfg.environment_adapter.to_genotype(env, raw_state)
                     if done:
+                        action_set = match_set.form_action_set(Classifier(action=action_classifier.action, behavioral_sequence=bseq_rescue, cfg=self.cfg))
                         break
                     steps += 1
 
