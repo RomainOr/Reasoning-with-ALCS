@@ -23,10 +23,22 @@ class BEACS(Agent):
         self.population = population or ClassifiersList()
         self.pai_states_memory = []
 
-    def get_population(self):
+    def get_population(self)-> ClassifiersList:
         return self.population
 
-    def get_cfg(self):
+    def duplicate_population(self)-> ClassifiersList:
+        duplicate_population = []
+        for cl in self.population:
+            cl_copy = Classifier.copy_from(cl, 0)
+            cl_copy.num = cl.num
+            cl_copy.exp = cl.exp
+            cl_copy.tga = cl.tga
+            cl_copy.tbseq = cl.tbseq
+            cl_copy.talp = cl.talp
+            duplicate_population.append(cl_copy)
+        return ClassifiersList(*duplicate_population)
+
+    def get_cfg(self)-> Configuration:
         return self.cfg
 
     def get_pai_states_memory(self):
