@@ -90,7 +90,7 @@ class Classifier:
 
 
     @classmethod
-    def copy_from(cls, old_cls: Classifier, p: Perception, time: int):
+    def copy_from(cls, old_cls: Classifier, time: int):
         """
         Copies old classifier with given time (tga, talp).
         Old tav gets replaced with new value.

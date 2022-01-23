@@ -93,7 +93,7 @@ def expected_case(
         cl.increase_quality()
         return None
 
-    child = cl.copy_from(cl, p1, time)
+    child = cl.copy_from(cl, time)
 
     no_spec = len(cl.specified_unchanging_attributes)
     no_spec_new = diff.specificity
@@ -147,7 +147,7 @@ def unexpected_case(
     cl.set_mark(p0)
     if not cl.effect.is_specializable(p0, p1):
         return None
-    child = cl.copy_from(cl, p1, time)
+    child = cl.copy_from(cl, time)
     child.specialize(p0, p1)
     if child.q < 0.5:
         child.q = 0.5

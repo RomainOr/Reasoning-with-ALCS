@@ -252,8 +252,8 @@ class ClassifiersList(TypedList):
                 lambda cl: pow(cl.q, 3) * cl.num
             )
 
-            child1 = Classifier.copy_from(parent1, p, time)
-            child2 = Classifier.copy_from(parent2, p, time)
+            child1 = Classifier.copy_from(parent1, time)
+            child2 = Classifier.copy_from(parent2, time)
 
             # Execute mutation
             ga.generalizing_mutation(child1, mu)

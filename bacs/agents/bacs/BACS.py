@@ -22,10 +22,21 @@ class BACS(Agent):
         self.cfg = cfg
         self.population = population or ClassifiersList()
 
-    def get_population(self):
+    def get_population(self)-> ClassifiersList:
         return self.population
 
-    def get_cfg(self):
+    def duplicate_population(self)-> ClassifiersList:
+        duplicate_population = []
+        for cl in self.population:
+            cl_copy = Classifier.copy_from(cl, 0)
+            cl_copy.num = cl.num
+            cl_copy.exp = cl.exp
+            cl_copy.tga = cl.tga
+            cl_copy.talp = cl.talp
+            duplicate_population.append(cl_copy)
+        return ClassifiersList(*duplicate_population)
+
+    def get_cfg(self)-> Configuration:
         return self.cfg
 
     def zip_population(
@@ -52,7 +63,8 @@ class BACS(Agent):
                     to_keep = False
                     break
             if to_keep and cl.behavioral_sequence is not None and \
-                (not cl.is_experienced() or not cl.is_reliable()):
+                (not cl.is_experienced()):
+                #(not cl.is_experienced() or not cl.is_reliable()):
                 to_keep = False
             if to_keep and cl.behavioral_sequence is not None and \
                 not cl.does_anticipate_change() and len(cl.effect)==1:
@@ -149,22 +161,28 @@ class BACS(Agent):
             raw_state, last_reward, done, _ = env.step(iaction)
             state = self.cfg.environment_adapter.to_genotype(raw_state)
 
+            if done and action_classifier.behavioral_sequence:
+                action_set = match_set.form_action_set(Classifier(action=action_classifier.action, cfg=self.cfg))
+            
             # Enter the if condition only if we have chosen a behavioral classifier
-            if action_classifier.behavioral_sequence :
+            if not done and action_classifier.behavioral_sequence :
+                bseq_rescue = []
                 is_behavioral_sequence = True
                 # Initialize the message list usefull to decrease quality of classifiers containing looping sequences
-                #message_list = [state]
+                message_list = [prev_state, state]
                 for act in action_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(act)
                     raw_state, last_reward, done, _ = env.step(iaction)
+                    bseq_rescue.append(act)
                     state = self.cfg.environment_adapter.to_genotype(raw_state)
-                    #if state in message_list:
-                    #    for cl in action_set:    
-                    #        cl.decrease_quality()
-                    #else:
-                    #    message_list.append(state)
+                    if state in message_list:
+                        for cl in action_set:    
+                            cl.decrease_quality()
+                    else:
+                        message_list.append(state)
                     if done:
+                        action_set = match_set.form_action_set(Classifier(action=action_classifier.action, behavioral_sequence=bseq_rescue, cfg=self.cfg))
                         break
                     steps += 1
 
@@ -246,21 +264,28 @@ class BACS(Agent):
             raw_state, last_reward, done, _ = env.step(iaction)
             state = self.cfg.environment_adapter.to_genotype(raw_state)
 
+            if done and best_classifier.behavioral_sequence:
+                action_set = match_set.form_action_set(Classifier(action=best_classifier.action, cfg=self.cfg))
+            
             # Enter the if condition only if we have chosen a behavioral classifier
-            if best_classifier.behavioral_sequence :
+            if not done and best_classifier.behavioral_sequence :
+                bseq_rescue = []
                 for act in best_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(act)
                     raw_state, last_reward, done, _ = env.step(iaction)
+                    bseq_rescue.append(act)
                     state = self.cfg.environment_adapter.to_genotype(raw_state)
                     if done:
+                        action_set = match_set.form_action_set(Classifier(action=best_classifier.action, behavioral_sequence=bseq_rescue, cfg=self.cfg))
                         break
                     steps += 1
 
             if done:
                 # Apply algorithms
                 ClassifiersList.apply_reinforcement_learning(
-                    action_set, last_reward, 0, self.cfg.beta_rl, self.cfg.gamma)
+                    action_set, last_reward, 0, self.cfg.beta_rl, self.cfg.gamma
+                )
 
             steps += 1
 
