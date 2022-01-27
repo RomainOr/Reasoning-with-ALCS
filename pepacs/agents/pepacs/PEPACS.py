@@ -26,6 +26,17 @@ class PEPACS(Agent):
     def get_population(self):
         return self.population
 
+    def duplicate_population(self)-> ClassifiersList:
+        duplicate_population = []
+        for cl in self.population:
+            cl_copy = Classifier.copy_from(cl, None, 0, True)
+            cl_copy.num = cl.num
+            cl_copy.exp = cl.exp
+            cl_copy.tga = cl.tga
+            cl_copy.talp = cl.talp
+            duplicate_population.append(cl_copy)
+        return ClassifiersList(*duplicate_population)
+
     def get_cfg(self):
         return self.cfg
 
@@ -53,7 +64,8 @@ class PEPACS(Agent):
                     to_keep = False
                     break
             #if to_keep and cl.behavioral_sequence is not None and \
-            #    (not cl.is_experienced() or not cl.is_reliable()):
+            #    (not cl.is_experienced()):
+                #(not cl.is_experienced() or not cl.is_reliable()):
             #    to_keep = False
             #if to_keep and cl.behavioral_sequence is not None and \
             #    not cl.does_anticipate_change() and len(cl.effect)==1:
@@ -61,6 +73,7 @@ class PEPACS(Agent):
             if to_keep:
                 classifiers_to_keep.append(cl)
         self.population = ClassifiersList(*classifiers_to_keep)
+
 
 
     def _run_trial_explore(self, env, time, current_trial=None) \

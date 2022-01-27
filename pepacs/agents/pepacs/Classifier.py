@@ -89,7 +89,7 @@ class Classifier:
 
 
     @classmethod
-    def copy_from(cls, old_cls: Classifier, p: Perception, time: int):
+    def copy_from(cls, old_cls: Classifier, p: Perception, time: int, deep: bool):
         """
         Copies old classifier with given time (tga, talp).
         Old tav gets replaced with new value.
@@ -119,7 +119,7 @@ class Classifier:
             talp=time,
             tav=old_cls.tav
         )
-        if new_cls.is_enhanced():
+        if not deep and new_cls.is_enhanced():
             for idx, ei in enumerate(new_cls.effect):
                 if isinstance(ei, ProbabilityEnhancedAttribute):
                     new_cls.effect[idx] = p[idx]
