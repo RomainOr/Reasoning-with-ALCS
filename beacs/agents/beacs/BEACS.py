@@ -68,7 +68,7 @@ class BEACS(Agent):
                     to_keep = False
                     break
             if to_keep and cl.behavioral_sequence is not None and \
-                (not cl.is_experienced() or not cl.is_reliable()):
+                not cl.is_experienced():
                 to_keep = False
             if to_keep and cl.behavioral_sequence is not None and \
                 not cl.does_anticipate_change() and len(cl.effect)==1:
