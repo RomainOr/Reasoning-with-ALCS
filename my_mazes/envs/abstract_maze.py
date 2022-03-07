@@ -14,7 +14,7 @@ from gym import spaces, utils
 
 from .. import find_action_by_direction
 from .. import ACTION_LOOKUP
-from ..maze import Maze, WALL_MAPPING, PATH_MAPPING, ALIASING_MAPPING, REWARD_MAPPING
+from ..maze import Maze, WALL_MAPPING, PATH_MAPPING, ALIASING_MAPPING, REWARD_MAPPING, OBSTACLE_MAPPING
 from ..utils import create_graph
 
 ANIMAT_MARKER = 5
@@ -27,10 +27,10 @@ class MazeObservationSpace(gym.Space):
         gym.Space.__init__(self, (self.n,), str)
 
     def sample(self):
-        return tuple(random.choice([str(PATH_MAPPING), str(WALL_MAPPING), str(REWARD_MAPPING)]) for _ in range(self.n))
+        return tuple(random.choice([str(PATH_MAPPING), str(WALL_MAPPING), str(REWARD_MAPPING), str(OBSTACLE_MAPPING)]) for _ in range(self.n))
 
     def contains(self, x):
-        return all(elem in (str(PATH_MAPPING), str(WALL_MAPPING), str(REWARD_MAPPING), str(ANIMAT_MARKER)) for elem in x)
+        return all(elem in (str(PATH_MAPPING), str(WALL_MAPPING), str(REWARD_MAPPING), str(ANIMAT_MARKER), str(OBSTACLE_MAPPING)) for elem in x)
 
     def to_jsonable(self, sample_n):
         return list(sample_n)
@@ -50,6 +50,14 @@ class AbstractMaze(gym.Env):
         self.observation_space = MazeObservationSpace(8)
         self.prob_slippery = 0.0
         self.random_attribute_length = 0
+        self.reward = 1000
+        self.obstacle_reward = -1000
+
+    def set_obstacle_reward(self, r: float = 0.0):
+        self.obstacle_reward = r
+
+    def set_reward(self, r: float = 0.0):
+        self.reward = r
 
     def set_prob_slippery(self, prob: float = 0.0):
         self.prob_slippery = prob
@@ -187,7 +195,9 @@ class AbstractMaze(gym.Env):
 
     def _get_reward(self):
         if self.maze.is_reward(self.pos_x, self.pos_y):
-            return 1000
+            return self.reward
+        if self.maze.is_obstacle(self.pos_x, self.pos_y):
+            return self.obstacle_reward
 
         return 0
 
@@ -266,6 +276,8 @@ class AbstractMaze(gym.Env):
             return utils.colorize('□', 'white')
         elif el == REWARD_MAPPING:
             return utils.colorize('$', 'yellow')
+        elif el == OBSTACLE_MAPPING:
+            return utils.colorize('■', 'magenta')
         elif el == ANIMAT_MARKER:
             return utils.colorize('A', 'red')
         elif el == ALIASING_MAPPING:

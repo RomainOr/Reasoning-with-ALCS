@@ -15,10 +15,12 @@ def create_graph(env):
                 g.add_node((x, y), type='path')
             if maze.is_reward(x, y):
                 g.add_node((x, y), type='reward')
+            if maze.is_obstacle(x, y):
+                g.add_node((x, y), type='obstacle')
 
     # Add edges
     path_nodes = [cords for cords, attribs
-        in g.nodes(data=True) if attribs['type'] == 'path']
+        in g.nodes(data=True) if attribs['type'] == 'path' or attribs['type'] == 'obstacle']
 
     for n in path_nodes:
         neighbour_cells = Maze.get_possible_neighbour_cords(*n)
