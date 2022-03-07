@@ -6,8 +6,7 @@
 
 from __future__ import annotations
 
-import random
-from typing import Optional, Union, Callable, List
+from typing import Optional, Union, List
 
 from beacs import Perception
 from beacs.agents.beacs import Configuration, Condition, EffectList, Effect, PMark
@@ -16,11 +15,8 @@ from beacs.agents.beacs import Configuration, Condition, EffectList, Effect, PMa
 class Classifier:
 
     __slots__ = ['condition', 'action', 'behavioral_sequence', 'effect', 'mark', 'q', 'ra', 'rb',
-                 'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'aliased_state', 'pai_state', 'err']
+        'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'aliased_state', 'pai_state', 'err']
 
-    # In paper it's advised to set experience and reward of newly generated
-    # classifier to 0. However in original code these values are initialized
-    # with defaults 1 and 0.5 correspondingly.
     def __init__(
             self,
             condition: Union[Condition, str, None] = None,
@@ -100,10 +96,10 @@ class Classifier:
 
 
     def __repr__(self):
-        return f"{self.condition} {self.action} {str(self.behavioral_sequence)} {str(self.effect)}\n" \
+        return f"C:{self.condition} A:{self.action} {str(self.behavioral_sequence)} E:{str(self.effect)}\n" \
             f"q: {self.q:<6.4} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} err: {self.err:<6.4}\n" \
             f"exp: {self.exp:<5} num: {self.num} ee: {self.ee}\n" \
-            f"Mark: {str(self.mark)} Aliased_state: {''.join(str(attr) for attr in self.aliased_state)} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \
+            f"Mark: {str(self.mark)} Can_be_generalized: {str(self.effect.enhanced_trace_ga)} Aliased_state: {''.join(str(attr) for attr in self.aliased_state)} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \
             f"tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n" \
 
 
@@ -154,6 +150,7 @@ class Classifier:
             new_cls.effect.effect_list.append(effect_to_append)
         new_cls.effect.effect_detailled_counter = old_cls.effect.effect_detailled_counter[:]
         new_cls.effect.enhanced_trace_ga = old_cls.effect.enhanced_trace_ga[:]
+        new_cls.effect.update_enhanced_trace_ga(new_cls.cfg.classifier_length)
         return new_cls
 
 
@@ -174,6 +171,7 @@ class Classifier:
         if self.behavioral_sequence:
             return self.q * (max_r - diff * len(self.behavioral_sequence) / self.cfg.bs_max)
         return self.q * max_r
+        # Tmp : mountaincar sans qualité pour fitness ?
 
 
     @property
@@ -311,9 +309,9 @@ class Classifier:
                 return True
             if self.is_marked() and other.is_marked() and self.mark == other.mark:
                 return True
-        return False    
-        
-        
+        return False
+
+
     def is_specializable(
             self,
             previous_situation: Perception,
@@ -336,7 +334,7 @@ class Classifier:
             True if specializable
         """
         return self.effect.is_specializable(previous_situation, situation)
-    
+
 
     def does_anticipate_change(self) -> bool:
         """
@@ -564,8 +562,24 @@ class Classifier:
         result.effect.enhance(other_classifier.effect, self.cfg.classifier_length)
         result.aliased_state = aliased_state
         return result
-    
-    def subsumes(self, other):
+
+
+    def subsumes(self, other) -> bool:
+
+        """
+        Check if one classifier can subsume another one.
+        Can be used anywhere and anytime...
+
+        Parameters
+        ----------
+        self: Classifier
+        other: Classifier
+
+        Returns
+        -------
+        bool
+            True if self sulbsumes other
+        """
         if self.condition.subsumes(other.condition) and \
                 self.action == other.action and \
                 self.behavioral_sequence == other.behavioral_sequence and \

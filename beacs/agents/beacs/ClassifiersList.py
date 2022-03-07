@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import random
 from itertools import chain
+from operator import attrgetter
 from typing import Optional, List
 
 import beacs.agents.beacs.components.alp as alp
@@ -46,22 +47,12 @@ class ClassifiersList(TypedList):
         ClassifiersList
             The whole set of matching classifiers
         """
-        best_classifier = None
-        best_fitness = 0.
-        matching = []
-        max_fitness_ra = 0.
-        max_fitness_rb = 0.
-        for cl in self:
-            if cl.does_match(situation):
-                matching.append(cl)
-                if cl.does_anticipate_change():
-                    if cl.q*cl.ra > max_fitness_ra:
-                        max_fitness_ra = cl.q*cl.ra
-                    if cl.q*cl.rb > max_fitness_rb:
-                        max_fitness_rb = cl.q*cl.rb
-                    if cl.fitness > best_fitness:
-                        best_classifier = cl
-                        best_fitness = cl.fitness
+        matching = [cl for cl in self if cl.does_match(situation)]
+        matching_with_change_anticipated = [cl for cl in matching if cl.does_anticipate_change()]
+        best_classifier = max(matching_with_change_anticipated,key=attrgetter('fitness'),default=None)
+        max_fitness_ra = max((cl.q*cl.ra for cl in matching_with_change_anticipated), default=0.)
+        max_fitness_rb = max((cl.q*cl.rb for cl in matching_with_change_anticipated), default=0.)
+        # Tmp : Parcours sur matching pour mountaincar
         return ClassifiersList(*matching), best_classifier, max_fitness_ra, max_fitness_rb
 
 

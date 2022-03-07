@@ -23,10 +23,22 @@ class BEACS(Agent):
         self.population = population or ClassifiersList()
         self.pai_states_memory = []
 
-    def get_population(self):
+    def get_population(self)-> ClassifiersList:
         return self.population
 
-    def get_cfg(self):
+    def duplicate_population(self)-> ClassifiersList:
+        duplicate_population = []
+        for cl in self.population:
+            cl_copy = Classifier.copy_from(cl, 0)
+            cl_copy.num = cl.num
+            cl_copy.exp = cl.exp
+            cl_copy.tga = cl.tga
+            cl_copy.tbseq = cl.tbseq
+            cl_copy.talp = cl.talp
+            duplicate_population.append(cl_copy)
+        return ClassifiersList(*duplicate_population)
+
+    def get_cfg(self)-> Configuration:
         return self.cfg
 
     def get_pai_states_memory(self):
@@ -56,7 +68,7 @@ class BEACS(Agent):
                     to_keep = False
                     break
             if to_keep and cl.behavioral_sequence is not None and \
-                (not cl.is_experienced() or not cl.is_reliable()):
+                not cl.is_experienced():
                 to_keep = False
             if to_keep and cl.behavioral_sequence is not None and \
                 not cl.does_anticipate_change() and len(cl.effect)==1:
@@ -78,6 +90,7 @@ class BEACS(Agent):
         raw_state = env.reset()
         state = self.cfg.environment_adapter.to_genotype(env, raw_state)
         last_reward = 0
+        total_reward = 0
         prev_state = Perception.empty()
         t_2_match_set = ClassifiersList()
         t_1_match_set = ClassifiersList()
@@ -131,6 +144,7 @@ class BEACS(Agent):
             t_1_match_set = match_set
             # Choose classifier
             action_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
+            # Tmp : Mountaincar -> epsilon degréssif : max(0.01, self.cfg.epsilon-current_trial/10000)
             # Record last activated classifier
             t_2_activated_classifier = t_1_activated_classifier
             t_1_activated_classifier = action_classifier
@@ -141,17 +155,25 @@ class BEACS(Agent):
             # Do the action
             prev_state = state
             raw_state, last_reward, done, _ = env.step(iaction)
+            total_reward += last_reward
             state = self.cfg.environment_adapter.to_genotype(env, raw_state)
+            
+            if done and action_classifier.behavioral_sequence:
+                action_set = match_set.form_action_set(Classifier(action=action_classifier.action, cfg=self.cfg))
 
             # Enter the if condition only if we have chosen a behavioral classifier
             if not done and action_classifier.behavioral_sequence :
+                bseq_rescue = []
                 # Initialize the message list usefull to decrease quality of classifiers containing looping sequences
                 for act in action_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(env, act)
                     raw_state, last_reward, done, _ = env.step(iaction)
+                    bseq_rescue.append(act)
+                    total_reward += last_reward
                     state = self.cfg.environment_adapter.to_genotype(env, raw_state)
                     if done:
+                        action_set = match_set.form_action_set(Classifier(action=action_classifier.action, behavioral_sequence=bseq_rescue, cfg=self.cfg))
                         break
                     steps += 1
 
@@ -188,7 +210,7 @@ class BEACS(Agent):
                 )
 
             steps += 1
-        return TrialMetrics(steps, last_reward)
+        return TrialMetrics(steps, total_reward)
 
     def _run_trial_exploit(
             self,
@@ -202,6 +224,7 @@ class BEACS(Agent):
         raw_state = env.reset()
         state = self.cfg.environment_adapter.to_genotype(env, raw_state)
         last_reward = 0
+        total_reward = 0
         action_set = ClassifiersList()
         done = False
 
@@ -224,6 +247,7 @@ class BEACS(Agent):
             iaction = self.cfg.environment_adapter.to_lcs_action(env, best_classifier.action)
             # Do the action
             raw_state, last_reward, done, _ = env.step(iaction)
+            total_reward += last_reward
             state = self.cfg.environment_adapter.to_genotype(env, raw_state)
 
             # Enter the if condition only if we have chosen a behavioral classifier
@@ -232,6 +256,7 @@ class BEACS(Agent):
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(env, act)
                     raw_state, last_reward, done, _ = env.step(iaction)
+                    total_reward += last_reward
                     state = self.cfg.environment_adapter.to_genotype(env, raw_state)
                     if done:
                         break
@@ -245,4 +270,4 @@ class BEACS(Agent):
 
             steps += 1
 
-        return TrialMetrics(steps, last_reward)
+        return TrialMetrics(steps, total_reward)

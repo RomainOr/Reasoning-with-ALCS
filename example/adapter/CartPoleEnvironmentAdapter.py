@@ -8,6 +8,8 @@ from beacs.agents.EnvironmentAdapter import EnvironmentAdapter
 
 #Discrtization from https://www.datamachinist.com/reinforcement-learning/part-6-q-learning-for-continuous-state-problems/
 
+#To achieve these results, the hypothesis about the need to anticipate a change has to be removed (classifier selection and building of matching set). Must be discussed in phd manuscript.
+
 buckets=(1, 1, 4, 3,) 
 
 class CartPoleEnvironmentAdapter(EnvironmentAdapter):

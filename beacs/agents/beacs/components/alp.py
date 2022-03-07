@@ -75,7 +75,10 @@ def expected_case(
         cl.ee = True
         is_aliasing_detected = True
 
-    diff = cl.mark.get_differences(p0)
+    if cl.is_enhanced():
+        diff = cl.mark.get_differences(cl.aliased_state)
+    else:
+        diff = cl.mark.get_differences(p0)
     if diff.specificity == 0:
         cl.increase_quality()
         return is_aliasing_detected, None

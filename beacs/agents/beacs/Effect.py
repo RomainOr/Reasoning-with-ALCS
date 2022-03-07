@@ -95,7 +95,3 @@ class Effect(AbstractPerception):
             # All checks passed
             return True
         return all(_item_anticipate_change(self[idx], p0[idx], p1[idx], self.wildcard) for idx in range(len(p0)))
-
-
-    def __str__(self):
-        return ''.join(str(attr) for attr in self)

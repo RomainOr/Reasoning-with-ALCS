@@ -21,11 +21,10 @@ class EffectList():
         if effect:
             self.effect_list = [effect]
             self.effect_detailled_counter = [1]
-            self.enhanced_trace_ga = [True] * length
         else:
             self.effect_list = []
             self.effect_detailled_counter = []
-            self.enhanced_trace_ga = []
+        self.enhanced_trace_ga = [True] * length
         self.wildcard = wildcard
 
 
@@ -56,7 +55,7 @@ class EffectList():
         ):
         """
         Creates a new enhanced effectlist by merging two effect lists.
-        
+
         Parameters
         ----------
         self: EffectList
@@ -76,8 +75,8 @@ class EffectList():
             else:
                 ei = self.effect_list.index(oeffect)
                 self.effect_detailled_counter[ei] += other.effect_detailled_counter[oi]
-        self.enhanced_trace_ga = [True] * length
         self.update_enhanced_trace_ga(length)
+
 
     def update_enhanced_trace_ga(
             self,
@@ -89,7 +88,7 @@ class EffectList():
                 if effect[idx] not in symbols:
                     symbols.append(effect[idx])
             self.enhanced_trace_ga[idx] = (self.wildcard not in symbols) or (len(symbols)==1)
-            
+
 
     @property
     def specify_change(self) -> bool:
@@ -124,7 +123,7 @@ class EffectList():
             p1: Perception
         ) -> bool:
         """
-        Determines if the effect part can be modified to 
+        Determines if the effect part can be modified to
         correctly anticipate changes from `p0` to `p1`.
         No need to check for enhanced effect : see the same
         function in classifier.py
@@ -224,5 +223,13 @@ class EffectList():
         return result
 
 
-    def sum_effect_counter(self):
+    def sum_effect_counter(self) -> float:
+        """
+        Computes the sum of all observations in the effect list
+
+        Returns
+        -------
+        float
+            The respective probabilities
+        """
         return float(sum(self.effect_detailled_counter))
