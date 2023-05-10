@@ -7,7 +7,7 @@
 # General
 from __future__ import unicode_literals
 
-from example.metrics.PlottingWrapper import plot_classifiers, plot_steps
+from my_example.metrics.PlottingWrapper import plot_classifiers, plot_steps
 
 import numpy as np
 import pandas as pd
@@ -68,8 +68,8 @@ def build_fitness_matrix(env, population, cfg):
     fitness = original.copy()
     # Think about more 'functional' way of doing this
     for index, x in np.ndenumerate(original):
-        # Path - best classfier fitness
-        if x == 0:
+        # Path or obstacle - best classfier fitness
+        if x == 0 or x == 3:
             perception = env.env.maze.perception(index[1], index[0])
             best_cl = find_best_classifier(population, perception, cfg)
             if best_cl:
@@ -104,8 +104,8 @@ def build_action_matrix(env, population, cfg, fitness_matrix):
     for index, x in np.ndenumerate(original):
         action[index] = ''
     for index, x in np.ndenumerate(original):
-        # Path - best classfier fitness
-        if x == 0:
+        # Path or Obstacle - best classfier fitness
+        if x == 0 or x ==3:
             perception = env.env.maze.perception(index[1], index[0])
             best_cl = find_best_classifier(population, perception, cfg)
             if best_cl:

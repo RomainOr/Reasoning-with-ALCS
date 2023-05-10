@@ -1,7 +1,5 @@
 from gym.envs.registration import register
 
-from .maze import Maze, PATH_MAPPING, WALL_MAPPING, REWARD_MAPPING
-
 ACTION_LOOKUP = {
     0: 'N',
     1: 'NE',
@@ -178,5 +176,11 @@ register(
 register(
     id='Woods102-v0',
     entry_point='my_mazes.envs:Woods102',
+    max_episode_steps=100
+)
+
+register(
+    id='MazeOntoLcs-v0',
+    entry_point='my_mazes.envs:MazeOntoLcs',
     max_episode_steps=100
 )
