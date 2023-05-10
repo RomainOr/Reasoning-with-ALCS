@@ -8,13 +8,14 @@ import io
 import random
 import sys
 import gym
+from gym.wrappers import TimeLimit
 import networkx as nx
 import numpy as np
 from gym import spaces, utils
 
 from .. import find_action_by_direction
 from .. import ACTION_LOOKUP
-from ..maze import Maze, WALL_MAPPING, PATH_MAPPING, ALIASING_MAPPING, REWARD_MAPPING, OBSTACLE_MAPPING
+from ..maze import Maze, WALL_MAPPING, PATH_MAPPING, ALIASING_MAPPING, EXIT_MAPPING, OBSTACLE_MAPPING
 from ..utils import create_graph
 
 ANIMAT_MARKER = 5
@@ -27,10 +28,10 @@ class MazeObservationSpace(gym.Space):
         gym.Space.__init__(self, (self.n,), str)
 
     def sample(self):
-        return tuple(random.choice([str(PATH_MAPPING), str(WALL_MAPPING), str(REWARD_MAPPING), str(OBSTACLE_MAPPING)]) for _ in range(self.n))
+        return tuple(random.choice([str(PATH_MAPPING), str(WALL_MAPPING), str(EXIT_MAPPING), str(OBSTACLE_MAPPING)]) for _ in range(self.n))
 
     def contains(self, x):
-        return all(elem in (str(PATH_MAPPING), str(WALL_MAPPING), str(REWARD_MAPPING), str(ANIMAT_MARKER), str(OBSTACLE_MAPPING)) for elem in x)
+        return all(elem in (str(PATH_MAPPING), str(WALL_MAPPING), str(EXIT_MAPPING), str(ANIMAT_MARKER), str(OBSTACLE_MAPPING)) for elem in x)
 
     def to_jsonable(self, sample_n):
         return list(sample_n)
@@ -50,14 +51,15 @@ class AbstractMaze(gym.Env):
         self.observation_space = MazeObservationSpace(8)
         self.prob_slippery = 0.0
         self.random_attribute_length = 0
-        self.reward = 1000
+        self.exit_reward = 1000
         self.obstacle_reward = -1000
+        self._elapsed_steps = None
+
+    def set_exit_reward(self, r: float = 0.0):
+        self.exit_reward = r
 
     def set_obstacle_reward(self, r: float = 0.0):
         self.obstacle_reward = r
-
-    def set_reward(self, r: float = 0.0):
-        self.reward = r
 
     def set_prob_slippery(self, prob: float = 0.0):
         self.prob_slippery = prob
@@ -65,7 +67,14 @@ class AbstractMaze(gym.Env):
     def set_random_attribute_length(self, l: int = 0):
         self.random_attribute_length = l
 
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed, options=options)
+        self._insert_animat()
+        self._elapsed_steps = 0
+        return self._observe(), self._get_info()
+
     def step(self, action):
+        self._elapsed_steps += 1
         previous_observation = self._observe()
         if random.random() < self.prob_slippery:
             self._take_action(
@@ -77,18 +86,14 @@ class AbstractMaze(gym.Env):
                 action, 
                 previous_observation
             )
-
         observation = self._observe()
         reward = self._get_reward()
         episode_over = self._is_over()
         info = self._get_info()
-
-        return observation, reward, episode_over, False, info
-
-    def reset(self, seed=None, options=None):
-        super().reset(seed=seed, options=options)
-        self._insert_animat()
-        return self._observe(), self._get_info()
+        truncated = False
+        if self._elapsed_steps >= self.spec.max_episode_steps:
+            truncated = True
+        return observation, reward, episode_over, truncated, info
 
     def render(self, mode='aliasing_human'):
         if mode == 'aliasing_human':
@@ -199,14 +204,14 @@ class AbstractMaze(gym.Env):
         return {}
 
     def _get_reward(self):
-        if self.maze.is_reward(self.pos_x, self.pos_y):
-            return self.reward
+        if self.maze.is_exit(self.pos_x, self.pos_y):
+            return self.exit_reward
         if self.maze.is_obstacle(self.pos_x, self.pos_y):
             return self.obstacle_reward
         return 0
 
     def _is_over(self):
-        return self.maze.is_reward(self.pos_x, self.pos_y)
+        return self.maze.is_exit(self.pos_x, self.pos_y)
 
     def _take_action(self, action, observation):
         """Executes the action inside the maze"""
@@ -278,7 +283,7 @@ class AbstractMaze(gym.Env):
             return utils.colorize('■', 'gray')
         elif el == PATH_MAPPING:
             return utils.colorize('□', 'white')
-        elif el == REWARD_MAPPING:
+        elif el == EXIT_MAPPING:
             return utils.colorize('$', 'yellow')
         elif el == OBSTACLE_MAPPING:
             return utils.colorize('■', 'magenta')

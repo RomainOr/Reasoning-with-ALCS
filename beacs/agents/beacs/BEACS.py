@@ -154,7 +154,8 @@ class BEACS(Agent):
             iaction = self.cfg.environment_adapter.to_lcs_action(env, action_classifier.action)
             # Do the action
             prev_state = state
-            raw_state, last_reward, done, _truncated, _info = env.step(iaction)
+            raw_state, last_reward, terminated, truncated, _info = env.step(iaction)
+            done = terminated or truncated
             total_reward += last_reward
             state = self.cfg.environment_adapter.to_genotype(env, raw_state)
             
@@ -168,7 +169,8 @@ class BEACS(Agent):
                 for act in action_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(env, act)
-                    raw_state, last_reward, done, _truncated, _info = env.step(iaction)
+                    raw_state, last_reward, terminated, truncated, _info = env.step(iaction)
+                    done = terminated or truncated
                     bseq_rescue.append(act)
                     total_reward += last_reward
                     state = self.cfg.environment_adapter.to_genotype(env, raw_state)
@@ -176,7 +178,6 @@ class BEACS(Agent):
                         action_set = match_set.form_action_set(Classifier(action=action_classifier.action, behavioral_sequence=bseq_rescue, cfg=self.cfg))
                         break
                     steps += 1
-
 
             if done:
                 ClassifiersList.apply_alp(
@@ -221,7 +222,7 @@ class BEACS(Agent):
 
         # Initial conditions
         steps = 0
-        raw_state = env.reset()
+        raw_state, _info = env.reset()
         state = self.cfg.environment_adapter.to_genotype(env, raw_state)
         last_reward = 0
         total_reward = 0
@@ -246,7 +247,8 @@ class BEACS(Agent):
             # Use environment adapter
             iaction = self.cfg.environment_adapter.to_lcs_action(env, best_classifier.action)
             # Do the action
-            raw_state, last_reward, done, _truncated, _info = env.step(iaction)
+            raw_state, last_reward, terminated, truncated, _info = env.step(iaction)
+            done = terminated or truncated
             total_reward += last_reward
             state = self.cfg.environment_adapter.to_genotype(env, raw_state)
 
@@ -255,7 +257,8 @@ class BEACS(Agent):
                 for act in best_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(env, act)
-                    raw_state, last_reward, done, _truncated, _info = env.step(iaction)
+                    raw_state, last_reward, terminated, truncated, _info = env.step(iaction)
+                    done = terminated or truncated
                     total_reward += last_reward
                     state = self.cfg.environment_adapter.to_genotype(env, raw_state)
                     if done:

@@ -3,7 +3,7 @@ import random
 PATH_MAPPING = 0
 WALL_MAPPING = 1
 OBSTACLE_MAPPING = 3
-REWARD_MAPPING = 9
+EXIT_MAPPING = 9
 ALIASING_MAPPING = -1 # Can be then enhanced according to the aliasing type
 
 class Maze:
@@ -14,7 +14,7 @@ class Maze:
     0 - path
     1 - wall
     3 - obstacle
-    9 - reward
+    9 - exit
     """
 
     def __init__(self, matrix, aliasing_matrix):
@@ -103,8 +103,8 @@ class Maze:
     def is_path(self, pos_x, pos_y):
         return self.matrix[pos_y, pos_x] == PATH_MAPPING
 
-    def is_reward(self, pos_x, pos_y):
-        return self.matrix[pos_y, pos_x] == REWARD_MAPPING
+    def is_exit(self, pos_x, pos_y):
+        return self.matrix[pos_y, pos_x] == EXIT_MAPPING
 
     def is_obstacle(self, pos_x, pos_y):
         return self.matrix[pos_y, pos_x] == OBSTACLE_MAPPING
