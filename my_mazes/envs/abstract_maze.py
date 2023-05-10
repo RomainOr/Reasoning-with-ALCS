@@ -40,7 +40,7 @@ class MazeObservationSpace(gym.Space):
 
 
 class AbstractMaze(gym.Env):
-    metadata = {'render.modes': ['human', 'ansi', 'aliasing_human']}
+    metadata = {'render_modes': ['human', 'ansi', 'aliasing_human'], "render_fps": 1}
 
     def __init__(self, matrix, aliasing_matrix):
         self.maze = Maze(matrix,aliasing_matrix)
@@ -81,12 +81,14 @@ class AbstractMaze(gym.Env):
         observation = self._observe()
         reward = self._get_reward()
         episode_over = self._is_over()
+        info = self._get_info()
 
-        return observation, reward, episode_over, {}
+        return observation, reward, episode_over, False, info
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed, options=options)
         self._insert_animat()
-        return self._observe()
+        return self._observe(), self._get_info()
 
     def render(self, mode='aliasing_human'):
         if mode == 'aliasing_human':
@@ -192,13 +194,15 @@ class AbstractMaze(gym.Env):
             return n, ne, e, se, s, sw, w, nw, str(random.randint(0, 1))
         else:
             return n, ne, e, se, s, sw, w, nw
+        
+    def _get_info(self):
+        return {}
 
     def _get_reward(self):
         if self.maze.is_reward(self.pos_x, self.pos_y):
             return self.reward
         if self.maze.is_obstacle(self.pos_x, self.pos_y):
             return self.obstacle_reward
-
         return 0
 
     def _is_over(self):
