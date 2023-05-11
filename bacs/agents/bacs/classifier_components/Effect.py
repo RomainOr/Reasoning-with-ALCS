@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from bacs import Perception
-from bacs.agents import AbstractPerception
+from bacs.agents.bacs.classifier_components import AbstractPerception
 
 class Effect(AbstractPerception):
     """

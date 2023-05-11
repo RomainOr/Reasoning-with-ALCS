@@ -3,16 +3,11 @@
     License, v. 2.0. If a copy of the MPL was not distributed with this
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
-
-from typing import List, Tuple
-
 from bacs import Perception
 from bacs.agents.Agent import Agent, TrialMetrics
-from bacs.agents.bacs import Classifier, ClassifiersList, Configuration
-from bacs.agents.bacs.Condition import Condition
-from bacs.agents.bacs.Effect import Effect
-from bacs.agents.bacs.components.subsumption_bacs import does_subsume, find_subsumers
-from bacs.agents.bacs.components.action_selection_bacs import choose_classifier
+from bacs.agents.bacs import ClassifiersList, Configuration
+from bacs.agents.bacs.classifier_components import Classifier
+from bacs.agents.bacs.components.action_selection import choose_classifier
 
 class BACS(Agent):
 
@@ -79,7 +74,7 @@ class BACS(Agent):
 
         # Initial conditions
         steps = 0
-        raw_state = env.reset()
+        raw_state, _info = env.reset()
         state = self.cfg.environment_adapter.to_genotype(raw_state)
         action = env.action_space.sample()
         last_reward = 0
@@ -158,7 +153,8 @@ class BACS(Agent):
             iaction = self.cfg.environment_adapter.to_lcs_action(action_classifier.action)
             # Do the action
             prev_state = state
-            raw_state, last_reward, done, _ = env.step(iaction)
+            raw_state, last_reward, terminated, truncated, _info = env.step(iaction)
+            done = terminated or truncated
             state = self.cfg.environment_adapter.to_genotype(raw_state)
 
             if done and action_classifier.behavioral_sequence:
@@ -173,7 +169,8 @@ class BACS(Agent):
                 for act in action_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(act)
-                    raw_state, last_reward, done, _ = env.step(iaction)
+                    raw_state, last_reward, terminated, truncated, _info = env.step(iaction)
+                    done = terminated or truncated
                     bseq_rescue.append(act)
                     state = self.cfg.environment_adapter.to_genotype(raw_state)
                     if state in message_list:
@@ -237,7 +234,7 @@ class BACS(Agent):
 
         # Initial conditions
         steps = 0
-        raw_state = env.reset()
+        raw_state, _info = env.reset()
         state = self.cfg.environment_adapter.to_genotype(raw_state)
         last_reward = 0
         action_set = ClassifiersList()
@@ -261,7 +258,8 @@ class BACS(Agent):
             # Use environment adapter
             iaction = self.cfg.environment_adapter.to_lcs_action(best_classifier.action)
             # Do the action
-            raw_state, last_reward, done, _ = env.step(iaction)
+            raw_state, last_reward, terminated, truncated, _info = env.step(iaction)
+            done = terminated or truncated
             state = self.cfg.environment_adapter.to_genotype(raw_state)
 
             if done and best_classifier.behavioral_sequence:
@@ -273,7 +271,8 @@ class BACS(Agent):
                 for act in best_classifier.behavioral_sequence:
                     # Use environment adapter to execute the action act and perceive its results
                     iaction = self.cfg.environment_adapter.to_lcs_action(act)
-                    raw_state, last_reward, done, _ = env.step(iaction)
+                    raw_state, last_reward, terminated, truncated, _info = env.step(iaction)
+                    done = terminated or truncated
                     bseq_rescue.append(act)
                     state = self.cfg.environment_adapter.to_genotype(raw_state)
                     if done:

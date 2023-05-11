@@ -26,3 +26,4 @@ from ..envs.Woods100 import Woods100
 from ..envs.Woods101 import Woods101
 from ..envs.Woods101demi import Woods101demi
 from ..envs.Woods102 import Woods102
+from ..envs.MazeOntoLcs import MazeOntoLcs

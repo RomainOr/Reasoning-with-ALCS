@@ -2,17 +2,13 @@ from copy import copy
 
 class AbstractPerception:
 
-    def __init__(self, observation, wildcard='#', oktypes=(str, dict)):
-        obs = tuple(observation)
-        self.oktypes = oktypes
-        assert type(wildcard) in self.oktypes
-        assert all(isinstance(o, self.oktypes) for o in obs)
-        self._items = obs
+    def __init__(self, observation, wildcard='#', oktypes=(str)):
+        self._items = tuple(observation)
         self.wildcard = wildcard
 
 
     @classmethod
-    def empty(cls, length: int, wildcard='#', oktypes=(str, dict)):
+    def empty(cls, length: int, wildcard='#', oktypes=(str)):
         """
         Creates an AbstractPerception composed from wildcard symbols.
         Note that in case that wildcard is an object is get's copied
@@ -24,7 +20,7 @@ class AbstractPerception:
             length of perception string
         wildcard: Any
             wildcard symbol
-        oktypes: (str, dict)
+        oktypes: (str)
             tuple of allowed classes to represent perception string
 
         Returns
@@ -34,22 +30,6 @@ class AbstractPerception:
         """
         ps_str = [copy(wildcard) for _ in range(length)]
         return cls(ps_str)
-
-
-    def subsumes(self, other) -> bool:
-        """
-        Checks if given perception string subsumes other one.
-        Parameters
-        ----------
-        other: AbstractPerception
-
-        Returns
-        -------
-        bool
-            True if `other` is subsumed by `self`, False otherwise
-        """
-        raise NotImplementedError()
-
 
     def __iter__(self):
         return iter(self._items)
@@ -61,10 +41,8 @@ class AbstractPerception:
         return self._items[index]
 
     def __setitem__(self, index, value):
-        assert isinstance(value, self.oktypes)
         lst = list(self._items)
         lst[index] = value
-
         self._items = tuple(lst)
 
     def __eq__(self, other):

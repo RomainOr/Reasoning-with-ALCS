@@ -10,7 +10,7 @@ from typing import Callable, Dict
 import numpy as np
 
 from bacs import Perception
-from bacs.agents.bacs.components.subsumption_bacs import find_subsumers
+from bacs.agents.bacs.components.subsumption import does_subsume
 
 
 def should_apply(
@@ -91,11 +91,18 @@ def roulette_wheel_selection(population, fitnessfunc: Callable):
     tuple
         two classifiers selected as parents
     """
-    choices = {cl: fitnessfunc(cl) for cl in population}
+    def _weighted_random_choice(choices: Dict):
+        max = sum(choices.values())
+        pick = random.uniform(0, max)
+        current = 0
+        for key, value in choices.items():
+            current += value
+            if current > pick:
+                return key
 
+    choices = {cl: fitnessfunc(cl) for cl in population}
     parent1 = _weighted_random_choice(choices)
     parent2 = _weighted_random_choice(choices)
-
     return parent1, parent2
 
 
@@ -135,52 +142,6 @@ def two_point_crossover(parent, donor) -> None:
     for idx, el in enumerate(range(left, right)):
         parent.condition[el] = chromosome2[idx]
         donor.condition[el] = chromosome1[idx]
-
-
-def add_classifier(
-        cl, 
-        p: Perception,
-        population, 
-        match_set, 
-        action_set,
-        theta_exp: int
-    )-> None:
-    """
-    Find subsumer/similar classifier, if present - increase its numerosity,
-    else add this new classifier
-
-    Parameters
-    ----------
-    cl:
-        newly created classifier
-    p: Perception
-        current perception
-    population:
-        population of classifiers
-    match_set:
-        match set
-    action_set:
-        action set
-    theta_exp: int
-        subsumption experience threshold
-    """
-    # Find_subsumers computes subsumer or classifier that are equal
-    subsumers = find_subsumers(cl, action_set, theta_exp)
-    # Check if subsumers exist, meaning that old_cl is mandatory not None
-    if len(subsumers) == 0:
-        old_cl = next(filter(lambda other: cl == other, action_set), None)
-        if old_cl:
-            if not old_cl.is_marked():
-                old_cl.num += 1
-        else:
-            population.append(cl)
-            action_set.append(cl)
-            if match_set is not None and cl.condition.does_match(p):
-                match_set.append(cl)
-    else:
-        old_cl = subsumers[0]
-        if not old_cl.is_marked():
-            old_cl.num += 1
 
 
 def delete_classifiers(population, match_set, action_set,
@@ -251,12 +212,54 @@ def _is_preferred_to_delete(cl_del, cl) -> bool:
     return False
 
 
-def _weighted_random_choice(choices: Dict):
-    max = sum(choices.values())
-    pick = random.uniform(0, max)
-    current = 0
+def add_classifier(
+        child, 
+        population,
+        new_list,
+        theta_exp
+    )-> None:
+    """
+    Looks for subsuming / similar classifiers in the population of classifiers
+    and those created in the current GA run.
 
-    for key, value in choices.items():
-        current += value
-        if current > pick:
-            return key
+    If a similar classifier was found it's numerosity is increased,
+    otherwise `child_cl` is added to `new_list`.
+
+    Parameters
+    ----------
+    child:
+        New classifier to examine
+    population:
+        List of classifiers
+    new_list:
+        A list of newly created classifiers in this GA run
+    theta_exp:
+        Experience threshold
+    """
+    old_cl = None
+    equal_cl = None
+
+    # Look if there is a classifier that subsumes the insertion candidate
+    for cl in population:
+        if does_subsume(cl, child, theta_exp):
+            if old_cl is None or cl.is_more_general(old_cl):
+                old_cl = cl
+        elif cl == child:
+            equal_cl = cl
+
+    # Check if there is similar classifier already in the population, previously found
+    if old_cl is None:
+        old_cl = equal_cl
+
+    # Check if any similar classifier was in this GA run
+    if old_cl is None:
+        for cl in new_list:
+            if cl == child:
+                old_cl = cl
+                break
+
+    if old_cl is None:
+        new_list.append(child)
+    else:
+        if not old_cl.is_marked():
+                old_cl.num += 1

@@ -7,7 +7,7 @@
 from typing import Optional
 
 from bacs import Perception
-from bacs.agents.bacs import Classifier
+from bacs.agents.bacs.classifier_components import Classifier
 
 def _updated_passthrough(
         child_effect, 

@@ -7,7 +7,7 @@
 import random
 from itertools import groupby
 
-from bacs.agents.bacs import Classifier
+from bacs.agents.bacs.classifier_components import Classifier
 
 
 def choose_classifier(cll, cfg, epsilon: float) -> Classifier:

@@ -10,7 +10,7 @@ import random
 from typing import Callable, Union
 
 from bacs import Perception
-from bacs.agents import AbstractPerception
+from bacs.agents.bacs.classifier_components import AbstractPerception
 
 
 class Condition(AbstractPerception):
@@ -23,6 +23,8 @@ class Condition(AbstractPerception):
     @property
     def specificity(self) -> int:
         """
+        Counts the number of items different from the wildcard in the condition.
+
         Returns
         -------
         int
@@ -34,6 +36,8 @@ class Condition(AbstractPerception):
     @property
     def wildcard_count(self) -> int:
         """
+        Counts the number of wildcards in the condition.
+
         Returns
         -------
         int
@@ -42,13 +46,35 @@ class Condition(AbstractPerception):
         return sum(1 for attr in self if attr == self.wildcard)
 
 
-    def specialize_with_condition(self, other: Condition) -> None:
+    def specialize_with_condition(
+            self,
+            other: Condition
+        ) -> None:
+        """
+        Specializes the condition with another one.
+
+        Parameters
+        ----------
+        other: Condition
+            Condition object
+        """
         for idx, new_el in enumerate(other):
             if new_el != self.wildcard:
                 self[idx] = new_el
 
 
-    def generalize(self, position=None):
+    def generalize(
+            self,
+            position: int
+        ):
+        """
+        Generalizes the condition at the given position.
+
+        Parameters
+        ----------
+        position: int
+            Index to update
+        """
         self[position] = self.wildcard
 
 
@@ -65,7 +91,7 @@ class Condition(AbstractPerception):
             Function for choosing which ID to generalize from the list of
             available ones
         """
-        specific_ids = [ci for ci, c in enumerate(self) if c != self.wildcard]
+        specific_ids = [i for i, c in enumerate(self) if c != self.wildcard]
         if len(specific_ids) > 0:
             ridx = func(specific_ids)
             self.generalize(ridx)
@@ -118,4 +144,3 @@ class Condition(AbstractPerception):
             if ci != self.wildcard and oi == self.wildcard:
                 return False
         return True
-

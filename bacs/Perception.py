@@ -1,7 +1,4 @@
 import collections.abc
-import itertools
-
-from . import check_types
 
 
 class Perception(collections.abc.Sequence):
@@ -16,13 +13,17 @@ class Perception(collections.abc.Sequence):
         self._items = list()
 
         for el in observation:
-            check_types(oktypes, el)
+            if not isinstance(el, oktypes):
+                raise TypeError(f"Wrong element type: object {el}, type {type(el)}")
 
         self._items.extend(list(observation))
 
     @classmethod
     def empty(cls):
         return cls([], oktypes=(None,))
+
+    def is_empty(self):
+        return len(self._items) == 0
 
     def __getitem__(self, i):
         return self._items[i]
@@ -31,7 +32,7 @@ class Perception(collections.abc.Sequence):
         return len(self._items)
 
     def __repr__(self):
-        return ' '.join(map(str, self))
+        return ''.join(map(str, self))
 
     def __eq__(self, other):
         if len(self) != len(other):

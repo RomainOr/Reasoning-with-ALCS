@@ -10,12 +10,12 @@ import random
 from itertools import chain
 from typing import Optional, List
 
-import bacs.agents.bacs.components.alp_bacs as alp_bacs
-import bacs.agents.bacs.components.genetic_algorithms_bacs as ga
-import bacs.agents.bacs.components.reinforcement_learning_bacs as rl
+import bacs.agents.bacs.components.alp as alp
+import bacs.agents.bacs.components.genetic_algorithms as ga
+import bacs.agents.bacs.components.reinforcement_learning as rl
 from bacs import Perception, TypedList
-from bacs.agents.bacs import Classifier, Configuration
-from bacs.agents.bacs.components.add_classifier_bacs import add_classifier
+from bacs.agents.bacs import Configuration
+from bacs.agents.bacs.classifier_components import Classifier
 
 class ClassifiersList(TypedList):
     """
@@ -66,6 +66,32 @@ class ClassifiersList(TypedList):
 
 
     @staticmethod
+    def merge_newly_built_classifiers(
+            new_list: ClassifiersList,
+            population: ClassifiersList,
+            match_set: ClassifiersList,
+            action_set: ClassifiersList,
+            p1: Perception
+        ) -> None:
+        """
+        Merge classifiers from new_list into self and population
+
+        Parameters
+        ----------
+        new_list
+        population
+        match_set
+        action_set
+        p1: Perception
+        """
+        action_set.extend(new_list)
+        population.extend(new_list)
+        if match_set is not None:
+            new_matching = [cl for cl in new_list if cl.condition.does_match(p1)]
+            match_set.extend(new_matching)
+
+
+    @staticmethod
     def apply_alp(
             population: ClassifiersList,
             match_set: ClassifiersList,
@@ -110,10 +136,10 @@ class ClassifiersList(TypedList):
             cl.set_alp_timestamp(time)
 
             if cl.does_anticipate_correctly(p0, p1):
-                new_cl = alp_bacs.expected_case(last_activated_classifier, cl, p0, p1, time)
+                new_cl = alp.expected_case(last_activated_classifier, cl, p0, p1, time)
                 was_expected_case = True
             else:
-                new_cl = alp_bacs.unexpected_case(cl, p0, p1, time)
+                new_cl = alp.unexpected_case(cl, p0, p1, time)
 
             if cl.is_inadequate():
                 # Removes classifier from population, match set
@@ -128,22 +154,17 @@ class ClassifiersList(TypedList):
             if new_cl is not None:
                 new_cl.tga = time
                 if new_cl.behavioral_sequence:
-                    add_classifier(new_cl, population, new_list, theta_exp)
+                    alp.add_classifier(new_cl, population, new_list, theta_exp)
                 else:
-                    add_classifier(new_cl, action_set, new_list, theta_exp)
+                    alp.add_classifier(new_cl, action_set, new_list, theta_exp)
 
         # No classifier anticipated correctly - generate new one
         if not was_expected_case:
-            new_cl = alp_bacs.cover(p0, action, p1, time, cfg)
-            add_classifier(new_cl, action_set, new_list, theta_exp)
+            new_cl = alp.cover(p0, action, p1, time, cfg)
+            alp.add_classifier(new_cl, action_set, new_list, theta_exp)
 
         # Merge classifiers from new_list into self and population
-        action_set.extend(new_list)
-        population.extend(new_list)
-
-        if match_set is not None:
-            new_matching = [cl for cl in new_list if cl.condition.does_match(p1)]
-            match_set.extend(new_matching)
+        ClassifiersList.merge_newly_built_classifiers(new_list, population, match_set, action_set, p1)
 
 
     @staticmethod
@@ -188,14 +209,14 @@ class ClassifiersList(TypedList):
                 cl.decrease_quality()
             # Expected case
             elif cl.does_anticipate_correctly(p0, p1):
-                new_cl = alp_bacs.expected_case(None, cl, p0, p1, time)
+                new_cl = alp.expected_case(None, cl, p0, p1, time)
             # Unexpected case
             else:
-                new_cl = alp_bacs.unexpected_case(cl, p0, p1, time)
+                new_cl = alp.unexpected_case(cl, p0, p1, time)
 
             if new_cl is not None:
                 new_cl.tga = time
-                add_classifier(new_cl, action_set, new_list, theta_exp)
+                alp.add_classifier(new_cl, action_set, new_list, theta_exp)
 
             # Quality Anticipation check
             if cl.is_inadequate():
@@ -209,12 +230,7 @@ class ClassifiersList(TypedList):
             idx += 1
 
         # Merge classifiers from new_list into action_set and population
-        action_set.extend(new_list)
-        population.extend(new_list)
-
-        if match_set is not None:
-            new_matching = [cl for cl in new_list if cl.condition.does_match(p1)]
-            match_set.extend(new_matching)
+        ClassifiersList.merge_newly_built_classifiers(new_list, population, match_set, action_set, p1)
 
 
     @staticmethod
@@ -283,16 +299,18 @@ class ClassifiersList(TypedList):
                 theta_as
             )
 
+            new_list = ClassifiersList()
             # check for subsumers / similar classifiers
             for child in unique_children:
                 ga.add_classifier(
                     child,
-                    p,
-                    population,
-                    match_set,
                     action_set,
+                    new_list,
                     theta_exp
                 )
+
+            # Merge classifiers from new_list into self and population
+            ClassifiersList.merge_newly_built_classifiers(new_list, population, match_set, action_set, p)
 
 
     def __str__(self):

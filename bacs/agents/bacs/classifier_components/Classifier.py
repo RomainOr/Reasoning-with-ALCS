@@ -10,7 +10,8 @@ import random
 from typing import Optional, Union, Callable, List
 
 from bacs import Perception
-from bacs.agents.bacs import Configuration, Condition, Effect, PMark
+from bacs.agents.bacs import Configuration
+from bacs.agents.bacs.classifier_components import Condition, Effect, PMark
 
 
 class Classifier:
@@ -127,25 +128,6 @@ class Classifier:
     @property
     def fitness(self):
         return self.q * self.r
-
-
-    @property
-    def specified_unchanging_attributes(self) -> List[int]:
-        """
-        Determines the number of specified unchanging attributes in
-        the classifier. An unchanging attribute is one that is anticipated
-        not to change in the effect part.
-
-        Returns
-        -------
-        List[int]
-            list specified unchanging attributes indices
-        """
-        indices = []
-        for idx, (cpi, epi) in enumerate(zip(self.condition, self.effect)):
-            if cpi != self.cfg.classifier_wildcard and epi == self.cfg.classifier_wildcard:
-                indices.append(idx)
-        return indices
 
 
     @property
@@ -317,32 +299,6 @@ class Classifier:
             True if classifier is more general than other
         """
         return self.condition.specificity <= other.condition.specificity
-
-
-    def generalize_unchanging_condition_attribute(
-                self,
-                randomfunc: Callable=random.choice
-            ) -> bool:
-        """
-        Generalizes one randomly unchanging attribute in the condition.
-        An unchanging attribute is one that is anticipated not to change
-        in the effect part.
-
-        Parameters
-        ----------
-        randomfunc: Callable
-            function returning attribute index to generalize
-
-        Returns
-        -------
-        bool
-            True if attribute was generalized, False otherwise
-        """
-        if len(self.specified_unchanging_attributes) > 0:
-            ridx = randomfunc(self.specified_unchanging_attributes)
-            self.condition.generalize(ridx)
-            return True
-        return False
 
 
     def is_marked(self):

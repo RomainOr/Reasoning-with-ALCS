@@ -2,7 +2,8 @@ import random
 from typing import List
 
 from bacs import Perception, TypedList
-from . import Configuration, Condition
+from bacs.agents.bacs import Configuration
+from bacs.agents.bacs.classifier_components import Condition
 
 
 class PMark(TypedList):
@@ -35,7 +36,6 @@ class PMark(TypedList):
         for idx, item in enumerate(perception):
             if item not in self[idx]:
                 self[idx].add(perception[idx])
-                set_ee = False
 
 
     def get_differences(self, p0: Perception) -> Condition:

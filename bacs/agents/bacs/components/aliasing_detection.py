@@ -5,7 +5,8 @@
 """
 
 from bacs import Perception
-from bacs.agents.bacs import Condition, PMark
+from bacs.agents.bacs.classifier_components import PMark
+from bacs.agents.bacs.classifier_components import Condition
 
 
 def is_state_aliased(

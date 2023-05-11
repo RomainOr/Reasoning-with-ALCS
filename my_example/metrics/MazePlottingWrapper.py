@@ -7,6 +7,8 @@
 # General
 from __future__ import unicode_literals
 
+from my_example.metrics.PlottingWrapper import plot_classifiers, plot_steps
+
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -35,7 +37,7 @@ def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metric
     return df
 
 def find_best_classifier(population, situation, cfg):
-    unused_match_set, best_classifier, unused_best_fitness = population.form_match_set(situation)
+    unused_match_set, best_classifier, unused_max_fitness = population.form_match_set(situation)
     return best_classifier
 
 def update_matrix_index(original, tmp_x, tmp_y, action):
@@ -156,34 +158,9 @@ def plot_knowledge(df, metrics_trial_frequency_explore, number_of_exploit_steps,
     ax.set_ylabel("Knowledge [%]", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylim([0, 105])
 
-def plot_steps(df, metrics_trial_frequency_explore, number_of_exploit_steps, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12):
-    if ax is None:
-        ax = plt.gca()
-    explore_df = df.query("phase == 'explore'")
-    exploit_df = df.query("phase == 'exploit'")
-    exploit_df.plot(y='steps_in_trial', ax=ax, c='red', linewidth=0.5, legend=False)
-    if number_of_exploit_steps:
-        ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0], ymin=0, ymax=max(exploit_df['steps_in_trial'])+1, colors='black', linestyle='dashed')
-        ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0]+number_of_exploit_steps[1], ymin=0, ymax=max(exploit_df['steps_in_trial'])+1, colors='black', linestyle='dashed')
-    ax.set_title("Steps", fontsize=TITLE_TEXT_SIZE)
-    ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
-    ax.set_ylabel("Steps", fontsize=AXIS_TEXT_SIZE)
-
-def plot_classifiers(df, metrics_trial_frequency_explore, number_of_exploit_steps, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12, LEGEND_TEXT_SIZE=14):
-    if ax is None:
-        ax = plt.gca()
-    explore_df = df.query("phase == 'explore'")
-    explore_df.plot(y='numerosity', ax=ax, c='blue')
-    explore_df.plot(y='population', ax=ax, c='green')
-    explore_df.plot(y='reliable', ax=ax, c='red')
-    ax.set_title("Classifiers", fontsize=TITLE_TEXT_SIZE)
-    ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
-    ax.set_ylabel("Classifiers", fontsize=AXIS_TEXT_SIZE)
-    ax.legend(fontsize=LEGEND_TEXT_SIZE)
-
 def plot_performance(agent, maze, metrics_df, cfg, env_name, metrics_trial_frequency_explore, number_of_exploit_steps):
     plt.figure(figsize=(13, 10), dpi=100)
-    plt.suptitle(f'BACS Performance in {env_name} environment', fontsize=32)
+    plt.suptitle(f'ALCS Performance in {env_name} environment', fontsize=32)
     ax1 = plt.subplot(221)
     plot_policy(maze, agent, cfg, ax1)
     ax2 = plt.subplot(222)
