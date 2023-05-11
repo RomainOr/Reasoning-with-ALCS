@@ -1,7 +1,4 @@
 import collections.abc
-import itertools
-
-from . import check_types
 
 
 class Perception(collections.abc.Sequence):
@@ -16,7 +13,8 @@ class Perception(collections.abc.Sequence):
         self._items = list()
 
         for el in observation:
-            check_types(oktypes, el)
+            if not isinstance(el, oktypes):
+                raise TypeError(f"Wrong element type: object {el}, type {type(el)}")
 
         self._items.extend(list(observation))
 

@@ -3,14 +3,10 @@
     License, v. 2.0. If a copy of the MPL was not distributed with this
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
-
-from typing import List, Tuple
-
 from beacs import Perception
 from beacs.agents.Agent import Agent, TrialMetrics
-from beacs.agents.beacs import Classifier, ClassifiersList, Configuration
-from beacs.agents.beacs.Condition import Condition
-from beacs.agents.beacs.Effect import Effect
+from beacs.agents.beacs import ClassifiersList, Configuration
+from beacs.agents.beacs.classifier_components import Classifier
 from beacs.agents.beacs.components.action_selection import choose_classifier
 
 class BEACS(Agent):

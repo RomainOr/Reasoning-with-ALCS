@@ -9,7 +9,8 @@ from __future__ import annotations
 from typing import Optional, Union, List
 
 from beacs import Perception
-from beacs.agents.beacs import Configuration, Condition, EffectList, Effect, PMark
+from beacs.agents.beacs import Configuration
+from beacs.agents.beacs.classifier_components import Condition, EffectList, Effect, PMark
 
 
 class Classifier:

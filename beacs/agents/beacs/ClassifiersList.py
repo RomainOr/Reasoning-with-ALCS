@@ -14,11 +14,9 @@ from typing import Optional, List
 import beacs.agents.beacs.components.alp as alp
 import beacs.agents.beacs.components.genetic_algorithms as ga
 import beacs.agents.beacs.components.reinforcement_learning as rl
-import beacs.agents.beacs.components.aliasing_detection as pai
 from beacs import Perception, TypedList
-from beacs.agents.beacs import Classifier, Configuration
-from beacs.agents.beacs.components.add_classifier import add_classifier
-from beacs.agents.beacs.components.build_behavioral_sequences import create_behavioral_classifier
+from beacs.agents.beacs import Configuration
+from beacs.agents.beacs.classifier_components import Classifier
 
 class ClassifiersList(TypedList):
     """
@@ -92,77 +90,33 @@ class ClassifiersList(TypedList):
 
 
     @staticmethod
-    def apply_enhanced_effect_part_check(
-            action_set: ClassifiersList,
+    def merge_newly_built_classifiers(
             new_list: ClassifiersList,
-            p0: Perception,
-            time: int,
-            cfg: Configuration
-        ) -> None:
-        candidates = [cl for cl in action_set if cl.ee]
-        if len(candidates) < 2:
-            return
-        for i, cl1 in enumerate(candidates):
-            for cl2 in candidates[i:]:
-                if cl1.mark == cl2.mark and \
-                not cl1.effect.subsumes(cl2.effect) and \
-                not cl2.effect.subsumes(cl1.effect) and \
-                (cl1.aliased_state == Perception.empty() or cl1.aliased_state == p0) and \
-                (cl2.aliased_state == Perception.empty() or cl2.aliased_state == p0):
-                    new_classifier = cl1.merge_with(cl2, p0, time)
-                    add_classifier(new_classifier, action_set, new_list)
-                    break
-
-
-    @staticmethod
-    def apply_perceptual_aliasing_issue_management(
             population: ClassifiersList,
-            t_2_match_set: ClassifiersList,
-            t_1_match_set: ClassifiersList,
             match_set: ClassifiersList,
             action_set: ClassifiersList,
-            penultimate_classifier: Classifier,
-            potential_cls_for_pai: List(Classifier),
-            new_list: ClassifiersList,
             p0: Perception,
-            p1: Perception,
-            time: int,
-            pai_states_memory,
-            cfg: Configuration
+            p1: Perception
         ) -> None:
-        # First, try to detect if it is time to detect a pai state - no need to compute this every time
-        knowledge_from_match_set = [cl for cl in t_1_match_set if
-            cl.behavioral_sequence is None and
-            (not cl.is_marked() or cl.mark.corresponds_to(p0)) and 
-            (cl.aliased_state == Perception.empty() or cl.aliased_state == p0)
-        ]
-        if pai.should_pai_detection_apply(knowledge_from_match_set, time, cfg.theta_bseq):
-            # We set the related timestamp t_bseq of the classifiers in the match set
-            pai.set_pai_detection_timestamps(knowledge_from_match_set, time)
-            # We check we have enough information from classifiers in the matching set to do the detection
-            enough_information, most_experienced_classifiers = pai.enough_information_to_try_PAI_detection(knowledge_from_match_set, cfg)
-            if enough_information:
-            # The system tries to determine is it suffers from the perceptual aliasing issue
-                if pai.is_perceptual_aliasing_state(most_experienced_classifiers, p0, cfg) > 0:
-                    # Add if needed the new pai state in memory
-                    if p0 not in pai_states_memory:
-                        pai_states_memory.append(p0)
-                else:
-                    # Remove if needed the pai state from memory and delete all behavioral classifiers created for this state
-                    if p0 in pai_states_memory:
-                        pai_states_memory.remove(p0)
-                        behavioral_classifiers_to_delete = [cl for cl in population if cl.pai_state == p0]
-                        for cl in behavioral_classifiers_to_delete:
-                            lists = [x for x in [population, match_set, action_set] if x]
-                            for lst in lists:
-                                lst.safe_remove(cl)
+        """
+        Merge classifiers from new_list into self and population
 
-        # Create new behavioral classifiers
-        if p0 in pai_states_memory and len(potential_cls_for_pai) > 0:
-            for candidate in potential_cls_for_pai:
-                new_cl = create_behavioral_classifier(penultimate_classifier, candidate, p1, p0, time)
-                if new_cl:
-                    add_classifier(new_cl, t_2_match_set, new_list)
+        Parameters
+        ----------
+        new_list
+        population
+        match_set
+        action_set
+        p0: Perception
+        p1: Perception
+        """
+        population.extend(new_list)
+        if match_set:
+            new_matching = [cl for cl in new_list if cl.does_match(p1)]
+            match_set.extend(new_matching)
+        if action_set:
+            new_action_cls = [cl for cl in new_list if cl.does_match(p0) and cl.action == action_set[0].action and cl.behavioral_sequence == action_set[0].behavioral_sequence]
+            action_set.extend(new_action_cls)
 
 
     @staticmethod
@@ -236,31 +190,25 @@ class ClassifiersList(TypedList):
 
             if new_cl is not None:
                 if new_cl.does_match(p0):
-                    add_classifier(new_cl, action_set, new_list)
+                    alp.add_classifier(new_cl, action_set, new_list)
                 else:
-                    add_classifier(new_cl, population, new_list)
+                    alp.add_classifier(new_cl, population, new_list)
 
         # No classifier anticipated correctly - generate new one through covering
         # only if we are not in the case of classifiers having behavioral sequences
         if not was_expected_case:
             if (len(action_set) > 0 and action_set[0].behavioral_sequence is None) or len(action_set) == 0:
                 new_cl = alp.cover(p0, action, p1, time, cfg)
-                add_classifier(new_cl, action_set, new_list)
+                alp.add_classifier(new_cl, action_set, new_list)
 
         if cfg.do_pep:
-            ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
+            alp.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
 
         if cfg.bs_max > 0 and penultimate_classifier is not None and len(potential_cls_for_pai) > 0:
-            ClassifiersList.apply_perceptual_aliasing_issue_management(population, t_2_match_set, t_1_match_set, match_set, action_set, penultimate_classifier, potential_cls_for_pai, new_list, p0, p1, time, pai_states_memory, cfg)
+            alp.apply_perceptual_aliasing_issue_management(population, t_2_match_set, t_1_match_set, match_set, action_set, penultimate_classifier, potential_cls_for_pai, new_list, p0, p1, time, pai_states_memory, cfg)
 
         # Merge classifiers from new_list into self and population
-        population.extend(new_list)
-        if match_set:
-            new_matching = [cl for cl in new_list if cl.does_match(p1)]
-            match_set.extend(new_matching)
-        if action_set:
-            new_action_cls = [cl for cl in new_list if cl.does_match(p0) and cl.action == action_set[0].action and cl.behavioral_sequence == action_set[0].behavioral_sequence]
-            action_set.extend(new_action_cls)
+        ClassifiersList.merge_newly_built_classifiers(new_list, population, match_set, action_set, p0, p1)
 
 
     @staticmethod
@@ -331,15 +279,17 @@ class ClassifiersList(TypedList):
                 theta_as
             )
 
+            new_list = ClassifiersList()
             # check for subsumers / similar classifiers
             for child in unique_children:
                 ga.add_classifier(
                     child,
-                    p1,
-                    population,
-                    match_set,
-                    action_set
+                    action_set,
+                    new_list
                 )
+
+            # Merge classifiers from new_list into self and population
+            ClassifiersList.merge_newly_built_classifiers(new_list, population, match_set, action_set, p0, p1)
 
 
     def __str__(self):

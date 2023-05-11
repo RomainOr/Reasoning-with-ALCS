@@ -2,7 +2,8 @@ import random
 from typing import List
 
 from beacs import Perception, TypedList
-from . import Configuration, Condition
+from beacs.agents.beacs import Configuration
+from beacs.agents.beacs.classifier_components import Condition
 
 
 class PMark(TypedList):

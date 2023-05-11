@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from beacs import Perception
-from beacs.agents import AbstractPerception
+from beacs.agents.beacs.classifier_components import AbstractPerception
 
 class Effect(AbstractPerception):
     """
