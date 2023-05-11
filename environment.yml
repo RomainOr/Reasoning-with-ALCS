@@ -7,6 +7,7 @@ dependencies:
   - aiohttp-cors=0.7.0=py_0
   - aiosignal=1.3.1=pyhd8ed1ab_0
   - anyio=3.5.0=py310hecd8cb5_0
+  - appdirs=1.4.4=pyhd3eb1b0_0
   - appnope=0.1.2=py310hecd8cb5_1001
   - argon2-cffi=21.3.0=pyhd3eb1b0_0
   - argon2-cffi-bindings=21.2.0=py310hca72f7f_0
@@ -135,12 +136,14 @@ dependencies:
   - pandocfilters=1.5.0=pyhd3eb1b0_0
   - parmap=1.6.0=pyhd8ed1ab_0
   - parso=0.8.3=pyhd3eb1b0_0
+  - patsy=0.5.3=py310hecd8cb5_0
   - pexpect=4.8.0=pyhd3eb1b0_3
   - pickleshare=0.7.5=pyhd3eb1b0_1003
   - pillow=9.5.0=py310h6b2f720_0
   - pip=23.1.2=pyhd8ed1ab_0
   - pkgutil-resolve-name=1.3.10=pyhd8ed1ab_0
   - platformdirs=3.5.0=pyhd8ed1ab_0
+  - pooch=1.4.0=pyhd3eb1b0_0
   - prometheus_client=0.13.1=pyhd8ed1ab_0
   - prompt-toolkit=3.0.36=py310hecd8cb5_0
   - protobuf=3.20.3=py310h7a76584_1
@@ -173,6 +176,8 @@ dependencies:
   - readline=8.2=h9e318b2_1
   - requests=2.29.0=pyhd8ed1ab_0
   - rsa=4.9=pyhd8ed1ab_0
+  - scipy=1.10.1=py310ha516a68_1
+  - seaborn=0.12.2=py310hecd8cb5_0
   - send2trash=1.8.0=pyhd3eb1b0_1
   - setproctitle=1.2.2=py310hca72f7f_0
   - setuptools=67.7.2=pyhd8ed1ab_0
@@ -183,6 +188,7 @@ dependencies:
   - sqlite=3.41.2=h2b0dec6_1
   - stack_data=0.2.0=pyhd3eb1b0_0
   - statistics=1.0.3.5=py310hecd8cb5_1
+  - statsmodels=0.13.5=py310h7b7cdfe_1
   - terminado=0.17.1=py310hecd8cb5_0
   - testpath=0.6.0=pyhd8ed1ab_0
   - tinycss2=1.2.1=py310hecd8cb5_0
