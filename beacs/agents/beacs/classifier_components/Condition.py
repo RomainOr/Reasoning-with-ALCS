@@ -10,7 +10,7 @@ import random
 from typing import Callable, Union
 
 from beacs import Perception
-from beacs.agents import AbstractPerception
+from beacs.agents.beacs.classifier_components import AbstractPerception
 
 
 class Condition(AbstractPerception):

@@ -9,8 +9,7 @@ from typing import Callable, Dict
 
 import numpy as np
 
-from beacs import Perception
-from beacs.agents.beacs.components.subsumption import find_subsumers
+from beacs.agents.beacs.components.subsumption import does_subsume
 
 
 def should_apply(
@@ -261,43 +260,50 @@ def _is_preferred_to_delete(
 
 
 def add_classifier(
-        cl, 
-        p: Perception,
-        population, 
-        match_set, 
-        action_set
+        child, 
+        population,
+        new_list
     )-> None:
     """
-    Finds subsumer/similar classifier, if present - increase its numerosity,
-    else add this new classifier
+    Looks for subsuming / similar classifiers in the population of classifiers
+    and those created in the current GA run.
+
+    If a similar classifier was found it's numerosity is increased,
+    otherwise `child_cl` is added to `new_list`.
 
     Parameters
     ----------
-    cl:
-        Newly created classifier
-    p: Perception
-        Current perception
+    child:
+        New classifier to examine
     population:
-        Population of classifiers
-    match_set:
-        Match set
-    action_set:
-        Action set
+        List of classifiers
+    new_list:
+        A list of newly created classifiers in this GA run
     """
-    # Find_subsumers computes subsumer or classifier that are equal
-    subsumers = find_subsumers(cl, action_set)
-    # Check if subsumers exist, meaning that old_cl is mandatory not None
-    if len(subsumers) == 0:
-        old_cl = next(filter(lambda other: cl == other, action_set), None)
-        if old_cl:
-            if not old_cl.is_marked():
-                old_cl.num += 1
-        else:
-            population.append(cl)
-            action_set.append(cl)
-            if match_set is not None and cl.does_match(p):
-                match_set.append(cl)
+    old_cl = None
+    equal_cl = None
+
+    # Look if there is a classifier that subsumes the insertion candidate
+    for cl in population:
+        if does_subsume(cl, child):
+            if old_cl is None or cl.is_more_general(old_cl):
+                old_cl = cl
+        elif cl == child:
+            equal_cl = cl
+
+    # Check if there is similar classifier already in the population, previously found
+    if old_cl is None:
+        old_cl = equal_cl
+
+    # Check if any similar classifier was in this GA run
+    if old_cl is None:
+        for cl in new_list:
+            if cl == child:
+                old_cl = cl
+                break
+
+    if old_cl is None:
+        new_list.append(child)
     else:
-        old_cl = subsumers[0]
         if not old_cl.is_marked():
-            old_cl.num += 1
+                old_cl.num += 1

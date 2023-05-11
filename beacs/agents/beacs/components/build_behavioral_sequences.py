@@ -7,7 +7,7 @@
 from typing import Optional
 
 from beacs import Perception
-from beacs.agents.beacs import Classifier
+from beacs.agents.beacs.classifier_components import Classifier
 
 def updated_passthrough(
         child_effect, 

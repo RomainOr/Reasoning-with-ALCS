@@ -5,7 +5,8 @@
 """
 
 from beacs import Perception
-from beacs.agents.beacs import ClassifiersList, Condition, Configuration, Effect, PMark
+from beacs.agents.beacs import ClassifiersList, Configuration
+from beacs.agents.beacs.classifier_components import Condition, Effect, PMark
 
 
 def is_state_aliased(
