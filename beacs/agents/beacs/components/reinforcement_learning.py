@@ -4,8 +4,7 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-
-import random
+from beacs import RandomNumberGenerator
 
 
 def update_classifier_q_learning(
@@ -65,7 +64,7 @@ def update_classifier_double_q_learning(
     gamma: float
         Reinforcement rate
     """
-    if random.random() < 0.5:
+    if RandomNumberGenerator.random() < 0.5:
         cl.err += beta_rl * (abs(step_reward + gamma * max_fitness_rb - cl.ra) - cl.err)
         cl.ra += beta_rl * (step_reward + gamma * max_fitness_rb - cl.ra)
     else:

@@ -1,5 +1,3 @@
-import random
-
 PATH_MAPPING = 0
 WALL_MAPPING = 1
 OBSTACLE_MAPPING = 3

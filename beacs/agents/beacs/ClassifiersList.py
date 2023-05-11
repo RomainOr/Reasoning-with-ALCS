@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-import random
 from itertools import chain
 from operator import attrgetter
 from typing import Optional, List
@@ -14,7 +13,7 @@ from typing import Optional, List
 import beacs.agents.beacs.components.alp as alp
 import beacs.agents.beacs.components.genetic_algorithms as ga
 import beacs.agents.beacs.components.reinforcement_learning as rl
-from beacs import Perception, TypedList
+from beacs import Perception, TypedList, RandomNumberGenerator
 from beacs.agents.beacs import Configuration
 from beacs.agents.beacs.classifier_components import Classifier
 
@@ -255,7 +254,7 @@ class ClassifiersList(TypedList):
             ga.mutation(child1, child2, mu)
 
             # Execute cross-over
-            if random.random() < chi:
+            if RandomNumberGenerator.random() < chi:
                 if child1.effect == child2.effect:
                     ga.two_point_crossover(child1, child2)
 
@@ -268,26 +267,25 @@ class ClassifiersList(TypedList):
             child2.q /= 2
 
             # We are interested only in classifiers with specialized condition
-            unique_children = {cl for cl in [child1, child2]
+            children = {cl for cl in [child1, child2]
                                if cl.condition.specificity > 0}
 
             ga.delete_classifiers(
                 population,
                 match_set,
                 action_set,
-                len(unique_children),
+                len(children),
                 theta_as
             )
 
             new_list = ClassifiersList()
             # check for subsumers / similar classifiers
-            for child in unique_children:
+            for child in children:
                 ga.add_classifier(
                     child,
                     action_set,
                     new_list
                 )
-
             # Merge classifiers from new_list into self and population
             ClassifiersList.merge_newly_built_classifiers(new_list, population, match_set, action_set, p0, p1)
 

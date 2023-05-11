@@ -4,11 +4,10 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from random import random
 from typing import Optional
 
 import beacs.agents.beacs.components.aliasing_detection as pai
-from beacs import Perception
+from beacs import Perception, RandomNumberGenerator
 from beacs.agents.beacs import ClassifiersList, Configuration
 from beacs.agents.beacs.classifier_components import Classifier
 from beacs.agents.beacs.components.aliasing_detection import is_state_aliased
@@ -96,7 +95,7 @@ def expected_case(
             child.generalize_specific_attribute_randomly()
             spec -= 1
         while spec + spec_new > child.cfg.u_max:
-            if spec > 0 and random() < 0.5:
+            if spec > 0 and RandomNumberGenerator.random() < 0.5:
                 child.generalize_specific_attribute_randomly()
                 spec -= 1
             else:

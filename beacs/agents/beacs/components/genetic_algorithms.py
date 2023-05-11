@@ -4,11 +4,9 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-import random
 from typing import Callable, Dict
 
-import numpy as np
-
+from beacs import RandomNumberGenerator
 from beacs.agents.beacs.components.subsumption import does_subsume
 
 
@@ -38,6 +36,7 @@ def should_apply(
     bool
         True if GA should be applied, False otherwise
     """
+    return False
     if action_set is None or not action_set:
         return False
 
@@ -95,8 +94,8 @@ def roulette_wheel_selection(
         Two classifiers selected as parents
     """
     def _weighted_random_choice(choices: Dict):
-        max = sum(choices.values())
-        pick = random.uniform(0, max)
+        maximum = sum(choices.values())
+        pick = RandomNumberGenerator.uniform(0, maximum)
         current = 0
         for key, value in choices.items():
             current += value
@@ -104,6 +103,7 @@ def roulette_wheel_selection(
                 return key
 
     choices = {cl: fitnessfunc(cl) for cl in population}
+    choices = dict(sorted(choices.items(), key=lambda item: item[1]))
     parent1 = _weighted_random_choice(choices)
     parent2 = _weighted_random_choice(choices)
     return parent1, parent2
@@ -134,23 +134,23 @@ def mutation(
         #
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] == cl2.cfg.classifier_wildcard:
-            if random.random() < mu and cl1.effect.enhanced_trace_ga[idx]:
+            if RandomNumberGenerator.random() < mu and cl1.effect.enhanced_trace_ga[idx]:
                 cl1.condition.generalize(idx)
             continue
         #
         if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
             cl2.condition[idx] != cl2.cfg.classifier_wildcard:
-            if random.random() < mu and cl2.effect.enhanced_trace_ga[idx]:
+            if RandomNumberGenerator.random() < mu and cl2.effect.enhanced_trace_ga[idx]:
                 cl2.condition.generalize(idx)
             continue
         #
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
             cl1.behavioral_sequence is None and cl1.effect.enhanced_trace_ga[idx] and \
-                random.random() < mu:
+                RandomNumberGenerator.random() < mu:
             cl1.condition.generalize(idx)
         if cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
             cl2.behavioral_sequence is None and cl2.effect.enhanced_trace_ga[idx] and \
-                random.random() < mu:
+                RandomNumberGenerator.random() < mu:
             cl2.condition.generalize(idx)
 
 
@@ -169,7 +169,7 @@ def two_point_crossover(
     donor
         Classifier
     """
-    left, right = sorted(np.random.choice(
+    left, right = sorted(RandomNumberGenerator.choice(
         range(0, parent.cfg.classifier_length + 1), 2, replace=False))
 
     # Extract chromosomes from condition parts
@@ -206,13 +206,12 @@ def delete_classifiers(
         The action set size threshold (θas ∈ N) specifies
         the maximal number of classifiers in an action set.
     """
-    while (insize + sum(cl.num for cl in action_set)) > theta_as:
-        
+    while (insize + sum(cl.num for cl in action_set)) > theta_as: 
         # We must delete at least one
         set_to_iterate = [cl for cl in action_set.expand()]
-        cl_del = random.choice(set_to_iterate)
+        cl_del = RandomNumberGenerator.choice(set_to_iterate)
         for cl in set_to_iterate:
-            if random.random() < .3:
+            if RandomNumberGenerator.random() < .3:
                 if _is_preferred_to_delete(cl_del, cl):
                     cl_del = cl
 
@@ -306,4 +305,4 @@ def add_classifier(
         new_list.append(child)
     else:
         if not old_cl.is_marked():
-                old_cl.num += 1
+                old_cl.num += child.num
