@@ -3,7 +3,7 @@
     License, v. 2.0. If a copy of the MPL was not distributed with this
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
-from bacs import Perception
+from bacs import Perception, RandomNumberGenerator
 from bacs.agents.Agent import Agent, TrialMetrics
 from bacs.agents.bacs import ClassifiersList, Configuration
 from bacs.agents.bacs.classifier_components import Classifier
@@ -16,6 +16,7 @@ class BACS(Agent):
                  population: ClassifiersList=None) -> None:
         self.cfg = cfg
         self.population = population or ClassifiersList()
+        RandomNumberGenerator.seed(self.cfg.seed)
 
     def get_population(self)-> ClassifiersList:
         return self.population
@@ -76,7 +77,6 @@ class BACS(Agent):
         steps = 0
         raw_state, _info = env.reset()
         state = self.cfg.environment_adapter.to_genotype(raw_state)
-        action = env.action_space.sample()
         last_reward = 0
         prev_state = Perception.empty()
         action_set = ClassifiersList()
@@ -201,7 +201,7 @@ class BACS(Agent):
                         ClassifiersList(),
                         action_set,
                         prev_state,
-                        action,
+                        t_1_activated_classifier.action,
                         state,
                         t_2_activated_classifier,
                         time + steps,

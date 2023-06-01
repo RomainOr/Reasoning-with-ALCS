@@ -4,12 +4,9 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-import random
 from typing import Callable, Dict
 
-import numpy as np
-
-from bacs import Perception
+from bacs import RandomNumberGenerator
 from bacs.agents.bacs.components.subsumption import does_subsume
 
 
@@ -92,8 +89,8 @@ def roulette_wheel_selection(population, fitnessfunc: Callable):
         two classifiers selected as parents
     """
     def _weighted_random_choice(choices: Dict):
-        max = sum(choices.values())
-        pick = random.uniform(0, max)
+        maximum = sum(choices.values())
+        pick = RandomNumberGenerator.uniform(0, maximum)
         current = 0
         for key, value in choices.items():
             current += value
@@ -113,7 +110,7 @@ def generalizing_mutation(cl, mu: float) -> None:
     generalized with `mu` probability.
     """
     for idx, cond in enumerate(cl.condition):
-        if cond != cl.cfg.classifier_wildcard and random.random() < mu:
+        if cond != cl.cfg.classifier_wildcard and RandomNumberGenerator.random() < mu:
             cl.condition.generalize(idx)
 
 
@@ -129,7 +126,7 @@ def two_point_crossover(parent, donor) -> None:
     donor
         Classifier
     """
-    left, right = sorted(np.random.choice(
+    left, right = sorted(RandomNumberGenerator.choice(
         range(0, parent.cfg.classifier_length + 1), 2, replace=False))
 
     assert left < right
@@ -160,28 +157,24 @@ def delete_classifiers(population, match_set, action_set,
         The action set size threshold (θas ∈ N) specifies
         the maximal number of classifiers in an action set.
     """
-    while (insize + sum(cl.num for cl in action_set)) > theta_as:
-        cl_del = None
+    while (insize + sum(cl.num for cl in action_set)) > theta_as: 
+        # We must delete at least one
+        set_to_iterate = [cl for cl in action_set.expand()]
+        cl_del = RandomNumberGenerator.choice(set_to_iterate)
+        for cl in set_to_iterate:
+            if RandomNumberGenerator.random() < .3:
+                if _is_preferred_to_delete(cl_del, cl):
+                    cl_del = cl
 
-        while cl_del is None:  # We must delete at least one
-            set_to_iterate = [cl for cl in action_set.expand()]
-            for cl in set_to_iterate:
-                if random.random() < .3:
-                    if cl_del is None:
-                        cl_del = cl
-                    else:
-                        if _is_preferred_to_delete(cl_del, cl):
-                            cl_del = cl
+        if cl_del.num > 1:
+            cl_del.num -= 1
+        else:
+            # Removes classifier from population, match set
+            # and current list
+            lists = [x for x in [population, match_set, action_set] if x]
+            for lst in lists:
+                lst.safe_remove(cl_del)
 
-        if cl_del is not None:
-            if cl_del.num > 1:
-                cl_del.num -= 1
-            else:
-                # Removes classifier from population, match set
-                # and current list
-                lists = [x for x in [population, match_set, action_set] if x]
-                for lst in lists:
-                    lst.safe_remove(cl_del)
 
 
 def _is_preferred_to_delete(cl_del, cl) -> bool:

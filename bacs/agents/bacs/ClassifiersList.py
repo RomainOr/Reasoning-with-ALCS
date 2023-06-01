@@ -6,14 +6,13 @@
 
 from __future__ import annotations
 
-import random
 from itertools import chain
 from typing import Optional, List
 
 import bacs.agents.bacs.components.alp as alp
 import bacs.agents.bacs.components.genetic_algorithms as ga
 import bacs.agents.bacs.components.reinforcement_learning as rl
-from bacs import Perception, TypedList
+from bacs import Perception, TypedList, RandomNumberGenerator
 from bacs.agents.bacs import Configuration
 from bacs.agents.bacs.classifier_components import Classifier
 
@@ -40,15 +39,7 @@ class ClassifiersList(TypedList):
 
 
     def form_action_set(self, action_classifier: Classifier) -> ClassifiersList:
-        if action_classifier.behavioral_sequence is None:
-            matching = [cl for cl in self if cl.action == action_classifier.action and cl.behavioral_sequence is None]
-        else :
-            matching = [cl for cl in self if cl.behavioral_sequence == action_classifier.behavioral_sequence and cl.action == action_classifier.action]
-        return ClassifiersList(*matching)
-
-
-    def form_action_set_acs2(self, action: int) -> ClassifiersList:
-        matching = [cl for cl in self if cl.action == action]
+        matching = [cl for cl in self if cl.behavioral_sequence == action_classifier.behavioral_sequence and cl.action == action_classifier.action]
         return ClassifiersList(*matching)
 
 
@@ -276,7 +267,7 @@ class ClassifiersList(TypedList):
             ga.generalizing_mutation(child2, mu)
 
             # Execute cross-over
-            if random.random() < chi:
+            if RandomNumberGenerator.random() < chi:
                 if child1.effect == child2.effect:
                     ga.two_point_crossover(child1, child2)
 

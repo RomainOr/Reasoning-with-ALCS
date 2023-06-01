@@ -52,6 +52,6 @@ class Lab1(AbstractMaze):
     def _insert_animat(self):
         starting_position_x = [1,1,12,12]
         starting_position_y = [1,10,1,10]
-        r = np.random.randint(4)
+        r = self.rng.integers(4)
         self.pos_x = starting_position_x[r]
         self.pos_y = starting_position_y[r]

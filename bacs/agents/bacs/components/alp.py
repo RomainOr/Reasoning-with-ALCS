@@ -4,10 +4,9 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from random import random
 from typing import Optional
 
-from bacs import Perception
+from bacs import Perception, RandomNumberGenerator
 from bacs.agents.bacs import Configuration
 from bacs.agents.bacs.classifier_components import Classifier
 from bacs.agents.bacs.components.aliasing_detection import is_state_aliased
@@ -104,7 +103,7 @@ def expected_case(
             child.generalize_specific_attribute_randomly()
             spec -= 1
         while spec + spec_new > child.cfg.u_max:
-            if spec > 0 and random() < 0.5:
+            if spec > 0 and RandomNumberGenerator.random() < 0.5:
                 child.generalize_specific_attribute_randomly()
                 spec -= 1
             else:

@@ -6,8 +6,7 @@
 
 from __future__ import annotations
 
-import random
-from typing import Optional, Union, Callable, List
+from typing import Optional, Union, List
 
 from bacs import Perception
 from bacs.agents.bacs import Configuration
