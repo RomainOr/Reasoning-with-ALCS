@@ -36,7 +36,6 @@ def should_apply(
     bool
         True if GA should be applied, False otherwise
     """
-    return False
     if action_set is None or not action_set:
         return False
 
@@ -103,7 +102,6 @@ def roulette_wheel_selection(
                 return key
 
     choices = {cl: fitnessfunc(cl) for cl in population}
-    choices = dict(sorted(choices.items(), key=lambda item: item[1]))
     parent1 = _weighted_random_choice(choices)
     parent2 = _weighted_random_choice(choices)
     return parent1, parent2
@@ -305,4 +303,4 @@ def add_classifier(
         new_list.append(child)
     else:
         if not old_cl.is_marked():
-                old_cl.num += child.num
+            old_cl.num += child.num
