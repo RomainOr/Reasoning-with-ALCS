@@ -5,10 +5,8 @@
 """
 
 import io
-import random
 import sys
 import gym
-from gym.wrappers import TimeLimit
 import networkx as nx
 import numpy as np
 from gym import spaces, utils
@@ -28,7 +26,7 @@ class MazeObservationSpace(gym.Space):
         gym.Space.__init__(self, (self.n,), str)
 
     def sample(self):
-        return tuple(random.choice([str(PATH_MAPPING), str(WALL_MAPPING), str(EXIT_MAPPING), str(OBSTACLE_MAPPING)]) for _ in range(self.n))
+        return tuple(self.np_random.choice([str(PATH_MAPPING), str(WALL_MAPPING), str(EXIT_MAPPING), str(OBSTACLE_MAPPING)]) for _ in range(self.n))
 
     def contains(self, x):
         return all(elem in (str(PATH_MAPPING), str(WALL_MAPPING), str(EXIT_MAPPING), str(ANIMAT_MARKER), str(OBSTACLE_MAPPING)) for elem in x)
@@ -76,9 +74,9 @@ class AbstractMaze(gym.Env):
     def step(self, action):
         self._elapsed_steps += 1
         previous_observation = self._observe()
-        if random.random() < self.prob_slippery:
+        if self.np_random.random() < self.prob_slippery:
             self._take_action(
-                random.randint(0, len(ACTION_LOOKUP)-1),
+                self.np_random.integers(len(ACTION_LOOKUP)),
                 previous_observation
             )
         else:
@@ -196,7 +194,7 @@ class AbstractMaze(gym.Env):
     def _observe(self):
         n, ne, e, se, s, sw, w, nw =  self.maze.perception(self.pos_x, self.pos_y)
         if self.random_attribute_length == 1:
-            return n, ne, e, se, s, sw, w, nw, str(random.randint(0, 1))
+            return n, ne, e, se, s, sw, w, nw, str(self.np_random.integers(2))
         else:
             return n, ne, e, se, s, sw, w, nw
         
@@ -258,7 +256,7 @@ class AbstractMaze(gym.Env):
 
     def _insert_animat(self):
         possible_coords = self.maze.get_possible_insertion_coordinates()
-        starting_position = random.choice(possible_coords)
+        starting_position = self.np_random.choice(possible_coords)
         self.pos_x = starting_position[0]
         self.pos_y = starting_position[1]
 

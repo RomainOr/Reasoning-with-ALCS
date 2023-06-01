@@ -1,7 +1,6 @@
-import random
 from typing import List
 
-from beacs import Perception, TypedList
+from beacs import Perception, TypedList, RandomNumberGenerator
 from beacs.agents.beacs import Configuration
 from beacs.agents.beacs.classifier_components import Condition
 
@@ -103,7 +102,7 @@ class PMark(TypedList):
         if nr1 > 0:
             possible_idx = [pi for pi, p in enumerate(p0) if
                             p not in self[pi] and len(self[pi]) > 0]
-            rand_idx = random.choice(possible_idx)
+            rand_idx = RandomNumberGenerator.choice(possible_idx)
             diff[rand_idx] = p0[rand_idx]
         elif nr2 > 0:
             for idx, item in enumerate(self):

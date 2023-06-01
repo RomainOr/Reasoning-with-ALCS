@@ -9,7 +9,6 @@ from __future__ import unicode_literals
 
 from my_example.metrics.PlottingWrapper import plot_classifiers, plot_rewards
 
-import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt

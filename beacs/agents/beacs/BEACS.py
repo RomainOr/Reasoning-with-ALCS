@@ -3,7 +3,7 @@
     License, v. 2.0. If a copy of the MPL was not distributed with this
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
-from beacs import Perception
+from beacs import Perception, RandomNumberGenerator
 from beacs.agents.Agent import Agent, TrialMetrics
 from beacs.agents.beacs import ClassifiersList, Configuration
 from beacs.agents.beacs.classifier_components import Classifier
@@ -18,6 +18,7 @@ class BEACS(Agent):
         self.cfg = cfg
         self.population = population or ClassifiersList()
         self.pai_states_memory = []
+        RandomNumberGenerator.seed(self.cfg.seed)
 
     def get_population(self)-> ClassifiersList:
         return self.population
