@@ -4,9 +4,9 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-import random
 from itertools import groupby
 
+from beacs import RandomNumberGenerator
 from beacs.agents.beacs.classifier_components import Classifier
 
 
@@ -32,7 +32,7 @@ def choose_classifier(
     -------
     Classifier
     """
-    if random.random() < epsilon:
+    if RandomNumberGenerator.random() < epsilon:
         return explore(cll, cfg)
 
     return choose_fittest_classifier(cll, cfg)
@@ -63,7 +63,7 @@ def explore(
     Classifier
         Chosen classifier
     """
-    rand = random.random()
+    rand = RandomNumberGenerator.random()
     if rand < pb:
         return choose_random_classifiers(cll, cfg)
     elif rand < pb + (1. - pb)/2.: #pb+ (1. - pb)/2. with 2 being the number of biases
@@ -142,7 +142,7 @@ def choose_action_from_knowledge_array(
 
         classifiers_that_match_action = [cl for cl in cll if cl.action == action]
         if len(classifiers_that_match_action) > 0:
-            idx = random.randint(0, len(classifiers_that_match_action) -1)
+            idx = RandomNumberGenerator.integers(len(classifiers_that_match_action))
             return classifiers_that_match_action[idx]
 
     return choose_random_classifiers(cll, cfg)
@@ -168,7 +168,7 @@ def choose_random_classifiers(
     Classifier
     """
     nb_of_cll = len(cll)
-    rand = random.randint(0, nb_of_cll + cfg.number_of_possible_actions - 1)
+    rand = RandomNumberGenerator.integers(nb_of_cll + cfg.number_of_possible_actions)
     if rand < nb_of_cll:
         return cll[rand]
     action = rand - nb_of_cll

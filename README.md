@@ -10,7 +10,7 @@ Then, you have to create a conda environment according to the environment file i
 ` conda env create -f environment.yml `
 
 The main libraires used within this project are : 
-` gym numpy matplotlib parmap statistics ray pandas networkx jupyter-notebook`
+` gym numpy matplotlib parmap statistics ray pandas networkx jupyter-notebook seaborn statsmodels`
 
 ## License
 
