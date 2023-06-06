@@ -1,2 +1,2 @@
 from .Agent import Agent
-from .AbstractPerception import AbstractPerception
+from .EnvironmentAdapter import EnvironmentAdapter

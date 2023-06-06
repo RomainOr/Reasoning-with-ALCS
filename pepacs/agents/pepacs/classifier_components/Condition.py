@@ -6,11 +6,10 @@
 
 from __future__ import annotations
 
-import random
 from typing import Callable, Union
 
-from pepacs import Perception
-from pepacs.agents import AbstractPerception
+from pepacs import Perception, RandomNumberGenerator
+from pepacs.agents.pepacs.classifier_components import AbstractPerception
 
 
 class Condition(AbstractPerception):
@@ -54,7 +53,7 @@ class Condition(AbstractPerception):
 
     def generalize_specific_attribute_randomly(
             self, 
-            func: Callable = random.choice
+            func: Callable = RandomNumberGenerator.choice
         ) -> None:
         """
         Generalizes one randomly selected specified attribute.

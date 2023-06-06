@@ -6,11 +6,11 @@
 
 from __future__ import annotations
 
-import random
-from typing import Optional, Union, Callable, List
+from typing import Optional, Union, List, Callable
 
-from pepacs import Perception
-from pepacs.agents.pepacs import Configuration, Condition, Effect, PMark, ProbabilityEnhancedAttribute
+from pepacs import Perception, RandomNumberGenerator
+from pepacs.agents.pepacs import Configuration
+from pepacs.agents.pepacs.classifier_components import Condition, Effect, PMark, ProbabilityEnhancedAttribute
 
 
 class Classifier:
@@ -132,45 +132,8 @@ class Classifier:
 
 
     @property
-    def specified_unchanging_attributes(self) -> List[int]:
-        """
-        Determines the number of specified unchanging attributes in
-        the classifier. An unchanging attribute is one that is anticipated
-        not to change in the effect part.
-
-        Returns
-        -------
-        List[int]
-            list specified unchanging attributes indices
-        """
-        indices = []
-        for idx, (cpi, epi) in enumerate(zip(self.condition, self.effect)):
-            if isinstance(epi, ProbabilityEnhancedAttribute):
-                if cpi != self.cfg.classifier_wildcard and \
-                        epi.does_contain(cpi):
-                    indices.append(idx)
-            else:
-                if cpi != self.cfg.classifier_wildcard and \
-                        epi == self.cfg.classifier_wildcard:
-                    indices.append(idx)
-        return indices
-
-
-    @property
     def specificity(self):
         return self.condition.specificity / len(self.condition)
-
-
-    def does_anticipate_change(self) -> bool:
-        """
-        Checks whether any change in environment is anticipated
-
-        Returns
-        -------
-        bool
-            true if the effect part contains any specified attributes
-        """
-        return self.effect.specify_change
 
 
     def is_enhanced(self):
@@ -183,49 +146,89 @@ class Classifier:
 
     def is_inadequate(self) -> bool:
         return self.q < self.cfg.theta_i
+        self.talp = time
 
 
-    def increase_experience(self) -> int:
-        self.exp += 1
-        return self.exp
-
-
-    def increase_quality(self) -> float:
-        self.q += self.cfg.beta_alp * (1 - self.q)
-        return self.q
-
-
-    def decrease_quality(self) -> float:
-        self.q -= self.cfg.beta_alp * self.q
-        return self.q
-
-
-    def specialize(
-            self,
-            previous_situation: Perception,
-            situation: Perception
-        ) -> None:
+    def is_more_general(self, other: Classifier) -> bool:
         """
-        Specializes the effect part where necessary to correctly anticipate
-        the changes from p0 to p1.
+        Checks if the classifiers condition is formally
+        more general than `other`s.
 
         Parameters
         ----------
-        previous_situation: Perception
-        situation: Perception
+        other: Classifier
+            other classifier to compare
+
+        Returns
+        -------
+        bool
+            True if classifier is more general than other
         """
-        for idx, _ in enumerate(situation):
-            if self.effect[idx] != self.cfg.classifier_wildcard:
-                # If we have a specialized attribute don't change it.
-                continue
-            if previous_situation[idx] != situation[idx]:
-                if self.effect[idx] == self.cfg.classifier_wildcard:
-                    self.effect[idx] = situation[idx]
-                elif self.ee:
-                    if not isinstance(self.effect[idx], ProbabilityEnhancedAttribute):
-                        self.effect[idx] = ProbabilityEnhancedAttribute(self.effect[idx])
-                    self.effect[idx].insert_symbol(situation[idx])
-                self.condition[idx] = previous_situation[idx]
+        return self.condition.specificity <= other.condition.specificity
+
+
+    def is_marked(self):
+        return self.mark.is_marked()
+
+
+    def is_experienced(self) -> bool:
+        """
+        Checks whether the classifier is enough experienced.
+
+        Returns
+        -------
+        bool
+            True if the classifier is enough experienced
+        """
+        return self.exp > self.cfg.theta_exp
+
+
+    def is_soft_subsumer_criteria_satisfied(self, other) -> bool:
+        """
+        Determines whether the classifier satisfies the soft subsumer criteria.
+
+        Parameters
+        ----------
+        other: Classifier
+            Other classifier to compare
+
+        Returns
+        -------
+        bool
+            True if the classifier satisfies the subsumer criteria.
+        """
+        if self.is_reliable() or (self.q > other.q):
+            if not self.is_marked():
+                return True
+            if self.is_marked() and other.is_marked() and self.mark == other.mark:
+                return True
+        return False  
+
+
+    def does_match(self, situation: Perception) -> bool:
+        """
+        Returns if the classifier matches the situation.
+        Parameters
+        -------
+        situation
+
+        Returns
+        -------
+        bool
+        """
+        return self.condition.does_match(situation)
+
+
+    def does_anticipate_change(self) -> bool:
+        """
+        Checks whether any change in environment is anticipated
+
+        Returns
+        -------
+        bool
+            true if the effect part contains any specified attributes
+        """
+        return self.effect.specify_change
 
 
     def does_predict_successfully(
@@ -288,6 +291,21 @@ class Classifier:
         return self.effect.anticipates_correctly(previous_situation, situation)
 
 
+    def increase_experience(self) -> int:
+        self.exp += 1
+        return self.exp
+
+
+    def increase_quality(self) -> float:
+        self.q += self.cfg.beta_alp * (1 - self.q)
+        return self.q
+
+
+    def decrease_quality(self) -> float:
+        self.q -= self.cfg.beta_alp * self.q
+        return self.q
+
+
     def set_mark(self, perception: Perception) -> None:
         """
         Specializes the mark in all attributes
@@ -314,69 +332,69 @@ class Classifier:
                 self.exp + 1)
         else:
             self.tav += self.cfg.beta_alp * ((time - self.talp) - self.tav)
-        self.talp = time
 
 
-    def is_more_general(self, other: Classifier) -> bool:
+    def specialize(
+            self,
+            previous_situation: Perception,
+            situation: Perception
+        ) -> None:
         """
-        Checks if the classifiers condition is formally
-        more general than `other`s.
+        Specializes the effect part where necessary to correctly anticipate
+        the changes from p0 to p1.
 
         Parameters
         ----------
-        other: Classifier
-            other classifier to compare
+        previous_situation: Perception
+        situation: Perception
+        """
+        for idx, _ in enumerate(situation):
+            if self.effect[idx] != self.cfg.classifier_wildcard:
+                # If we have a specialized attribute don't change it.
+                continue
+            if previous_situation[idx] != situation[idx]:
+                if self.effect[idx] == self.cfg.classifier_wildcard:
+                    self.effect[idx] = situation[idx]
+                elif self.ee:
+                    if not isinstance(self.effect[idx], ProbabilityEnhancedAttribute):
+                        self.effect[idx] = ProbabilityEnhancedAttribute(self.effect[idx])
+                    self.effect[idx].insert_symbol(situation[idx])
+                self.condition[idx] = previous_situation[idx]
+
+
+    @property
+    def specified_unchanging_attributes(self) -> List[int]:
+        """
+        Determines the number of specified unchanging attributes in
+        the classifier. An unchanging attribute is one that is anticipated
+        not to change in the effect part.
 
         Returns
         -------
-        bool
-            True if classifier is more general than other
+        List[int]
+            list specified unchanging attributes indices
         """
-        return self.condition.specificity <= other.condition.specificity
+        indices = []
+        for idx, (cpi, epi) in enumerate(zip(self.condition, self.effect)):
+            if isinstance(epi, ProbabilityEnhancedAttribute):
+                if cpi != self.cfg.classifier_wildcard and \
+                        epi.does_contain(cpi):
+                    indices.append(idx)
+            else:
+                if cpi != self.cfg.classifier_wildcard and \
+                        epi == self.cfg.classifier_wildcard:
+                    indices.append(idx)
+        return indices
 
 
-    def generalize_unchanging_condition_attribute(
-                self,
-                randomfunc: Callable=random.choice
-            ) -> bool:
+
+    def generalize_specific_attribute_randomly(self):
         """
-        Generalizes one randomly unchanging attribute in the condition.
-        An unchanging attribute is one that is anticipated not to change
-        in the effect part.
-
-        Parameters
-        ----------
-        randomfunc: Callable
-            function returning attribute index to generalize
-
-        Returns
-        -------
-        bool
-            True if attribute was generalized, False otherwise
+        Generalizes one randomly attribute in the condition.
         """
         if len(self.specified_unchanging_attributes) > 0:
-            ridx = randomfunc(self.specified_unchanging_attributes)
+            ridx = RandomNumberGenerator.choice(self.specified_unchanging_attributes)
             self.condition.generalize(ridx)
-            return True
-        return False
-
-
-    def is_marked(self):
-        return self.mark.is_marked()
-
-
-    def does_match(self, situation: Perception) -> bool:
-        """
-        Returns if the classifier matches the situation.
-        Parameters
-        -------
-        situation
-
-        Returns
-        -------
-        bool
-        """
-        return self.condition.does_match(situation)
 
 
     def merge_with(self, other_classifier, perception, time):
@@ -394,41 +412,7 @@ class Classifier:
             self.effect, 
             other_classifier.effect,
             perception)
-        return result
-
-
-    def is_experienced(self) -> bool:
-        """
-        Checks whether the classifier is enough experienced.
-
-        Returns
-        -------
-        bool
-            True if the classifier is enough experienced
-        """
-        return self.exp > self.cfg.theta_exp
-
-
-    def is_soft_subsumer_criteria_satisfied(self, other) -> bool:
-        """
-        Determines whether the classifier satisfies the soft subsumer criteria.
-
-        Parameters
-        ----------
-        other: Classifier
-            Other classifier to compare
-
-        Returns
-        -------
-        bool
-            True if the classifier satisfies the subsumer criteria.
-        """
-        if self.is_reliable() or (self.q > other.q):
-            if not self.is_marked():
-                return True
-            if self.is_marked() and other.is_marked() and self.mark == other.mark:
-                return True
-        return False   
+        return result 
     
 
     def subsumes(self, other):

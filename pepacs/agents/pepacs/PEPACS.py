@@ -4,14 +4,10 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from typing import List, Tuple
-
-from pepacs import Perception
+from pepacs import Perception, RandomNumberGenerator
 from pepacs.agents.Agent import Agent, TrialMetrics
-from pepacs.agents.pepacs import Classifier, ClassifiersList, Configuration
-from pepacs.agents.pepacs.Condition import Condition
-from pepacs.agents.pepacs.Effect import Effect
-from pepacs.agents.pepacs.components.subsumption import does_subsume, find_subsumers
+from pepacs.agents.pepacs import ClassifiersList, Configuration
+from pepacs.agents.pepacs.classifier_components import Classifier
 from pepacs.agents.pepacs.components.action_selection import choose_action
 
 class PEPACS(Agent):
@@ -22,6 +18,7 @@ class PEPACS(Agent):
             ) -> None:
         self.cfg = cfg
         self.population = population or ClassifiersList()
+        RandomNumberGenerator.seed(self.cfg.seed)
 
     def get_population(self):
         return self.population
@@ -55,7 +52,7 @@ class PEPACS(Agent):
         if is_reliable:
             pop = [cl for cl in self.population if cl.is_reliable()]
             self.population = ClassifiersList(*pop)
-        # Removing subsumed classifiers and unwanted behavioral classifiers
+        # Removing subsumed classifiers
         classifiers_to_keep = []
         for cl in self.population:
             to_keep = True
@@ -63,13 +60,6 @@ class PEPACS(Agent):
                 if cl != other and other.subsumes(cl):
                     to_keep = False
                     break
-            #if to_keep and cl.behavioral_sequence is not None and \
-            #    (not cl.is_experienced()):
-                #(not cl.is_experienced() or not cl.is_reliable()):
-            #    to_keep = False
-            #if to_keep and cl.behavioral_sequence is not None and \
-            #    not cl.does_anticipate_change() and len(cl.effect)==1:
-            #    to_keep = False
             if to_keep:
                 classifiers_to_keep.append(cl)
         self.population = ClassifiersList(*classifiers_to_keep)
@@ -81,9 +71,8 @@ class PEPACS(Agent):
 
         # Initial conditions
         steps = 0
-        raw_state = env.reset()
+        raw_state, _info = env.reset()
         state = self.cfg.environment_adapter.to_genotype(env,raw_state)
-        action = env.action_space.sample()
         last_reward = 0
         prev_state = Perception.empty()
         action_set = ClassifiersList()
@@ -115,6 +104,7 @@ class PEPACS(Agent):
                         self.population,
                         match_set,
                         action_set,
+                        prev_state,
                         state,
                         self.cfg.theta_ga,
                         self.cfg.mu,
@@ -130,7 +120,8 @@ class PEPACS(Agent):
             iaction = self.cfg.environment_adapter.to_lcs_action(env,action)
             # Do the action
             prev_state = state
-            raw_state, last_reward, done, _ = env.step(iaction)
+            raw_state, last_reward, terminated, truncated, _info = env.step(iaction)
+            done = terminated or truncated
             state = self.cfg.environment_adapter.to_genotype(env,raw_state)
 
             if done:
@@ -148,18 +139,19 @@ class PEPACS(Agent):
                 ClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, 0, self.cfg.beta_rl, self.cfg.gamma
                 )
-            if self.cfg.do_ga:
-                ClassifiersList.apply_ga(
-                    time + steps,
-                    self.population,
-                    ClassifiersList(),
-                    action_set,
-                    state,
-                    self.cfg.theta_ga,
-                    self.cfg.mu,
-                    self.cfg.chi,
-                    self.cfg.theta_as,
-                    self.cfg.theta_exp)
+                if self.cfg.do_ga:
+                    ClassifiersList.apply_ga(
+                        time + steps,
+                        self.population,
+                        ClassifiersList(),
+                        action_set,
+                        prev_state,
+                        state,
+                        self.cfg.theta_ga,
+                        self.cfg.mu,
+                        self.cfg.chi,
+                        self.cfg.theta_as,
+                        self.cfg.theta_exp)
 
             steps += 1
         return TrialMetrics(steps, last_reward)
@@ -190,7 +182,8 @@ class PEPACS(Agent):
             # Use environment adapter
             iaction = self.cfg.environment_adapter.to_lcs_action(env,best_classifier.action)
             # Do the action
-            raw_state, last_reward, done, _ = env.step(iaction)
+            raw_state, last_reward, terminated, truncated, _info = env.step(iaction)
+            done = terminated or truncated
             state = self.cfg.environment_adapter.to_genotype(env,raw_state)
 
             if done:

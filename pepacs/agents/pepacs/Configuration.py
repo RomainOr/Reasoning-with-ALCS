@@ -6,7 +6,7 @@
 
 from typing import Callable
 
-from example.adapter.EnvironmentAdapter import EnvironmentAdapter
+from pepacs.agents.EnvironmentAdapter import EnvironmentAdapter
 
 
 class Configuration:
@@ -32,7 +32,9 @@ class Configuration:
             theta_ga: int=100,
             theta_as: int=20,
             mu: float=0.3,
-            chi: float=0.8) -> None:
+            chi: float=0.8,
+            seed:int = None) -> None:
+
         """
         Creates the configuration object used during training the pepacs agent.
 
@@ -69,6 +71,8 @@ class Configuration:
             GA mutation probability
         chi
             GA crossover probability
+        seed
+            RNG seed
         """
         self.classifier_length = classifier_length
         self.number_of_possible_actions = number_of_possible_actions
@@ -91,6 +95,7 @@ class Configuration:
         self.theta_as = theta_as
         self.mu = mu
         self.chi = chi
+        self.seed = seed
 
 
     def __str__(self):
@@ -106,6 +111,7 @@ class Configuration:
             "\n\t- Beta_PEP: [{}]" \
             "\n\t- ..." \
             "\n\t- epsilon: [{}]" \
+            "\n\t- seed: [{}]" \
         .format(
             self.classifier_length,
             self.number_of_possible_actions,
@@ -116,5 +122,6 @@ class Configuration:
             self.beta_alp,
             self.beta_rl,
             self.beta_pep,
-            self.epsilon
+            self.epsilon,
+            self.seed
         )

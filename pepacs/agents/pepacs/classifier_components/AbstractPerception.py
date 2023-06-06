@@ -34,21 +34,6 @@ class AbstractPerception:
         return cls(ps_str)
 
 
-    def subsumes(self, other) -> bool:
-        """
-        Checks if given perception string subsumes other one.
-        Parameters
-        ----------
-        other: AbstractPerception
-
-        Returns
-        -------
-        bool
-            True if `other` is subsumed by `self`, False otherwise
-        """
-        raise NotImplementedError()
-
-
     def __iter__(self):
         return iter(self._items)
 

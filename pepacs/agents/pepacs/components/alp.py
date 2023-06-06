@@ -4,13 +4,13 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from random import random
 from typing import Optional
 
-from pepacs import Perception
-from pepacs.agents.pepacs import Classifier, ClassifiersList, Condition, Configuration, PMark
-from pepacs.agents.pepacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
+from pepacs import Perception, RandomNumberGenerator
+from pepacs.agents.pepacs import Configuration
+from pepacs.agents.pepacs.classifier_components import Classifier
 from pepacs.agents.pepacs.components.aliasing_detection import is_state_aliased
+from pepacs.agents.pepacs.components.subsumption import does_subsume
 
 
 def cover(
@@ -87,29 +87,28 @@ def expected_case(
 
     child = cl.copy_from(cl, p1, time, False)
 
-    no_spec = len(cl.specified_unchanging_attributes)
-    no_spec_new = diff.specificity
-    if no_spec >= cl.cfg.u_max:
-        while no_spec >= cl.cfg.u_max:
-            cl.generalize_unchanging_condition_attribute()
-            no_spec -= 1
-
-        while no_spec + no_spec_new > cl.cfg.u_max:
-            if random() < 0.5:
-                diff.generalize_specific_attribute_randomly()
-                no_spec_new -= 1
+    spec = cl.specificity
+    spec_new = diff.specificity
+    if spec >= child.cfg.u_max:
+        while spec >= child.cfg.u_max:
+            child.generalize_specific_attribute_randomly()
+            spec -= 1
+        while spec + spec_new > child.cfg.u_max:
+            if spec > 0 and RandomNumberGenerator.random() < 0.5:
+                child.generalize_specific_attribute_randomly()
+                spec -= 1
             else:
-                if cl.generalize_unchanging_condition_attribute():
-                    no_spec -= 1
+                diff.generalize_specific_attribute_randomly()
+                spec_new -= 1
     else:
-        while no_spec + no_spec_new > cl.cfg.u_max:
+        while spec + spec_new > child.cfg.u_max:
             diff.generalize_specific_attribute_randomly()
-            no_spec_new -= 1
+            spec_new -= 1
+
 
     child.condition.specialize_with_condition(diff)
 
-    if child.q < 0.5:
-        child.q = 0.5
+    child.q = max(0.5, child.q)
 
     return child
 
@@ -143,3 +142,51 @@ def unexpected_case(
     if child.q < 0.5:
         child.q = 0.5
     return child
+
+
+def add_classifier(child, population, new_list, theta_exp: int) -> None:
+    """
+    Looks for subsuming / similar classifiers in the population of classifiers
+    and those created in the current ALP run (`new_list`).
+
+    If a similar classifier was found it's quality is increased,
+    otherwise `child_cl` is added to `new_list`.
+
+    Parameters
+    ----------
+    child:
+        New classifier to examine
+    population:
+        list of classifiers
+    new_list:
+        A list of newly created classifiers in this ALP run
+    theta_exp: int
+        experience threshold for subsumption
+    """
+    old_cl = None
+
+    # Look if there is a classifier that subsumes the insertion candidate
+    for cl in population:
+        if does_subsume(cl, child, theta_exp):
+            if old_cl is None or cl.is_more_general(old_cl):
+                old_cl = cl
+                break
+
+    # Check if any similar classifier was in this ALP run
+    if old_cl is None:
+        for cl in new_list:
+            if cl == child:
+                old_cl = cl
+                break
+
+    # Check if there is similar classifier already
+    if old_cl is None:
+        for cl in population:
+            if cl == child:
+                old_cl = cl
+                break
+
+    if old_cl is None:
+        new_list.append(child)
+    else:
+        old_cl.increase_quality()

@@ -5,7 +5,7 @@
 """
 
 from pepacs import Perception
-from pepacs.agents.pepacs import Condition, PMark
+from pepacs.agents.pepacs.classifier_components import Condition, PMark
 
 
 def is_state_aliased(

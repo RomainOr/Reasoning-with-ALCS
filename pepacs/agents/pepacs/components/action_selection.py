@@ -1,7 +1,7 @@
-import random
 from itertools import groupby
 
-from pepacs.agents.pepacs import Classifier
+from pepacs import RandomNumberGenerator
+from pepacs.agents.pepacs.classifier_components import Classifier
 
 
 def choose_action(cll, cfg, epsilon: float) -> int:
@@ -22,9 +22,8 @@ def choose_action(cll, cfg, epsilon: float) -> int:
     int 
         Action
     """
-    if random.random() < epsilon:
+    if RandomNumberGenerator.random() < epsilon:
         return explore(cll, cfg)
-
     return choose_fittest_action(cll, cfg)
 
 
@@ -46,14 +45,14 @@ def explore(cll, cfg, pb: float = 0.5) -> int:
     int 
         Action
     """
-    if random.random() < pb:
-        # We are in the biased exploration
-        if random.random() < 0.5:
-            return choose_latest_action(cll, cfg)
-        else:
-            return choose_action_from_knowledge_array(cll, cfg)
+    rand = RandomNumberGenerator.random()
+    if rand < pb:
+        return choose_random_action(cfg)
+    elif rand < pb + (1. - pb)/2.: #pb+ (1. - pb)/2. with 2 being the number of biases
+        return choose_action_from_knowledge_array(cll, cfg)
+    else:
+        return choose_latest_action(cll, cfg)
 
-    return choose_random_action(cfg)
 
 
 def choose_latest_action(cll, cfg) -> int:
@@ -137,7 +136,7 @@ def choose_random_action(cfg) -> int:
     int
         Action
     """
-    return random.randint(0, cfg.number_of_possible_actions -1)
+    return RandomNumberGenerator.integers(cfg.number_of_possible_actions)
 
 
 def choose_fittest_action(cll, cfg) -> int:
@@ -159,6 +158,8 @@ def choose_fittest_action(cll, cfg) -> int:
     if len(cll) > 0:
         anticipated_change = [cl for cl in cll if cl.does_anticipate_change()]
         if len(anticipated_change) > 0:
-            best_classifier = max(anticipated_change, key=lambda cl: cl.fitness)
-            return best_classifier.action
+            return max(anticipated_change, key=lambda cl: cl.fitness).action
+        else:
+            return max(cll, key=lambda cl: cl.fitness).action
     return choose_random_action(cfg)
+

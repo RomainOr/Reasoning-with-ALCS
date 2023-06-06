@@ -6,17 +6,15 @@
 
 from __future__ import annotations
 
-import random
 from itertools import chain
 from typing import Optional, List
 
 import pepacs.agents.pepacs.components.alp as alp
 import pepacs.agents.pepacs.components.genetic_algorithms as ga
 import pepacs.agents.pepacs.components.reinforcement_learning as rl
-from pepacs import Perception, TypedList
-from pepacs.agents.pepacs import Classifier, Configuration
-from pepacs.agents.pepacs.components.add_classifier import add_classifier
-from pepacs.agents.pepacs.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
+from pepacs import Perception, TypedList, RandomNumberGenerator
+from pepacs.agents.pepacs import Configuration
+from pepacs.agents.pepacs.classifier_components import Classifier
 
 class ClassifiersList(TypedList):
     """
@@ -59,6 +57,37 @@ class ClassifiersList(TypedList):
 
 
     @staticmethod
+    def merge_newly_built_classifiers(
+            new_list: ClassifiersList,
+            population: ClassifiersList,
+            match_set: ClassifiersList,
+            action_set: ClassifiersList,
+            p0: Perception,
+            p1: Perception
+        ) -> None:
+        """
+        Merge classifiers from new_list into self and population
+
+        Parameters
+        ----------
+        new_list
+        population
+        match_set
+        action_set
+        p0: Perception
+        p1: Perception
+        """
+        population.extend(new_list)
+        if match_set:
+            new_matching = [cl for cl in new_list if cl.does_match(p1)]
+            match_set.extend(new_matching)
+        if action_set:
+            new_action_cls = [cl for cl in new_list if cl.does_match(p0) and cl.action == action_set[0].action]
+            action_set.extend(new_action_cls)
+
+
+
+    @staticmethod
     def apply_enhanced_effect_part_check(
             action_set: ClassifiersList,
             new_list: ClassifiersList,
@@ -75,10 +104,10 @@ class ClassifiersList(TypedList):
         for candidate in candidates:
             candidates2 = [cl for cl in candidates if candidate != cl and cl.mark == candidate.mark]
             if len(candidates2) > 0:
-                merger = random.choice(candidates2)
+                merger = RandomNumberGenerator.choice(candidates2)
                 new_classifier = candidate.merge_with(merger, previous_situation, time)
                 if new_classifier is not None:
-                    add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
+                    alp.add_classifier(new_classifier, action_set, new_list, cfg.theta_exp)
         return new_list
 
 
@@ -142,7 +171,7 @@ class ClassifiersList(TypedList):
 
             if new_cl is not None:
                 new_cl.tga = time
-                add_classifier(new_cl, action_set, new_list, theta_exp)
+                alp.add_classifier(new_cl, action_set, new_list, theta_exp)
 
         if cfg.do_pep:
             ClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
@@ -150,27 +179,22 @@ class ClassifiersList(TypedList):
         # No classifier anticipated correctly - generate new one
         if not was_expected_case:
             new_cl = alp.cover(p0, action, p1, time, cfg)
-            add_classifier(new_cl, action_set, new_list, theta_exp)
+            alp.add_classifier(new_cl, action_set, new_list, theta_exp)
 
         # Merge classifiers from new_list into self and population
-        action_set.extend(new_list)
-        population.extend(new_list)
-
-        if match_set is not None:
-            new_matching = [cl for cl in new_list if cl.condition.does_match(p1)]
-            match_set.extend(new_matching)
+        ClassifiersList.merge_newly_built_classifiers(new_list, population, match_set, action_set, p0, p1)
 
 
     @staticmethod
     def apply_reinforcement_learning(
             action_set: ClassifiersList,
             reward: int,
-            p: float,
+            max_fitness: float,
             beta_rl: float,
             gamma: float
         ) -> None:
         for cl in action_set:
-            rl.update_classifier(cl, reward, p, beta_rl, gamma)
+            rl.update_classifier(cl, reward, max_fitness, beta_rl, gamma)
 
 
     @staticmethod
@@ -179,7 +203,8 @@ class ClassifiersList(TypedList):
             population: ClassifiersList,
             match_set: ClassifiersList,
             action_set: ClassifiersList,
-            p: Perception,
+            p0: Perception,
+            p1: Perception,
             theta_ga: int,
             mu: float,
             chi: float,
@@ -196,15 +221,15 @@ class ClassifiersList(TypedList):
                 lambda cl: pow(cl.q, 3) * cl.num
             )
 
-            child1 = Classifier.copy_from(parent1, p, time, False)
-            child2 = Classifier.copy_from(parent2, p, time, False)
+            child1 = Classifier.copy_from(parent1, p1, time, False)
+            child2 = Classifier.copy_from(parent2, p1, time, False)
 
             # Execute mutation
             ga.generalizing_mutation(child1, mu)
             ga.generalizing_mutation(child2, mu)
 
             # Execute cross-over
-            if random.random() < chi:
+            if RandomNumberGenerator.random() < chi:
                 if child1.effect == child2.effect:
                     ga.two_point_crossover(child1, child2)
 
@@ -216,27 +241,30 @@ class ClassifiersList(TypedList):
             child2.q /= 2
 
             # We are interested only in classifiers with specialized condition
-            unique_children = {cl for cl in [child1, child2]
+            children = {cl for cl in [child1, child2]
                                if cl.condition.specificity > 0}
 
             ga.delete_classifiers(
                 population,
                 match_set,
                 action_set,
-                len(unique_children),
+                len(children),
                 theta_as
             )
 
+            new_list = ClassifiersList()
             # check for subsumers / similar classifiers
-            for child in unique_children:
+            for child in children:
                 ga.add_classifier(
                     child,
-                    p,
-                    population,
-                    match_set,
                     action_set,
+                    new_list,
                     theta_exp
+                
                 )
+
+            # Merge classifiers from new_list into self and population
+            ClassifiersList.merge_newly_built_classifiers(new_list, population, match_set, action_set, p0, p1)
 
 
     def __str__(self):

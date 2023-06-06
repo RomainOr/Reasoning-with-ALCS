@@ -1,7 +1,5 @@
 import collections.abc
 
-from . import check_types
-
 
 class TypedList(collections.abc.MutableSequence):
 
@@ -12,13 +10,15 @@ class TypedList(collections.abc.MutableSequence):
         self.oktypes = oktypes
 
         for el in args:
-            check_types(oktypes, el)
+            if not isinstance(el, oktypes):
+                raise TypeError(f"Wrong element type: object {el}, type {type(el)}")
 
         self._items.extend(list(args))
 
-    def insert(self, index: int, o) -> None:
-        check_types(self.oktypes, o)
-        self._items.insert(index, o)
+    def insert(self, index: int, el) -> None:
+        if not isinstance(el, self.oktypes):
+            raise TypeError(f"Wrong element type: object {el}, type {type(el)}")
+        self._items.insert(index, el)
 
     def safe_remove(self, o) -> None:
         try:
@@ -32,9 +32,10 @@ class TypedList(collections.abc.MutableSequence):
     def __repr__(self):
         return f"{len(self._items)} items"
 
-    def __setitem__(self, i, o):
-        check_types(self.oktypes, o)
-        self._items[i] = o
+    def __setitem__(self, i, el):
+        if not isinstance(el, self.oktypes):
+            raise TypeError(f"Wrong element type: object {el}, type {type(el)}")
+        self._items[i] = el
 
     def __delitem__(self, i):
         del self._items[i]
