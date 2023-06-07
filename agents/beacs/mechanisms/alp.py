@@ -11,7 +11,7 @@ from agents.common import Perception, RandomNumberGenerator
 from agents.common.mechanisms.subsumption import does_subsume
 
 import agents.beacs.mechanisms.pai_detection as pai_detection
-from agents.beacs import ClassifiersList, Configuration
+from agents.beacs import ClassifiersList, BEACSConfiguration
 from agents.beacs.classifier_components import Classifier
 from agents.beacs.mechanisms.build_behavioral_sequences import create_behavioral_classifier
 
@@ -21,7 +21,7 @@ def cover(
         action: int,
         p1: Perception,
         time: int,
-        cfg: Configuration
+        cfg: BEACSConfiguration
     ) -> Classifier:
     """
     Covering - creates a classifier that anticipates a change correctly.
@@ -36,8 +36,8 @@ def cover(
         current perception
     time: int
         current epoch
-    cfg: Configuration
-        algorithm configuration class
+    cfg: BEACSConfiguration
+        algorithm BEACSConfiguration class
 
     Returns
     -------
@@ -60,7 +60,7 @@ def expected_case(
         p0: Perception,
         p1: Perception,
         time: int,
-        cfg: Configuration,
+        cfg: BEACSConfiguration,
     ):
     """
     Controls the expected case of a classifier with the help of 
@@ -192,7 +192,7 @@ def apply_enhanced_effect_part_check(
         new_list: ClassifiersList,
         p0: Perception,
         time: int,
-        cfg: Configuration
+        cfg: BEACSConfiguration
     ) -> None:
     """
     Used to build enhanced classifiers
@@ -225,7 +225,7 @@ def apply_perceptual_aliasing_issue_management(
         p1: Perception,
         time: int,
         pai_states_memory,
-        cfg: Configuration
+        cfg: BEACSConfiguration
     ) -> None:
     """
     Used to manage the detection of PAI and to manage the behavioral classifiers

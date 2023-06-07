@@ -6,15 +6,13 @@
 
 from typing import List
 
-from agents.common import Perception, RandomNumberGenerator, TypedList
+from agents.common import BaseConfiguration, Perception, RandomNumberGenerator, TypedList
 from agents.common.classifier_components import Condition
-
-from agents.beacs import Configuration
 
 
 class PMark(TypedList):
 
-    def __init__(self, cfg: Configuration) -> None:
+    def __init__(self, cfg: BaseConfiguration) -> None:
         self.cfg = cfg
         initial: List = [set() for _ in range(self.cfg.classifier_length)]
         super().__init__((set,), *initial)

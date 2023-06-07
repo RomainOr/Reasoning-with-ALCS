@@ -15,10 +15,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.008382552116189318,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.782242868882725,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.01646792092235677,
-        "avg_old_pep_error_list": 4.59561616806312,
-        "std_old_pep_error_list": 0.32776807393218205,
-        "avg_old_peps_match_non_aliased_states_list": 271,
-        "std_old_peps_match_non_aliased_states_list": 26.470543159754275,
+        "avg_old_ep_error_list": 4.59561616806312,
+        "std_old_ep_error_list": 0.32776807393218205,
+        "avg_old_eps_match_non_aliased_states_list": 271,
+        "std_old_eps_match_non_aliased_states_list": 26.470543159754275,
         "avg_new_knowledge": 98.52813852813853,
         "std_new_knowledge": 1.217016111833301,
         "avg_new_population": 380,
@@ -33,8 +33,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.017096343299415173,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.7224463699259035,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.014027733099952169,
-        "avg_new_peps_match_non_aliased_states_list": 98.36666666666666,
-        "std_new_peps_match_non_aliased_states_list": 6.233852704405991,
+        "avg_new_eps_match_non_aliased_states_list": 98.36666666666666,
+        "std_new_eps_match_non_aliased_states_list": 6.233852704405991,
         "avg_full_knowledge_first_trial_list": 1332.7333333333333,
         "std_full_knowledge_first_trial_list": 1821.4684665710365,
         "avg_full_knowledge_stable_trial_list": 1035.9,
@@ -285,7 +285,7 @@
             0.7965561224489796,
             0.7675561797752809
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             4.446361953389559,
             4.618584530207834,
             4.493590527570402,
@@ -317,7 +317,7 @@
             4.359586275361582,
             4.5364077589907135
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             263,
             245,
             290,
@@ -573,7 +573,7 @@
             0.7222222222222222,
             0.7285353535353535
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             4.410213599345354,
             4.607569372864056,
             4.354663629988106,
@@ -605,7 +605,7 @@
             4.354702388497556,
             4.499824048496557
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             97,
             99,
             95,
@@ -1075,10 +1075,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.010310021785925497,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.7782959598917465,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.01999676073391185,
-        "avg_old_pep_error_list": 2.6945585953577145,
-        "std_old_pep_error_list": 0.2943579309251675,
-        "avg_old_peps_match_non_aliased_states_list": 108.13333333333334,
-        "std_old_peps_match_non_aliased_states_list": 12.016463801753433,
+        "avg_old_ep_error_list": 2.6945585953577145,
+        "std_old_ep_error_list": 0.2943579309251675,
+        "avg_old_eps_match_non_aliased_states_list": 108.13333333333334,
+        "std_old_eps_match_non_aliased_states_list": 12.016463801753433,
         "avg_new_knowledge": 99.65517241379311,
         "std_new_knowledge": 1.0521675056184996,
         "avg_new_population": 286.3333333333333,
@@ -1093,8 +1093,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.012552950967764556,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.771623449791884,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.0175720288810264,
-        "avg_new_peps_match_non_aliased_states_list": 69,
-        "std_new_peps_match_non_aliased_states_list": 4.571274627949839,
+        "avg_new_eps_match_non_aliased_states_list": 69,
+        "std_new_eps_match_non_aliased_states_list": 4.571274627949839,
         "avg_full_knowledge_first_trial_list": 1009.9666666666667,
         "std_full_knowledge_first_trial_list": 768.0925987339581,
         "avg_full_knowledge_stable_trial_list": 949.9,
@@ -1345,7 +1345,7 @@
             0.794392523364486,
             0.7653985507246377
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             2.713634424943271,
             2.3126828706503044,
             2.714863193813915,
@@ -1377,7 +1377,7 @@
             2.3754181318088015,
             2.5901500204572785
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             102,
             100,
             113,
@@ -1633,7 +1633,7 @@
             0.7857142857142857,
             0.7638888888888888
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             2.703954571032185,
             2.2727323080030497,
             2.7177178931472934,
@@ -1665,7 +1665,7 @@
             2.391532424420266,
             2.539683936563639
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             71,
             61,
             72,
@@ -2135,10 +2135,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.0026188776448422104,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.9273164316157517,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.008702818021050508,
-        "avg_old_pep_error_list": 3.6048642192842064,
-        "std_old_pep_error_list": 0.22477944075076273,
-        "avg_old_peps_match_non_aliased_states_list": 421.3666666666667,
-        "std_old_peps_match_non_aliased_states_list": 27.956226045599283,
+        "avg_old_ep_error_list": 3.6048642192842064,
+        "std_old_ep_error_list": 0.22477944075076273,
+        "avg_old_eps_match_non_aliased_states_list": 421.3666666666667,
+        "std_old_eps_match_non_aliased_states_list": 27.956226045599283,
         "avg_new_knowledge": 99.91341991341992,
         "std_new_knowledge": 0.3294910801330692,
         "avg_new_population": 424.43333333333334,
@@ -2153,8 +2153,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.003920915862291224,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.9205532199758529,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.008594116359360134,
-        "avg_new_peps_match_non_aliased_states_list": 239.7,
-        "std_new_peps_match_non_aliased_states_list": 13.595511429677178,
+        "avg_new_eps_match_non_aliased_states_list": 239.7,
+        "std_new_eps_match_non_aliased_states_list": 13.595511429677178,
         "avg_full_knowledge_first_trial_list": 2003.3333333333333,
         "std_full_knowledge_first_trial_list": 1001.5447838329491,
         "avg_full_knowledge_stable_trial_list": 2099.9333333333334,
@@ -2405,7 +2405,7 @@
             0.9170454545454545,
             0.9116161616161617
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             3.580090587844528,
             3.686985584096084,
             3.6855868918144905,
@@ -2437,7 +2437,7 @@
             3.5254318357440266,
             3.4086267840274673
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             412,
             388,
             412,
@@ -2693,7 +2693,7 @@
             0.9107142857142857,
             0.906441717791411
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             3.5851771981023277,
             3.7001718924634086,
             3.695420379725531,
@@ -2725,7 +2725,7 @@
             3.5233630336556208,
             3.3978498303644082
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             249,
             225,
             230,
@@ -3195,10 +3195,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.0,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.9694532642718577,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.0026318220301346567,
-        "avg_old_pep_error_list": 1.282002360610056,
-        "std_old_pep_error_list": 0.05881713771133956,
-        "avg_old_peps_match_non_aliased_states_list": 178.03333333333333,
-        "std_old_peps_match_non_aliased_states_list": 1.473521078171633,
+        "avg_old_ep_error_list": 1.282002360610056,
+        "std_old_ep_error_list": 0.05881713771133956,
+        "avg_old_eps_match_non_aliased_states_list": 178.03333333333333,
+        "std_old_eps_match_non_aliased_states_list": 1.473521078171633,
         "avg_new_knowledge": 100.0,
         "std_new_knowledge": 0.0,
         "avg_new_population": 176.06666666666666,
@@ -3213,8 +3213,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.0,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.9693007939565143,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.0026292452662306344,
-        "avg_new_peps_match_non_aliased_states_list": 176.03333333333333,
-        "std_new_peps_match_non_aliased_states_list": 0.18257418583505536,
+        "avg_new_eps_match_non_aliased_states_list": 176.03333333333333,
+        "std_new_eps_match_non_aliased_states_list": 0.18257418583505536,
         "avg_full_knowledge_first_trial_list": 676.6666666666666,
         "std_full_knowledge_first_trial_list": 340.064226523343,
         "avg_full_knowledge_stable_trial_list": 710,
@@ -3465,7 +3465,7 @@
             0.9738700564971752,
             0.9706703910614525
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             1.1977030718181918,
             1.275287409518411,
             1.340283606000382,
@@ -3497,7 +3497,7 @@
             1.3063793547931724,
             1.3703629535679893
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             177,
             177,
             182,
@@ -3753,7 +3753,7 @@
             0.9737215909090909,
             0.9701704545454546
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             1.1975520515749432,
             1.275287409518411,
             1.340181734091395,
@@ -3785,7 +3785,7 @@
             1.3075101773987683,
             1.370642224571437
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             176,
             176,
             176,
@@ -4251,10 +4251,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.001149069217073742,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.9479778402063861,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.009617348266898912,
-        "avg_old_pep_error_list": 3.9286210964104136,
-        "std_old_pep_error_list": 0.2794500712122124,
-        "avg_old_peps_match_non_aliased_states_list": 559,
-        "std_old_peps_match_non_aliased_states_list": 40.186633564425115,
+        "avg_old_ep_error_list": 3.9286210964104136,
+        "std_old_ep_error_list": 0.2794500712122124,
+        "avg_old_eps_match_non_aliased_states_list": 559,
+        "std_old_eps_match_non_aliased_states_list": 40.186633564425115,
         "avg_new_knowledge": 99.76666666666667,
         "std_new_knowledge": 0.5040069329937309,
         "avg_new_population": 465.56666666666666,
@@ -4269,8 +4269,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.003009382426482211,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.941713106983029,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.009139214605943696,
-        "avg_new_peps_match_non_aliased_states_list": 252.03333333333333,
-        "std_new_peps_match_non_aliased_states_list": 13.142411822254967,
+        "avg_new_eps_match_non_aliased_states_list": 252.03333333333333,
+        "std_new_eps_match_non_aliased_states_list": 13.142411822254967,
         "avg_full_knowledge_first_trial_list": 1866.5,
         "std_full_knowledge_first_trial_list": 1321.249898052389,
         "avg_full_knowledge_stable_trial_list": 2466.4666666666667,
@@ -4521,7 +4521,7 @@
             0.9632352941176471,
             0.9359631147540983
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             3.849650449741283,
             4.322827893496593,
             4.221420118634797,
@@ -4553,7 +4553,7 @@
             3.4030345468094727,
             3.928351074586159
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             543,
             566,
             634,
@@ -4809,7 +4809,7 @@
             0.9583333333333334,
             0.9292929292929293
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             3.8583480692537817,
             4.292719811270863,
             4.205105448255752,
@@ -4841,7 +4841,7 @@
             3.4136792595119094,
             3.8935101137836536
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             248,
             257,
             245,
@@ -5311,10 +5311,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.002414434084945284,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.9535366791467248,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.006820154025894802,
-        "avg_old_pep_error_list": 3.4641893138918705,
-        "std_old_pep_error_list": 0.3019364821657172,
-        "avg_old_peps_match_non_aliased_states_list": 393.7,
-        "std_old_peps_match_non_aliased_states_list": 24.870908084859252,
+        "avg_old_ep_error_list": 3.4641893138918705,
+        "std_old_ep_error_list": 0.3019364821657172,
+        "avg_old_eps_match_non_aliased_states_list": 393.7,
+        "std_old_eps_match_non_aliased_states_list": 24.870908084859252,
         "avg_new_knowledge": 99.51388888888889,
         "std_new_knowledge": 0.7098389452719376,
         "avg_new_population": 391.73333333333335,
@@ -5329,8 +5329,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.003972228753726099,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.9490092449424854,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.0074315857043695125,
-        "avg_new_peps_match_non_aliased_states_list": 248.2,
-        "std_new_peps_match_non_aliased_states_list": 13.097512267076024,
+        "avg_new_eps_match_non_aliased_states_list": 248.2,
+        "std_new_eps_match_non_aliased_states_list": 13.097512267076024,
         "avg_full_knowledge_first_trial_list": 1969.8,
         "std_full_knowledge_first_trial_list": 1402.2966974168507,
         "avg_full_knowledge_stable_trial_list": 1759.6333333333334,
@@ -5581,7 +5581,7 @@
             0.9367408906882592,
             0.9571572580645161
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             3.3032038514984676,
             3.5131546762855037,
             3.43287082030837,
@@ -5613,7 +5613,7 @@
             3.6030105878170575,
             3.46984853816391
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             389,
             373,
             417,
@@ -5869,7 +5869,7 @@
             0.9296482412060302,
             0.9493589743589743
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             3.299081659683428,
             3.490940855130919,
             3.4376173703973905,
@@ -5901,7 +5901,7 @@
             3.6551381379354133,
             3.5073755896594085
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             243,
             230,
             265,
@@ -6369,10 +6369,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.024826858449910068,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.7023252282086693,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.015384199157122379,
-        "avg_old_pep_error_list": 1.109038213593523,
-        "std_old_pep_error_list": 0.15288782235746826,
-        "avg_old_peps_match_non_aliased_states_list": 123,
-        "std_old_peps_match_non_aliased_states_list": 8.537947746627285,
+        "avg_old_ep_error_list": 1.109038213593523,
+        "std_old_ep_error_list": 0.15288782235746826,
+        "avg_old_eps_match_non_aliased_states_list": 123,
+        "std_old_eps_match_non_aliased_states_list": 8.537947746627285,
         "avg_new_knowledge": 100.0,
         "std_new_knowledge": 0.0,
         "avg_new_population": 149.16666666666666,
@@ -6387,8 +6387,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.02533313014927349,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.7186341512573998,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.009561306086765451,
-        "avg_new_peps_match_non_aliased_states_list": 105.1,
-        "std_new_peps_match_non_aliased_states_list": 5.094621910779357,
+        "avg_new_eps_match_non_aliased_states_list": 105.1,
+        "std_new_eps_match_non_aliased_states_list": 5.094621910779357,
         "avg_full_knowledge_first_trial_list": 350,
         "std_full_knowledge_first_trial_list": 188.91705897672077,
         "avg_full_knowledge_stable_trial_list": 370,
@@ -6639,7 +6639,7 @@
             0.6715425531914894,
             0.7104430379746836
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             0.8383136142058351,
             1.0033735189401836,
             0.9685916492698586,
@@ -6671,7 +6671,7 @@
             1.0649047308746011,
             1.097826733922547
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             128,
             120,
             146,
@@ -6927,7 +6927,7 @@
             0.7116666666666667,
             0.726027397260274
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             0.8379039361645783,
             1.0066724927822628,
             0.9702968928972866,
@@ -6959,7 +6959,7 @@
             1.070325511884259,
             1.099416215723675
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             102,
             102,
             114,
@@ -7427,10 +7427,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.0,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.9604593200403019,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.00301997034322982,
-        "avg_old_pep_error_list": 1.6403762424757034,
-        "std_old_pep_error_list": 0.1415783397436521,
-        "avg_old_peps_match_non_aliased_states_list": 219.16666666666666,
-        "std_old_peps_match_non_aliased_states_list": 4.210687005403187,
+        "avg_old_ep_error_list": 1.6403762424757034,
+        "std_old_ep_error_list": 0.1415783397436521,
+        "avg_old_eps_match_non_aliased_states_list": 219.16666666666666,
+        "std_old_eps_match_non_aliased_states_list": 4.210687005403187,
         "avg_new_knowledge": 100.0,
         "std_new_knowledge": 0.0,
         "avg_new_population": 217.9,
@@ -7445,8 +7445,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.0,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.9603012933851569,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.0028195748534670705,
-        "avg_new_peps_match_non_aliased_states_list": 208.76666666666668,
-        "std_new_peps_match_non_aliased_states_list": 1.1043279539543756,
+        "avg_new_eps_match_non_aliased_states_list": 208.76666666666668,
+        "std_new_eps_match_non_aliased_states_list": 1.1043279539543756,
         "avg_full_knowledge_first_trial_list": 1870,
         "std_full_knowledge_first_trial_list": 959.5796493508373,
         "avg_full_knowledge_stable_trial_list": 1976.6666666666667,
@@ -7697,7 +7697,7 @@
             0.9602534562211982,
             0.9575688073394495
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             1.5313830784359743,
             1.5635421709786417,
             1.597317440518275,
@@ -7729,7 +7729,7 @@
             1.6200463272581418,
             1.495096260713074
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             223,
             218,
             228,
@@ -7985,7 +7985,7 @@
             0.9603365384615384,
             0.9575358851674641
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             1.5351310093091806,
             1.5683044329500508,
             1.597546397373573,
@@ -8017,7 +8017,7 @@
             1.6190805658063707,
             1.500400680142568
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             208,
             210,
             209,
@@ -8483,10 +8483,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.0,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.9670712813335258,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.002267596365531418,
-        "avg_old_pep_error_list": 1.7172465351131776,
-        "std_old_pep_error_list": 0.0871935394410411,
-        "avg_old_peps_match_non_aliased_states_list": 307.96666666666664,
-        "std_old_peps_match_non_aliased_states_list": 13.879986418887654,
+        "avg_old_ep_error_list": 1.7172465351131776,
+        "std_old_ep_error_list": 0.0871935394410411,
+        "avg_old_eps_match_non_aliased_states_list": 307.96666666666664,
+        "std_old_eps_match_non_aliased_states_list": 13.879986418887654,
         "avg_new_knowledge": 99.9771689497717,
         "std_new_knowledge": 0.12505081221579298,
         "avg_new_population": 292.3333333333333,
@@ -8501,8 +8501,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.0,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.9670675121502704,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.0022975667481594077,
-        "avg_new_peps_match_non_aliased_states_list": 289.73333333333335,
-        "std_new_peps_match_non_aliased_states_list": 5.064639642920676,
+        "avg_new_eps_match_non_aliased_states_list": 289.73333333333335,
+        "std_new_eps_match_non_aliased_states_list": 5.064639642920676,
         "avg_full_knowledge_first_trial_list": 1973.3333333333333,
         "std_full_knowledge_first_trial_list": 866.5959299160864,
         "avg_full_knowledge_stable_trial_list": 2046.6333333333334,
@@ -8753,7 +8753,7 @@
             0.9652103559870551,
             0.9650974025974026
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             1.7000981053583308,
             1.6908559197520316,
             1.6333638278003564,
@@ -8785,7 +8785,7 @@
             1.7640186237924032,
             1.757262586791205
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             303,
             302,
             302,
@@ -9041,7 +9041,7 @@
             0.9645328719723183,
             0.9655172413793104
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             1.7063335971823737,
             1.6908753846496327,
             1.6261365018905192,
@@ -9073,7 +9073,7 @@
             1.7695592620863136,
             1.7552593421751483
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             289,
             288,
             288,
@@ -9541,10 +9541,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.04050543301952085,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.6445281427908898,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.018228194392321876,
-        "avg_old_pep_error_list": 1.0985153321428045,
-        "std_old_pep_error_list": 0.11001596084945096,
-        "avg_old_peps_match_non_aliased_states_list": 111.76666666666667,
-        "std_old_peps_match_non_aliased_states_list": 8.873374871445217,
+        "avg_old_ep_error_list": 1.0985153321428045,
+        "std_old_ep_error_list": 0.11001596084945096,
+        "avg_old_eps_match_non_aliased_states_list": 111.76666666666667,
+        "std_old_eps_match_non_aliased_states_list": 8.873374871445217,
         "avg_new_knowledge": 100.0,
         "std_new_knowledge": 0.0,
         "avg_new_population": 132.73333333333332,
@@ -9559,8 +9559,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.03712546416926149,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.6559421620804147,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.010624794174377275,
-        "avg_new_peps_match_non_aliased_states_list": 92.23333333333333,
-        "std_new_peps_match_non_aliased_states_list": 5.506631321029866,
+        "avg_new_eps_match_non_aliased_states_list": 92.23333333333333,
+        "std_new_eps_match_non_aliased_states_list": 5.506631321029866,
         "avg_full_knowledge_first_trial_list": 270,
         "std_full_knowledge_first_trial_list": 172.50687142735845,
         "avg_full_knowledge_stable_trial_list": 386.6666666666667,
@@ -9811,7 +9811,7 @@
             0.6298701298701299,
             0.6265822784810127
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             1.0777320598847715,
             1.1880565822204041,
             1.1497741094011535,
@@ -9843,7 +9843,7 @@
             1.105005534995816,
             1.1205977763785422
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             118,
             115,
             113,
@@ -10099,7 +10099,7 @@
             0.654296875,
             0.6473880597014925
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             1.0776717503278779,
             1.2009245762758851,
             1.1510710564467455,
@@ -10131,7 +10131,7 @@
             1.1065188139673188,
             1.1207834141735495
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             101,
             91,
             90,
@@ -10599,10 +10599,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.01210068545521049,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.7460622403747778,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.018024240111702002,
-        "avg_old_pep_error_list": 2.5187977004151367,
-        "std_old_pep_error_list": 0.6838126558619537,
-        "avg_old_peps_match_non_aliased_states_list": 121.73333333333333,
-        "std_old_peps_match_non_aliased_states_list": 16.915476148584567,
+        "avg_old_ep_error_list": 2.5187977004151367,
+        "std_old_ep_error_list": 0.6838126558619537,
+        "avg_old_eps_match_non_aliased_states_list": 121.73333333333333,
+        "std_old_eps_match_non_aliased_states_list": 16.915476148584567,
         "avg_new_knowledge": 99.8989898989899,
         "std_new_knowledge": 0.5532551085910771,
         "avg_new_population": 422.53333333333336,
@@ -10617,8 +10617,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.009563532424481856,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.7404353865184403,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.019075374364820753,
-        "avg_new_peps_match_non_aliased_states_list": 85.63333333333334,
-        "std_new_peps_match_non_aliased_states_list": 10.377307249336237,
+        "avg_new_eps_match_non_aliased_states_list": 85.63333333333334,
+        "std_new_eps_match_non_aliased_states_list": 10.377307249336237,
         "avg_full_knowledge_first_trial_list": 820,
         "std_full_knowledge_first_trial_list": 833.9354146827372,
         "avg_full_knowledge_stable_trial_list": 826.6333333333333,
@@ -10869,7 +10869,7 @@
             0.7445652173913043,
             0.7373949579831933
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             2.2380187636644946,
             3.1233734255352,
             2.5709455007308613,
@@ -10901,7 +10901,7 @@
             2.0247167361854825,
             1.9579679334043736
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             113,
             157,
             109,
@@ -11157,7 +11157,7 @@
             0.7411764705882353,
             0.726123595505618
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             2.2417260911002774,
             3.1238504096740094,
             2.5508643061028935,
@@ -11189,7 +11189,7 @@
             2.024048819289342,
             1.9438211804377232
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             81,
             98,
             77,
@@ -11659,10 +11659,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.0016837928277275548,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.8662634025661633,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.0076408549972621555,
-        "avg_old_pep_error_list": 5.311992624870457,
-        "std_old_pep_error_list": 0.37601739748857327,
-        "avg_old_peps_match_non_aliased_states_list": 735.1,
-        "std_old_peps_match_non_aliased_states_list": 45.38368991548426,
+        "avg_old_ep_error_list": 5.311992624870457,
+        "std_old_ep_error_list": 0.37601739748857327,
+        "avg_old_eps_match_non_aliased_states_list": 735.1,
+        "std_old_eps_match_non_aliased_states_list": 45.38368991548426,
         "avg_new_knowledge": 95.44540229885058,
         "std_new_knowledge": 1.1908830910978196,
         "avg_new_population": 1146.5666666666666,
@@ -11677,8 +11677,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.006544009701563714,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.8200937198022764,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.00900992912463899,
-        "avg_new_peps_match_non_aliased_states_list": 294.06666666666666,
-        "std_new_peps_match_non_aliased_states_list": 14.943418187497691,
+        "avg_new_eps_match_non_aliased_states_list": 294.06666666666666,
+        "std_new_eps_match_non_aliased_states_list": 14.943418187497691,
         "avg_full_knowledge_first_trial_list": -1,
         "std_full_knowledge_first_trial_list": 0.0,
         "avg_full_knowledge_stable_trial_list": -1,
@@ -11929,7 +11929,7 @@
             0.8591115434500648,
             0.8654186320754716
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             4.694997621944673,
             5.212650801229087,
             4.861233646761018,
@@ -11961,7 +11961,7 @@
             5.138527122682809,
             5.170999806371657
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             724,
             687,
             787,
@@ -12217,7 +12217,7 @@
             0.8123333333333334,
             0.8193430656934306
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             4.646246994624808,
             5.111063841329565,
             4.856547824702076,
@@ -12249,7 +12249,7 @@
             5.033822364603179,
             5.085628731845962
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             310,
             307,
             283,
@@ -12730,10 +12730,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.008152740961263056,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.6448245353601282,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.014928830108115082,
-        "avg_old_pep_error_list": 3.531596999389173,
-        "std_old_pep_error_list": 0.44183737881018176,
-        "avg_old_peps_match_non_aliased_states_list": 301.26666666666665,
-        "std_old_peps_match_non_aliased_states_list": 30.795133217524118,
+        "avg_old_ep_error_list": 3.531596999389173,
+        "std_old_ep_error_list": 0.44183737881018176,
+        "avg_old_eps_match_non_aliased_states_list": 301.26666666666665,
+        "std_old_eps_match_non_aliased_states_list": 30.795133217524118,
         "avg_new_knowledge": 97.0436507936508,
         "std_new_knowledge": 1.5978287340257513,
         "avg_new_population": 639.7,
@@ -12748,8 +12748,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.011697141137681305,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.5754685743484964,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.013256036100450574,
-        "avg_new_peps_match_non_aliased_states_list": 141.2,
-        "std_new_peps_match_non_aliased_states_list": 10.1621339056933,
+        "avg_new_eps_match_non_aliased_states_list": 141.2,
+        "std_new_eps_match_non_aliased_states_list": 10.1621339056933,
         "avg_full_knowledge_first_trial_list": -1,
         "std_full_knowledge_first_trial_list": 0.0,
         "avg_full_knowledge_stable_trial_list": -1,
@@ -13000,7 +13000,7 @@
             0.6782334384858044,
             0.6644917582417582
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             3.999491437689782,
             3.217729373738401,
             2.9968137539669217,
@@ -13032,7 +13032,7 @@
             3.3713986805491745,
             3.260416947861696
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             284,
             339,
             296,
@@ -13288,7 +13288,7 @@
             0.5923611111111111,
             0.5778186274509803
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             3.99507008666806,
             3.2195089921411983,
             2.986772147465945,
@@ -13320,7 +13320,7 @@
             3.3396290099136308,
             3.248450560463983
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             132,
             143,
             137,
@@ -13792,10 +13792,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.0,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.9058663617886179,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.011352419858420611,
-        "avg_old_pep_error_list": 1.1305567542869452,
-        "std_old_pep_error_list": 0.10274590978833906,
-        "avg_old_peps_match_non_aliased_states_list": 40.1,
-        "std_old_peps_match_non_aliased_states_list": 0.30512857662936466,
+        "avg_old_ep_error_list": 1.1305567542869452,
+        "std_old_ep_error_list": 0.10274590978833906,
+        "avg_old_eps_match_non_aliased_states_list": 40.1,
+        "std_old_eps_match_non_aliased_states_list": 0.30512857662936466,
         "avg_new_knowledge": 100.0,
         "std_new_knowledge": 0.0,
         "avg_new_population": 40,
@@ -13810,8 +13810,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.0,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.9058333333333334,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.011304148104471029,
-        "avg_new_peps_match_non_aliased_states_list": 40,
-        "std_new_peps_match_non_aliased_states_list": 0.0,
+        "avg_new_eps_match_non_aliased_states_list": 40,
+        "std_new_eps_match_non_aliased_states_list": 0.0,
         "avg_full_knowledge_first_trial_list": 200,
         "std_full_knowledge_first_trial_list": 78.78385971583353,
         "avg_full_knowledge_stable_trial_list": 200,
@@ -14062,7 +14062,7 @@
             0.928125,
             0.89375
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             0.997747159753762,
             0.9674942319549302,
             1.0104567267310192,
@@ -14094,7 +14094,7 @@
             1.2645827987869,
             1.0766974755136312
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             40,
             40,
             40,
@@ -14350,7 +14350,7 @@
             0.928125,
             0.89375
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             0.997747159753762,
             0.9674942319549302,
             1.0104567267310192,
@@ -14382,7 +14382,7 @@
             1.2645827987869,
             1.0766974755136312
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             40,
             40,
             40,
@@ -14848,10 +14848,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.0,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.9014756944444444,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.011218329040882529,
-        "avg_old_pep_error_list": 0.9482197243159297,
-        "std_old_pep_error_list": 0.06983349888813131,
-        "avg_old_peps_match_non_aliased_states_list": 48,
-        "std_old_peps_match_non_aliased_states_list": 0.0,
+        "avg_old_ep_error_list": 0.9482197243159297,
+        "std_old_ep_error_list": 0.06983349888813131,
+        "avg_old_eps_match_non_aliased_states_list": 48,
+        "std_old_eps_match_non_aliased_states_list": 0.0,
         "avg_new_knowledge": 100.0,
         "std_new_knowledge": 0.0,
         "avg_new_population": 48.03333333333333,
@@ -14866,8 +14866,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.0,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.9014756944444444,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.011218329040882529,
-        "avg_new_peps_match_non_aliased_states_list": 48,
-        "std_new_peps_match_non_aliased_states_list": 0.0,
+        "avg_new_eps_match_non_aliased_states_list": 48,
+        "std_new_eps_match_non_aliased_states_list": 0.0,
         "avg_full_knowledge_first_trial_list": 143.33333333333334,
         "std_full_knowledge_first_trial_list": 62.606231557929256,
         "avg_full_knowledge_stable_trial_list": 143.33333333333334,
@@ -15118,7 +15118,7 @@
             0.8828125,
             0.9036458333333334
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             0.8719135451932655,
             0.9465177572959599,
             0.9682253418575848,
@@ -15150,7 +15150,7 @@
             0.941391063361436,
             1.1202228044136253
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             48,
             48,
             48,
@@ -15406,7 +15406,7 @@
             0.8828125,
             0.9036458333333334
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             0.8719135451932655,
             0.9465177572959599,
             0.9682253418575848,
@@ -15438,7 +15438,7 @@
             0.941391063361436,
             1.1202228044136253
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             48,
             48,
             48,
@@ -15904,10 +15904,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.002909301357306485,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.8999874903663058,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.006944309061500722,
-        "avg_old_pep_error_list": 5.061483396737449,
-        "std_old_pep_error_list": 0.3630433978991497,
-        "avg_old_peps_match_non_aliased_states_list": 647.4,
-        "std_old_peps_match_non_aliased_states_list": 59.945722576113916,
+        "avg_old_ep_error_list": 5.061483396737449,
+        "std_old_ep_error_list": 0.3630433978991497,
+        "avg_old_eps_match_non_aliased_states_list": 647.4,
+        "std_old_eps_match_non_aliased_states_list": 59.945722576113916,
         "avg_new_knowledge": 95.27777777777779,
         "std_new_knowledge": 2.066502897972994,
         "avg_new_population": 765.4666666666667,
@@ -15922,8 +15922,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.0059525611509710094,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.8676720214012736,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.008062390582480893,
-        "avg_new_peps_match_non_aliased_states_list": 237.33333333333334,
-        "std_new_peps_match_non_aliased_states_list": 11.54999129222939,
+        "avg_new_eps_match_non_aliased_states_list": 237.33333333333334,
+        "std_new_eps_match_non_aliased_states_list": 11.54999129222939,
         "avg_full_knowledge_first_trial_list": -1,
         "std_full_knowledge_first_trial_list": 0.0,
         "avg_full_knowledge_stable_trial_list": -1,
@@ -16174,7 +16174,7 @@
             0.8863877118644068,
             0.8987556561085973
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             5.538092958424435,
             5.2451618993170435,
             5.589314191245995,
@@ -16206,7 +16206,7 @@
             4.796929773258502,
             5.002457899616656
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             672,
             573,
             661,
@@ -16462,7 +16462,7 @@
             0.8570754716981132,
             0.8631422924901185
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             5.462901324590308,
             5.038027082518481,
             5.468279406126913,
@@ -16494,7 +16494,7 @@
             4.667708549070238,
             4.95847285827048
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             227,
             221,
             238,
@@ -16965,10 +16965,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.0023402796669337814,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.8927341544622514,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.004556618315672955,
-        "avg_old_pep_error_list": 4.447471657915408,
-        "std_old_pep_error_list": 0.32798695166385294,
-        "avg_old_peps_match_non_aliased_states_list": 709.3,
-        "std_old_peps_match_non_aliased_states_list": 61.67330501703422,
+        "avg_old_ep_error_list": 4.447471657915408,
+        "std_old_ep_error_list": 0.32798695166385294,
+        "avg_old_eps_match_non_aliased_states_list": 709.3,
+        "std_old_eps_match_non_aliased_states_list": 61.67330501703422,
         "avg_new_knowledge": 95.82089552238806,
         "std_new_knowledge": 1.965668105154793,
         "avg_new_population": 692.1666666666666,
@@ -16983,8 +16983,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.0056769726750391086,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.8660352044155382,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.006316662938870159,
-        "avg_new_peps_match_non_aliased_states_list": 258.8333333333333,
-        "std_new_peps_match_non_aliased_states_list": 15.038074283661441,
+        "avg_new_eps_match_non_aliased_states_list": 258.8333333333333,
+        "std_new_eps_match_non_aliased_states_list": 15.038074283661441,
         "avg_full_knowledge_first_trial_list": 162.36666666666667,
         "std_full_knowledge_first_trial_list": 894.7960847776063,
         "avg_full_knowledge_stable_trial_list": 162.36666666666667,
@@ -17235,7 +17235,7 @@
             0.896671826625387,
             0.8963509316770186
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             4.513454020487361,
             4.740266518579694,
             4.450096501872976,
@@ -17267,7 +17267,7 @@
             4.681925575606436,
             4.489638056797776
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             649,
             703,
             758,
@@ -17523,7 +17523,7 @@
             0.8679245283018868,
             0.8696428571428572
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             4.434045948186035,
             4.714893745979368,
             4.424981791560251,
@@ -17555,7 +17555,7 @@
             4.673217018139167,
             4.543112380197059
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             246,
             282,
             272,
@@ -18025,10 +18025,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.0,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.7861984803391053,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.007166699525856898,
-        "avg_old_pep_error_list": 0.744414430769949,
-        "std_old_pep_error_list": 0.0550845104414424,
-        "avg_old_peps_match_non_aliased_states_list": 64.56666666666666,
-        "std_old_peps_match_non_aliased_states_list": 1.072648457158112,
+        "avg_old_ep_error_list": 0.744414430769949,
+        "std_old_ep_error_list": 0.0550845104414424,
+        "avg_old_eps_match_non_aliased_states_list": 64.56666666666666,
+        "std_old_eps_match_non_aliased_states_list": 1.072648457158112,
         "avg_new_knowledge": 100.0,
         "std_new_knowledge": 0.0,
         "avg_new_population": 72.23333333333333,
@@ -18043,8 +18043,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.0,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.786061746413309,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.006881385812125404,
-        "avg_new_peps_match_non_aliased_states_list": 64.33333333333333,
-        "std_new_peps_match_non_aliased_states_list": 0.7111590022187596,
+        "avg_new_eps_match_non_aliased_states_list": 64.33333333333333,
+        "std_new_eps_match_non_aliased_states_list": 0.7111590022187596,
         "avg_full_knowledge_first_trial_list": 170,
         "std_full_knowledge_first_trial_list": 87.6906789368961,
         "avg_full_knowledge_stable_trial_list": 170,
@@ -18295,7 +18295,7 @@
             0.787109375,
             0.7857142857142857
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             0.7563519240647683,
             0.7789454931321091,
             0.7526704736780443,
@@ -18327,7 +18327,7 @@
             0.7225939251218169,
             0.8203612020396165
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             64,
             64,
             64,
@@ -18583,7 +18583,7 @@
             0.787109375,
             0.7857142857142857
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             0.7563519240647683,
             0.7789454931321091,
             0.7526704736780443,
@@ -18615,7 +18615,7 @@
             0.7225939251218169,
             0.8203612020396165
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             64,
             64,
             64,
@@ -19081,10 +19081,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.05308178593600417,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.5562257850508341,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.005724468196385225,
-        "avg_old_pep_error_list": 0.48987548238088957,
-        "std_old_pep_error_list": 0.07128579909399482,
-        "avg_old_peps_match_non_aliased_states_list": 148.33333333333334,
-        "std_old_peps_match_non_aliased_states_list": 12.242755305537408,
+        "avg_old_ep_error_list": 0.48987548238088957,
+        "std_old_ep_error_list": 0.07128579909399482,
+        "avg_old_eps_match_non_aliased_states_list": 148.33333333333334,
+        "std_old_eps_match_non_aliased_states_list": 12.242755305537408,
         "avg_new_knowledge": 100.0,
         "std_new_knowledge": 0.0,
         "avg_new_population": 150.93333333333334,
@@ -19099,8 +19099,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.055172865359341405,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.554699670846507,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.0033669754445226296,
-        "avg_new_peps_match_non_aliased_states_list": 146.63333333333333,
-        "std_new_peps_match_non_aliased_states_list": 8.434262363075707,
+        "avg_new_eps_match_non_aliased_states_list": 146.63333333333333,
+        "std_new_eps_match_non_aliased_states_list": 8.434262363075707,
         "avg_full_knowledge_first_trial_list": 306.6666666666667,
         "std_full_knowledge_first_trial_list": 101.48325268098498,
         "avg_full_knowledge_stable_trial_list": 330,
@@ -19351,7 +19351,7 @@
             0.5538194444444444,
             0.5538194444444444
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             0.4367968740062924,
             0.4385638012767073,
             0.4539480426376511,
@@ -19383,7 +19383,7 @@
             0.44501268152119905,
             0.4486824033332801
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             144,
             144,
             145,
@@ -19639,7 +19639,7 @@
             0.5538194444444444,
             0.5538194444444444
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             0.4367968740062924,
             0.4385638012767073,
             0.4539480426376511,
@@ -19671,7 +19671,7 @@
             0.44501268152119905,
             0.4486824033332801
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             144,
             144,
             145,
@@ -20140,10 +20140,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.007849142906152046,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.17294170501641107,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.004458616426961608,
-        "avg_old_pep_error_list": 0.4608880148841125,
-        "std_old_pep_error_list": 0.0511689856600918,
-        "avg_old_peps_match_non_aliased_states_list": 63.86666666666667,
-        "std_old_peps_match_non_aliased_states_list": 5.210952215143193,
+        "avg_old_ep_error_list": 0.4608880148841125,
+        "std_old_ep_error_list": 0.0511689856600918,
+        "avg_old_eps_match_non_aliased_states_list": 63.86666666666667,
+        "std_old_eps_match_non_aliased_states_list": 5.210952215143193,
         "avg_new_knowledge": 100.0,
         "std_new_knowledge": 0.0,
         "avg_new_population": 75.33333333333333,
@@ -20158,8 +20158,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.008006307840977318,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.15060213414634147,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.0014789470750188095,
-        "avg_new_peps_match_non_aliased_states_list": 50.46666666666667,
-        "std_new_peps_match_non_aliased_states_list": 3.636342737661994,
+        "avg_new_eps_match_non_aliased_states_list": 50.46666666666667,
+        "std_new_eps_match_non_aliased_states_list": 3.636342737661994,
         "avg_full_knowledge_first_trial_list": 153.33333333333334,
         "std_full_knowledge_first_trial_list": 86.03661343041527,
         "avg_full_knowledge_stable_trial_list": 153.33333333333334,
@@ -20410,7 +20410,7 @@
             0.16489361702127658,
             0.17307692307692307
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             0.4421093899951171,
             0.47380657071935683,
             0.5357378344327273,
@@ -20442,7 +20442,7 @@
             0.4756883581671129,
             0.44736319223371135
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             63,
             58,
             60,
@@ -20698,7 +20698,7 @@
             0.15,
             0.15
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             0.4421093899951171,
             0.473976238622714,
             0.5357378344327273,
@@ -20730,7 +20730,7 @@
             0.47565448172668656,
             0.4455671800256139
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             48,
             48,
             46,
@@ -21198,10 +21198,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.007338495913597427,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.8502993255659856,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.01347918259871673,
-        "avg_old_pep_error_list": 3.2593594213973858,
-        "std_old_pep_error_list": 0.5391795785388888,
-        "avg_old_peps_match_non_aliased_states_list": 180.23333333333332,
-        "std_old_peps_match_non_aliased_states_list": 24.201287132104664,
+        "avg_old_ep_error_list": 3.2593594213973858,
+        "std_old_ep_error_list": 0.5391795785388888,
+        "avg_old_eps_match_non_aliased_states_list": 180.23333333333332,
+        "std_old_eps_match_non_aliased_states_list": 24.201287132104664,
         "avg_new_knowledge": 100.0,
         "std_new_knowledge": 0.0,
         "avg_new_population": 247.5,
@@ -21216,8 +21216,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.007341050835094468,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.8278283056384632,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.01452836986428002,
-        "avg_new_peps_match_non_aliased_states_list": 123.4,
-        "std_new_peps_match_non_aliased_states_list": 13.002917444518577,
+        "avg_new_eps_match_non_aliased_states_list": 123.4,
+        "std_new_eps_match_non_aliased_states_list": 13.002917444518577,
         "avg_full_knowledge_first_trial_list": 290,
         "std_full_knowledge_first_trial_list": 226.44174100409472,
         "avg_full_knowledge_stable_trial_list": 360,
@@ -21468,7 +21468,7 @@
             0.84875,
             0.8333333333333334
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             3.7530597433841066,
             3.142795992593888,
             3.924706442858571,
@@ -21500,7 +21500,7 @@
             2.9552750852537235,
             3.150724335108177
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             167,
             190,
             232,
@@ -21756,7 +21756,7 @@
             0.8259493670886076,
             0.8106617647058824
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             3.7051536658901827,
             3.1825623913324086,
             3.930896885608869,
@@ -21788,7 +21788,7 @@
             3.0139831216222386,
             3.1208178524297847
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             125,
             133,
             153,
@@ -22257,10 +22257,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.005226156648661623,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.6228959831571561,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.010989976713671098,
-        "avg_old_pep_error_list": 3.7404530692024864,
-        "std_old_pep_error_list": 0.6563111189755725,
-        "avg_old_peps_match_non_aliased_states_list": 343.73333333333335,
-        "std_old_peps_match_non_aliased_states_list": 25.424578568823886,
+        "avg_old_ep_error_list": 3.7404530692024864,
+        "std_old_ep_error_list": 0.6563111189755725,
+        "avg_old_eps_match_non_aliased_states_list": 343.73333333333335,
+        "std_old_eps_match_non_aliased_states_list": 25.424578568823886,
         "avg_new_knowledge": 99.68253968253968,
         "std_new_knowledge": 1.0337440129888222,
         "avg_new_population": 441.93333333333334,
@@ -22275,8 +22275,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.006815534708214643,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.6085818535743888,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.010645182175787225,
-        "avg_new_peps_match_non_aliased_states_list": 219.76666666666668,
-        "std_new_peps_match_non_aliased_states_list": 12.98190606411367,
+        "avg_new_eps_match_non_aliased_states_list": 219.76666666666668,
+        "std_new_eps_match_non_aliased_states_list": 12.98190606411367,
         "avg_full_knowledge_first_trial_list": 443.3333333333333,
         "std_full_knowledge_first_trial_list": 219.2201433818704,
         "avg_full_knowledge_stable_trial_list": 539.9,
@@ -22527,7 +22527,7 @@
             0.6362951807228916,
             0.625
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             3.1492979619401926,
             3.769331511003101,
             3.914684857119426,
@@ -22559,7 +22559,7 @@
             2.9412640789355526,
             3.264049550431499
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             306,
             352,
             333,
@@ -22815,7 +22815,7 @@
             0.6181640625,
             0.606404958677686
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             3.44543948167116,
             3.7972327920178626,
             3.897117603466314,
@@ -22847,7 +22847,7 @@
             2.923987736808145,
             3.4578712352990753
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             198,
             218,
             214,
@@ -23322,10 +23322,10 @@
         "std_old_mean_reliable_bs_classifier_specificity": 0.0024040504198348045,
         "avg_old_mean_reliable_no_bs_classifier_specificity": 0.8404800420845651,
         "std_old_mean_reliable_no_bs_classifier_specificity": 0.01382124672848347,
-        "avg_old_pep_error_list": 4.344650184858944,
-        "std_old_pep_error_list": 0.20932654118233632,
-        "avg_old_peps_match_non_aliased_states_list": 391.96666666666664,
-        "std_old_peps_match_non_aliased_states_list": 60.11797787989726,
+        "avg_old_ep_error_list": 4.344650184858944,
+        "std_old_ep_error_list": 0.20932654118233632,
+        "avg_old_eps_match_non_aliased_states_list": 391.96666666666664,
+        "std_old_eps_match_non_aliased_states_list": 60.11797787989726,
         "avg_new_knowledge": 99.81981981981981,
         "std_new_knowledge": 0.4672241941104881,
         "avg_new_population": 620.3666666666667,
@@ -23340,8 +23340,8 @@
         "std_new_mean_reliable_bs_classifier_specificity": 0.004830821484065257,
         "avg_new_mean_reliable_no_bs_classifier_specificity": 0.8443491764264409,
         "std_new_mean_reliable_no_bs_classifier_specificity": 0.01562902893791279,
-        "avg_new_peps_match_non_aliased_states_list": 184.1,
-        "std_new_peps_match_non_aliased_states_list": 13.649175799292792,
+        "avg_new_eps_match_non_aliased_states_list": 184.1,
+        "std_new_eps_match_non_aliased_states_list": 13.649175799292792,
         "avg_full_knowledge_first_trial_list": 983.3,
         "std_full_knowledge_first_trial_list": 765.2728677203743,
         "avg_full_knowledge_stable_trial_list": 1083.2,
@@ -23592,7 +23592,7 @@
             0.8627906976744186,
             0.8556818181818182
         ],
-        "old_pep_error_list": [
+        "old_ep_error_list": [
             4.5001318154677,
             4.18925760970106,
             4.249778496779606,
@@ -23624,7 +23624,7 @@
             4.295556440697322,
             4.2567597684624205
         ],
-        "old_peps_match_non_aliased_states_list": [
+        "old_eps_match_non_aliased_states_list": [
             536,
             313,
             464,
@@ -23880,7 +23880,7 @@
             0.8597560975609756,
             0.8646449704142012
         ],
-        "new_pep_error_list": [
+        "new_ep_error_list": [
             4.462045353719071,
             4.114452979859898,
             4.238865896217788,
@@ -23912,7 +23912,7 @@
             4.257179227698171,
             4.322784045274236
         ],
-        "new_peps_match_non_aliased_states_list": [
+        "new_eps_match_non_aliased_states_list": [
             195,
             166,
             203,

@@ -14,7 +14,7 @@ from agents.common import Perception, RandomNumberGenerator, TypedList
 
 import agents.beacs.mechanisms.alp as alp
 import agents.beacs.mechanisms.reinforcement_learning as rl
-from agents.beacs import Configuration
+from agents.beacs import BEACSConfiguration
 from agents.beacs.classifier_components import Classifier
 
 
@@ -131,7 +131,7 @@ class ClassifiersList(TypedList):
             p1: Perception,
             time: int,
             pai_states_memory,
-            cfg: Configuration
+            cfg: BEACSConfiguration
         ) -> None:
         """
         The Anticipatory Learning Process. Handles all updates by the ALP,
@@ -151,7 +151,7 @@ class ClassifiersList(TypedList):
         p1: Perception
         time: int
         pai_states_memory
-        cfg: Configuration
+        cfg:BEACSConfiguration
         """
         new_list = ClassifiersList()
         new_cl: Optional[Classifier] = None
@@ -200,7 +200,7 @@ class ClassifiersList(TypedList):
                 new_cl = alp.cover(p0, action, p1, time, cfg)
                 alp.add_classifier(new_cl, action_set, new_list)
 
-        if cfg.do_pep:
+        if cfg.do_ep:
             alp.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
 
         if cfg.bs_max > 0 and penultimate_classifier is not None and len(potential_cls_for_pai) > 0:

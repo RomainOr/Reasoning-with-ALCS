@@ -4,23 +4,25 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from agents.common import Perception, RandomNumberGenerator
+from agents.common import Perception
 from agents.common.Agent import Agent, TrialMetrics
 from agents.common.mechanisms.action_selection import choose_classifier
 
-from agents.beacs import ClassifiersList, Configuration
+from agents.beacs import ClassifiersList, BEACSConfiguration
 from agents.beacs.classifier_components import Classifier
 
 class BEACS(Agent):
 
     def __init__(self,
-            cfg: Configuration,
+            cfg: BEACSConfiguration,
             population: ClassifiersList=None
-            ) -> None:
-        self.cfg = cfg
+            ):
         self.population = population or ClassifiersList()
         self.pai_states_memory = []
-        RandomNumberGenerator.seed(self.cfg.seed)
+        super().__init__(
+            cfg=cfg,
+            seed=cfg.seed
+        )
 
     def get_population(self)-> ClassifiersList:
         return self.population
@@ -36,9 +38,6 @@ class BEACS(Agent):
             cl_copy.talp = cl.talp
             duplicate_population.append(cl_copy)
         return ClassifiersList(*duplicate_population)
-
-    def get_cfg(self)-> Configuration:
-        return self.cfg
 
     def get_pai_states_memory(self):
         return self.pai_states_memory

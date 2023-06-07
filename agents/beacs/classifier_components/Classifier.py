@@ -10,7 +10,7 @@ from typing import Optional, Union, List
 from agents.common import Perception
 from agents.common.classifier_components import Condition, PMark
 
-from agents.beacs import Configuration
+from agents.beacs import BEACSConfiguration
 from agents.beacs.classifier_components import EffectList, Effect
 
 

@@ -6,7 +6,7 @@
 
 from agents.common import Perception
 
-from agents.beacs import ClassifiersList, Configuration
+from agents.beacs import ClassifiersList, BEACSConfiguration
 from agents.beacs.classifier_components import Effect
 
 
@@ -73,7 +73,7 @@ def set_pai_detection_timestamps(
 
 def enough_information_to_try_PAI_detection(
         match_set: ClassifiersList,
-        cfg: Configuration
+        cfg: BEACSConfiguration
     ):
     """
     Check if we can collect enough information from the match set to try to detect if the state related to the match set is a PAI state
@@ -83,8 +83,8 @@ def enough_information_to_try_PAI_detection(
     match_set: ClassifiersList
         Population of classifiers having no mark or a mark that corresponds to p0
         and whose condition matches p0, without the behavioral ones.
-    cfg: Configuration
-        Configuration used in the ALCS
+    cfg: BEACSConfiguration
+        BEACSConfiguration used in the ALCS
 
     Returns
     -------
@@ -111,7 +111,7 @@ def enough_information_to_try_PAI_detection(
 def is_perceptual_aliasing_state(
         most_experienced_classifiers: dict,
         p0: Perception,
-        cfg: Configuration
+        cfg: BEACSConfiguration
     ) -> bool:
     """
     Check if the system suffers from the perceptual aliasing issue in the penultimate perception
@@ -123,8 +123,8 @@ def is_perceptual_aliasing_state(
         Classifiers to do the detection that are the most experienced and reliable for each action
     p0: Perception
         Perception of the state in the previous step
-    cfg: Configuration
-        Configuration used in the ALCS
+    cfg: BEACSConfiguration
+        BEACSConfiguration used in the ALCS
 
     Returns
     -------

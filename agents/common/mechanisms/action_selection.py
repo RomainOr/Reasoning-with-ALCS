@@ -24,7 +24,7 @@ def choose_classifier(
     ----------
     cll: ClassifierList
         Matching set
-    cfg: Configuration
+    cfg: BaseConfiguration
         Allow to retrieve the number of possible actions
     epsilon: float
         Probability of executing exploration path
@@ -54,7 +54,7 @@ def explore(
     ----------
     cll: ClassifierList
         Matching set
-    cfg: Configuration
+    cfg: BaseConfiguration
         Allow to retrieve the number of possible actions
     pb: float
         probability of biased exploration
@@ -85,7 +85,7 @@ def choose_latest_action(
     ----------
     cll: ClassifierList
         Matching set
-    cfg: Configuration
+    cfg: BaseConfiguration
         Allow to retrieve the number of possible actions
 
     Returns
@@ -121,7 +121,7 @@ def choose_action_from_knowledge_array(
     ----------
     cll: ClassifierList
         Matching set
-    cfg: Configuration
+    cfg: BaseConfiguration
         Allow to retrieve the number of possible actions
 
     Returns
@@ -161,7 +161,7 @@ def choose_random_classifiers(
     ----------
     cll: ClassifierList
         Matching set
-    cfg: Configuration
+    cfg: BaseConfiguration
         Allow to retrieve the number of possible actions
 
     Returns
@@ -187,7 +187,7 @@ def choose_fittest_classifier(
     ----------
     cll: ClassifierList
         Matching set
-    cfg: Configuration
+    cfg: BaseConfiguration
         Allow to retrieve the number of possible actions
 
     Returns

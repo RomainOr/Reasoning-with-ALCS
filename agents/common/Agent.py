@@ -1,10 +1,25 @@
+"""
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+"""
+
 from collections import namedtuple
 from typing import Callable, List, Tuple
+
+from agents.common import BaseConfiguration
+from agents.common.RandomNumberGenerator import RandomNumberGenerator
 
 TrialMetrics = namedtuple('TrialMetrics', ['steps', 'reward'])
 
 
 class Agent:
+
+    def __init__(self,
+            cfg: BaseConfiguration,
+            seed):
+        self.cfg = cfg
+        RandomNumberGenerator.seed(seed)
 
     def _run_trial_explore(self, env, trials, current_trial) -> TrialMetrics:
         raise NotImplementedError()
@@ -16,7 +31,7 @@ class Agent:
         raise NotImplementedError()
 
     def get_cfg(self):
-        raise NotImplementedError()
+        return self.cfg
 
     def explore(self, env, trials) -> Tuple:
         """

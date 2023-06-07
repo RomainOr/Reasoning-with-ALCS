@@ -4,6 +4,6 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from .Configuration import Configuration
+from .BEACSConfiguration import BEACSConfiguration
 from .ClassifiersList import ClassifiersList
 from .BEACS import BEACS

@@ -57,7 +57,7 @@ def _maze_metrics(
     return metrics
 
 
-def _how_many_peps_match_non_aliased_states(
+def _how_many_eps_match_non_aliased_states(
         pop,
         env
     ) -> int:
@@ -169,8 +169,8 @@ def compute_mean_and_stdev_for_one_env(env_name, results):
     mean_reliable_classifier_specificity_list = []
     mean_reliable_bs_classifier_specificity_list = []
     mean_reliable_no_bs_classifier_specificity_list = []
-    pep_error_list = []
-    peps_match_non_aliased_states_list = []
+    ep_error_list = []
+    eps_match_non_aliased_states_list = []
     
     full_knowledge_first_trial_list = []
     full_knowledge_stable_trial_list = []
@@ -196,8 +196,8 @@ def compute_mean_and_stdev_for_one_env(env_name, results):
             mean_reliable_classifier_specificity_list.append(res['mean_reliable_classifier_specificity'])
             mean_reliable_bs_classifier_specificity_list.append(res['mean_reliable_bs_classifier_specificity'])
             mean_reliable_no_bs_classifier_specificity_list.append(res['mean_reliable_no_bs_classifier_specificity'])
-            pep_error_list.append(res['pep_error'])
-            peps_match_non_aliased_states_list.append(res['peps_match_non_aliased_states'])
+            ep_error_list.append(res['ep_error'])
+            eps_match_non_aliased_states_list.append(res['eps_match_non_aliased_states'])
             
             full_knowledge_first_trial_list.append(res['full_knowledge_first_trial'])
             full_knowledge_stable_trial_list.append(res['full_knowledge_stable_trial'])
@@ -238,10 +238,10 @@ def compute_mean_and_stdev_for_one_env(env_name, results):
     std_mean_reliable_bs_classifier_specificity = statistics.stdev(mean_reliable_bs_classifier_specificity_list)
     avg_mean_reliable_no_bs_classifier_specificity = statistics.mean(mean_reliable_no_bs_classifier_specificity_list)
     std_mean_reliable_no_bs_classifier_specificity = statistics.stdev(mean_reliable_no_bs_classifier_specificity_list)
-    avg_pep_error_list = statistics.mean(pep_error_list)
-    std_pep_error_list = statistics.stdev(pep_error_list)
-    avg_peps_match_non_aliased_states_list = statistics.mean(peps_match_non_aliased_states_list)
-    std_peps_match_non_aliased_states_list = statistics.stdev(peps_match_non_aliased_states_list)
+    avg_ep_error_list = statistics.mean(ep_error_list)
+    std_ep_error_list = statistics.stdev(ep_error_list)
+    avg_eps_match_non_aliased_states_list = statistics.mean(eps_match_non_aliased_states_list)
+    std_eps_match_non_aliased_states_list = statistics.stdev(eps_match_non_aliased_states_list)
     
     avg_full_knowledge_first_trial_list = statistics.mean(full_knowledge_first_trial_list)
     std_full_knowledge_first_trial_list = statistics.stdev(full_knowledge_first_trial_list)
@@ -281,10 +281,10 @@ def compute_mean_and_stdev_for_one_env(env_name, results):
         'std_mean_reliable_bs_classifier_specificity' : std_mean_reliable_bs_classifier_specificity,
         'avg_mean_reliable_no_bs_classifier_specificity' : avg_mean_reliable_no_bs_classifier_specificity,
         'std_mean_reliable_no_bs_classifier_specificity' : std_mean_reliable_no_bs_classifier_specificity,
-        'avg_pep_error_list' : avg_pep_error_list,
-        'std_pep_error_list' : std_pep_error_list,
-        'avg_peps_match_non_aliased_states_list' : avg_peps_match_non_aliased_states_list,
-        'std_peps_match_non_aliased_states_list' : std_peps_match_non_aliased_states_list,
+        'avg_ep_error_list' : avg_ep_error_list,
+        'std_ep_error_list' : std_ep_error_list,
+        'avg_eps_match_non_aliased_states_list' : avg_eps_match_non_aliased_states_list,
+        'std_eps_match_non_aliased_states_list' : std_eps_match_non_aliased_states_list,
         
         'avg_full_knowledge_first_trial_list'  : avg_full_knowledge_first_trial_list,
         'std_full_knowledge_first_trial_list'  : std_full_knowledge_first_trial_list,
@@ -314,8 +314,8 @@ def compute_mean_and_stdev_for_one_env(env_name, results):
         'mean_reliable_classifier_specificity_list' : mean_reliable_classifier_specificity_list,
         'mean_reliable_bs_classifier_specificity_list' : mean_reliable_bs_classifier_specificity_list,
         'mean_reliable_no_bs_classifier_specificity_list' : mean_reliable_no_bs_classifier_specificity_list,
-        'pep_error_list' : pep_error_list,
-        'peps_match_non_aliased_states_list' : peps_match_non_aliased_states_list,
+        'ep_error_list' : ep_error_list,
+        'eps_match_non_aliased_states_list' : eps_match_non_aliased_states_list,
         
         'full_knowledge_first_trial_list'  : full_knowledge_first_trial_list,
         'full_knowledge_stable_trial_list' : full_knowledge_stable_trial_list,
