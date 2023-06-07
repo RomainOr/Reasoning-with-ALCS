@@ -6,7 +6,7 @@
 
 from typing import Callable, Dict
 
-from agents.common import RandomNumberGenerator
+from agents.common.RandomNumberGenerator import RandomNumberGenerator
 from agents.common.mechanisms.subsumption import does_subsume
 
 

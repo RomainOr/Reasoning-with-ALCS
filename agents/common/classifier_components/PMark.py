@@ -6,8 +6,11 @@
 
 from typing import List
 
-from agents.common import BaseConfiguration, Perception, RandomNumberGenerator, TypedList
-from agents.common.classifier_components import Condition
+from agents.common.BaseConfiguration import BaseConfiguration
+from agents.common.Perception import Perception
+from agents.common.RandomNumberGenerator import RandomNumberGenerator
+from agents.common.TypedList import TypedList
+from agents.common.classifier_components.Condition import Condition
 
 
 class PMark(TypedList):

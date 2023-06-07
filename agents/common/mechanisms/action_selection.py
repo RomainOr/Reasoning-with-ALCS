@@ -6,23 +6,22 @@
 
 from itertools import groupby
 
-from agents.common import RandomNumberGenerator
-
-from agents.beacs.classifier_components import Classifier
+from agents.common.RandomNumberGenerator import RandomNumberGenerator
+from agents.common.classifier_components.BaseClassifier import BaseClassifier
 
 
 def choose_classifier(
         cll,
         cfg,
         epsilon: float
-    ) -> Classifier:
+    ) -> BaseClassifier:
     """
     Chooses which classifier to use given matching set through an
     epsilon greedy method.
 
     Parameters
     ----------
-    cll: ClassifierList
+    cll: BaseClassifiersList
         Matching set
     cfg: BaseConfiguration
         Allow to retrieve the number of possible actions
@@ -43,7 +42,7 @@ def explore(
         cll,
         cfg,
         pb: float = 0.5
-    ) -> Classifier:
+    ) -> BaseClassifier:
     """
     Chooses classifier according to current exploration policy.
     There is pb probability to choose a random classifier.
@@ -52,7 +51,7 @@ def explore(
 
     Parameters
     ----------
-    cll: ClassifierList
+    cll: BaseClassifiersList
         Matching set
     cfg: BaseConfiguration
         Allow to retrieve the number of possible actions
@@ -76,14 +75,14 @@ def explore(
 def choose_latest_action(
         cll,
         cfg
-    )-> Classifier:
+    )-> BaseClassifier:
     """
     Computes latest executed action ("action delay bias") and return 
     a corresponding classifier.
 
     Parameters
     ----------
-    cll: ClassifierList
+    cll: BaseClassifiersList
         Matching set
     cfg: BaseConfiguration
         Allow to retrieve the number of possible actions
@@ -102,7 +101,7 @@ def choose_latest_action(
             number_of_cls_per_action[_action] = sum([cl.num for cl in _clss])
         for action, nCls in number_of_cls_per_action.items():
             if nCls == 0:
-                return Classifier(action=action, cfg=cfg)
+                return BaseClassifier(action=action, cfg=cfg)
         return last_executed_cls
     return choose_random_classifiers(cll, cfg)
 
@@ -110,7 +109,7 @@ def choose_latest_action(
 def choose_action_from_knowledge_array(
         cll,
         cfg
-    ) -> Classifier:
+    ) -> BaseClassifier:
     """
     Creates 'knowledge array' that represents the average quality of the
     anticipation for each action in the current list. Chosen is
@@ -119,7 +118,7 @@ def choose_action_from_knowledge_array(
 
     Parameters
     ----------
-    cll: ClassifierList
+    cll: BaseClassifiersList
         Matching set
     cfg: BaseConfiguration
         Allow to retrieve the number of possible actions
@@ -152,14 +151,14 @@ def choose_action_from_knowledge_array(
 def choose_random_classifiers(
         cll,
         cfg
-    )-> Classifier:
+    )-> BaseClassifier:
     """
     Chooses one of the possible actions in the environment randomly 
     and return a corresponding classifier.
 
     Parameters
     ----------
-    cll: ClassifierList
+    cll: BaseClassifiersList
         Matching set
     cfg: BaseConfiguration
         Allow to retrieve the number of possible actions
@@ -173,19 +172,19 @@ def choose_random_classifiers(
     if rand < nb_of_cll:
         return cll[rand]
     action = rand - nb_of_cll
-    return Classifier(action=action, cfg=cfg)
+    return BaseClassifier(action=action, cfg=cfg)
 
 
 def choose_fittest_classifier(
         cll,
         cfg
-    )-> Classifier:
+    )-> BaseClassifier:
     """
     Chooses the fittest classifier in the matching set
 
     Parameters
     ----------
-    cll: ClassifierList
+    cll: BaseClassifiersList
         Matching set
     cfg: BaseConfiguration
         Allow to retrieve the number of possible actions

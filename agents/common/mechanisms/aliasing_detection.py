@@ -5,7 +5,8 @@
 """
 
 from agents.common import Perception
-from agents.common.classifier_components import Condition, PMark
+from agents.common.classifier_components.Condition import Condition
+from agents.common.classifier_components.PMark import PMark
 
 
 def is_state_aliased(

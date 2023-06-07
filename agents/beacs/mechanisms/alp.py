@@ -7,12 +7,13 @@
 from typing import Optional
 
 import agents.common.mechanisms.aliasing_detection as aliasing_detection
-from agents.common import Perception, RandomNumberGenerator
+from agents.common.Perception import Perception
+from agents.common.RandomNumberGenerator import RandomNumberGenerator
 from agents.common.mechanisms.subsumption import does_subsume
 
 import agents.beacs.mechanisms.pai_detection as pai_detection
-from agents.beacs import ClassifiersList, BEACSConfiguration
-from agents.beacs.classifier_components import Classifier
+from agents.beacs.BEACSConfiguration import BEACSConfiguration
+from agents.beacs.classifier_components.BEACSClassifier import BEACSClassifier
 from agents.beacs.mechanisms.build_behavioral_sequences import create_behavioral_classifier
 
 
@@ -22,7 +23,7 @@ def cover(
         p1: Perception,
         time: int,
         cfg: BEACSConfiguration
-    ) -> Classifier:
+    ) -> BEACSClassifier:
     """
     Covering - creates a classifier that anticipates a change correctly.
 
@@ -44,7 +45,7 @@ def cover(
     Classifier
         new classifier
     """
-    new_cl = Classifier(
+    new_cl = BEACSClassifier(
         action=action, 
         tga=time,
         tbseq=time,
@@ -56,7 +57,7 @@ def cover(
 
 
 def expected_case(
-        cl: Classifier,
+        cl: BEACSClassifier,
         p0: Perception,
         p1: Perception,
         time: int,
@@ -115,11 +116,11 @@ def expected_case(
 
 
 def unexpected_case(
-        cl: Classifier,
+        cl: BEACSClassifier,
         p0: Perception,
         p1: Perception,
         time: int
-    ) -> Optional[Classifier]:
+    ) -> Optional[BEACSClassifier]:
     """
     Controls the unexpected case of the classifier.
 
@@ -188,11 +189,10 @@ def add_classifier(
 
     
 def apply_enhanced_effect_part_check(
-        action_set: ClassifiersList,
-        new_list: ClassifiersList,
+        action_set,
+        new_list,
         p0: Perception,
-        time: int,
-        cfg: BEACSConfiguration
+        time: int
     ) -> None:
     """
     Used to build enhanced classifiers
@@ -213,14 +213,14 @@ def apply_enhanced_effect_part_check(
 
 
 def apply_perceptual_aliasing_issue_management(
-        population: ClassifiersList,
-        t_2_match_set: ClassifiersList,
-        t_1_match_set: ClassifiersList,
-        match_set: ClassifiersList,
-        action_set: ClassifiersList,
-        penultimate_classifier: Classifier,
+        population,
+        t_2_match_set,
+        t_1_match_set,
+        match_set,
+        action_set,
+        penultimate_classifier: BEACSClassifier,
         potential_cls_for_pai,
-        new_list: ClassifiersList,
+        new_list,
         p0: Perception,
         p1: Perception,
         time: int,

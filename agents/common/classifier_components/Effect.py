@@ -16,8 +16,8 @@ class Effect(AbstractPerception):
     to be caused by the specified action.
     """
 
-    def __init__(self, observation, wildcard='#'):
-        super().__init__(observation, wildcard)
+    def __init__(self, observation, wildcard='#', oktypes=(str, dict)):
+        super().__init__(observation, wildcard, oktypes)
 
 
     @property
@@ -34,26 +34,20 @@ class Effect(AbstractPerception):
         return any(True for e in self if e != self.wildcard)
 
 
-    def is_specializable(
-            self,
-            p0: Perception,
-            p1: Perception
-        ) -> bool:
+    def is_specializable(self, p0: Perception, p1: Perception) -> bool:
         """
         Determines if the effect part can be modified to anticipate
         changes from `p0` to `p1` correctly by only specializing attributes.
-
         Parameters
         ----------
         p0: Perception
-            Previous perception
+            previous perception
         p1: Perception
-            Current perception
-
+            current perception
         Returns
         -------
         bool
-            True if specializable
+            True if specializable, false otherwise
         """
         for p0i, p1i, ei in zip(p0, p1, self):
             if ei != self.wildcard:
@@ -62,32 +56,8 @@ class Effect(AbstractPerception):
         return True
 
 
-    def does_anticipate_correctly(
-            self,
-            p0: Perception,
-            p1: Perception
-        ) -> bool:
-        """
-        Determines if the effect anticipates correctly changes from `p0` to `p1`.
-
-        Parameters
-        ----------
-        p0: Perception
-            Previous perception
-        p1: Perception
-            Current perception
-
-        Returns
-        -------
-        bool
-            True the anticipation is correct
-        """
-        def _item_anticipate_change(
-                item,
-                p0_item,
-                p1_item,
-                wildcard
-            ) -> bool:
+    def anticipates_correctly(self, p0: Perception, p1: Perception) -> bool:
+        def item_anticipate_change(item, p0_item, p1_item, wildcard) -> bool:
             if item == wildcard:
                 if p0_item != p1_item: return False
             else:
@@ -95,4 +65,21 @@ class Effect(AbstractPerception):
                 if item != p1_item: return False
             # All checks passed
             return True
-        return all(_item_anticipate_change(self[idx], p0[idx], p1[idx], self.wildcard) for idx in range(len(p0)))
+        return all(item_anticipate_change(eitem, p0[idx], p1[idx], self.wildcard) for idx, eitem in enumerate(self))
+
+
+    def subsumes(self, other: Effect) -> bool:
+        for si, oi in zip(self, other):
+            if si != oi: return False
+        return True
+
+
+    def getEffectAttribute(self, perception, index):
+        if self[index] == self.wildcard:
+            return {int(perception[index]):1.0}
+        else:
+            return {int(self[index]): 1.0}
+
+
+    def __str__(self):
+        return ''.join(str(attr) for attr in self)

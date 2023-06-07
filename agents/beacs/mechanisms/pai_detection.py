@@ -6,12 +6,12 @@
 
 from agents.common import Perception
 
-from agents.beacs import ClassifiersList, BEACSConfiguration
-from agents.beacs.classifier_components import Effect
+from agents.beacs.BEACSConfiguration import BEACSConfiguration
+from agents.beacs.classifier_components.Effect import Effect
 
 
 def should_pai_detection_apply(
-        match_set: ClassifiersList,
+        match_set,
         time: int, 
         theta_bseq: int
     ) -> bool:
@@ -21,7 +21,7 @@ def should_pai_detection_apply(
 
     Parameters
     ----------
-    match_set: ClassifiersList
+    match_set
         Population of classifiers having no mark or a mark that corresponds to p0
         and whose condition matches p0, without the behavioral ones.
     time: int
@@ -61,7 +61,7 @@ def set_pai_detection_timestamps(
 
     Parameters
     ----------
-    match_set: ClassifiersList
+    match_set
         Population of classifiers having no mark or a mark that corresponds to p0
         and whose condition matches p0, without the behavioral ones.
     epoch: int
@@ -72,7 +72,7 @@ def set_pai_detection_timestamps(
 
 
 def enough_information_to_try_PAI_detection(
-        match_set: ClassifiersList,
+        match_set,
         cfg: BEACSConfiguration
     ):
     """
@@ -80,7 +80,7 @@ def enough_information_to_try_PAI_detection(
 
     Parameters
     ----------
-    match_set: ClassifiersList
+    match_set
         Population of classifiers having no mark or a mark that corresponds to p0
         and whose condition matches p0, without the behavioral ones.
     cfg: BEACSConfiguration

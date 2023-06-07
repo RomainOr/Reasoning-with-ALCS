@@ -7,8 +7,9 @@
 from __future__ import annotations
 from typing import Callable, Union
 
-from agents.common import Perception, RandomNumberGenerator
-from agents.common.classifier_components import AbstractPerception
+from agents.common.Perception import Perception
+from agents.common.RandomNumberGenerator import RandomNumberGenerator
+from agents.common.classifier_components.AbstractPerception import AbstractPerception
 
 
 

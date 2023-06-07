@@ -7,7 +7,8 @@
 from collections import namedtuple
 from typing import Callable, List, Tuple
 
-from agents.common import BaseConfiguration
+from agents.common.BaseClassifiersList import BaseClassifiersList
+from agents.common.BaseConfiguration import BaseConfiguration
 from agents.common.RandomNumberGenerator import RandomNumberGenerator
 
 TrialMetrics = namedtuple('TrialMetrics', ['steps', 'reward'])
@@ -17,21 +18,70 @@ class Agent:
 
     def __init__(self,
             cfg: BaseConfiguration,
+            population: BaseClassifiersList,
             seed):
         self.cfg = cfg
+        self.population = population
         RandomNumberGenerator.seed(seed)
 
+
     def _run_trial_explore(self, env, trials, current_trial) -> TrialMetrics:
-        raise NotImplementedError()
+        raise NotImplementedError("Subclasses should implement this method.")
+
 
     def _run_trial_exploit(self, env, trials, current_trial) -> TrialMetrics:
-        raise NotImplementedError()
+        raise NotImplementedError("Subclasses should implement this method.")
+
 
     def get_population(self):
-        raise NotImplementedError()
+        raise NotImplementedError("Subclasses should implement this method.")
+
 
     def get_cfg(self):
         return self.cfg
+
+
+    def get_population(self)-> BaseClassifiersList:
+        return self.population
+
+
+    def duplicate_population(self)-> BaseClassifiersList:
+        raise NotImplementedError("Subclasses should implement this method.")
+
+
+    def apply_CRACS(
+            self,
+            does_anticipate_change:bool=False,
+            is_reliable:bool=False
+        ):
+        # Keep or not classifiers that anticipate changes
+        if does_anticipate_change:
+            pop = [cl for cl in self.population if cl.does_anticipate_change()]
+            self.population = BaseClassifiersList(*pop)
+        # Keep all classifiers or only reliable classifiers
+        if is_reliable:
+            pop = [cl for cl in self.population if cl.is_reliable()]
+            self.population = BaseClassifiersList(*pop)
+        # Removing subsumed classifiers and unwanted behavioral classifiers
+        classifiers_to_keep = []
+        for cl in self.population:
+            to_keep = True
+            for other in self.population:
+                if cl != other and other.subsumes(cl):
+                    to_keep = False
+                    break
+            if to_keep and cl.behavioral_sequence is not None and \
+                not cl.is_experienced():
+                to_keep = False
+            if to_keep and cl.behavioral_sequence is not None and \
+                not cl.does_anticipate_change() and len(cl.effect)==1:
+                to_keep = False
+            if to_keep:
+                classifiers_to_keep.append(cl)
+        for cl in self.population:
+            if cl not in classifiers_to_keep:
+                self.population.safe_remove(cl)
+
 
     def explore(self, env, trials) -> Tuple:
         """
@@ -51,6 +101,7 @@ class Agent:
         """
         return self._evaluate(env, trials, self._run_trial_explore)
 
+
     def exploit(self, env, trials) -> Tuple:
         """
         Exploits the environments in given set of trials (always executing
@@ -69,6 +120,7 @@ class Agent:
             population of classifiers and metrics
         """
         return self._evaluate(env, trials, self._run_trial_exploit)
+
 
     def _evaluate(self, env, max_trials: int, func: Callable) -> Tuple:
         """

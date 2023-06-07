@@ -4,7 +4,7 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from agents.common import RandomNumberGenerator
+from agents.common.RandomNumberGenerator import RandomNumberGenerator
 
 
 def update_classifier_double_q_learning(
@@ -35,9 +35,9 @@ def update_classifier_double_q_learning(
         Reinforcement rate
     """
     if RandomNumberGenerator.random() < 0.5:
-        cl.err += beta_rl * (abs(step_reward + gamma * max_fitness_rb - cl.ra) - cl.err)
-        cl.ra += beta_rl * (step_reward + gamma * max_fitness_rb - cl.ra)
+        cl.err += beta_rl * (abs(step_reward + gamma * max_fitness_rb - cl.r) - cl.err)
+        cl.r += beta_rl * (step_reward + gamma * max_fitness_rb - cl.r)
     else:
-        cl.err += beta_rl * (abs(step_reward + gamma * max_fitness_ra - cl.rb) - cl.err)
-        cl.rb += beta_rl * (step_reward + gamma * max_fitness_ra - cl.rb)
+        cl.err += beta_rl * (abs(step_reward + gamma * max_fitness_ra - cl.r_bis) - cl.err)
+        cl.r_bis += beta_rl * (step_reward + gamma * max_fitness_ra - cl.r_bis)
     cl.ir += beta_rl * (step_reward - cl.ir)

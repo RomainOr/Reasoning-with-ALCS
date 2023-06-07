@@ -5,5 +5,5 @@
 """
 
 from .BEACSConfiguration import BEACSConfiguration
-from .ClassifiersList import ClassifiersList
+from .BEACSClassifiersList import BEACSClassifiersList
 from .BEACS import BEACS

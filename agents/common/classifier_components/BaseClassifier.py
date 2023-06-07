@@ -7,17 +7,17 @@
 from __future__ import annotations
 from typing import Optional, Union, List
 
-from agents.common import Perception
-from agents.common.classifier_components import Condition, PMark
+from agents.common.Perception import Perception
+from agents.common.BaseConfiguration import BaseConfiguration
+from agents.common.classifier_components.Condition import Condition
+from agents.common.classifier_components.PMark import PMark
+from agents.common.classifier_components.Effect import Effect
 
-from agents.beacs import BEACSConfiguration
-from agents.beacs.classifier_components import EffectList, Effect
 
+class BaseClassifier:
 
-class Classifier:
-
-    __slots__ = ['condition', 'action', 'behavioral_sequence', 'effect', 'mark', 'q', 'ra', 'rb',
-        'ir', 'num', 'exp', 'talp', 'tga', 'tbseq', 'tav', 'cfg', 'ee', 'aliased_state', 'pai_state', 'err']
+    __slots__ = ['condition', 'action', 'behavioral_sequence', 'effect', 'mark', 'q', 'r',
+        'ir', 'num', 'exp', 'talp', 'tga', 'tav', 'cfg', 'ee']
 
     def __init__(
             self,
@@ -26,23 +26,18 @@ class Classifier:
             behavioral_sequence: Optional[List[int]] = None,
             effect: Optional[Effect] = None,
             quality: float=0.5,
-            rewarda: float=0.,
-            rewardb: float=0.,
+            reward: float=0.,
             immediate_reward: float=0.0,
             numerosity: int=1,
             experience: int=1,
             talp: int=0,
             tga: int=0,
-            tbseq: int=0,
             tav: float=0.0,
-            aliased_state: Optional[Perception] = None,
-            pai_state: Optional[Perception] = None,
-            cfg: Optional[Configuration] = None
+            cfg: Optional[BaseConfiguration] = None
         ) -> None:
         if cfg is None:
             raise TypeError("Configuration should be passed to Classifier")
         self.cfg = cfg
-
         def _build_perception_string(
                 cls,
                 initial,
@@ -52,32 +47,20 @@ class Classifier:
             if initial:
                 return cls(initial, wildcard=wildcard)
             return cls.empty(wildcard=wildcard, length=length)
-
         self.condition = _build_perception_string(Condition, condition)
         self.action = action
         self.behavioral_sequence = behavioral_sequence
-        self.effect = EffectList(_build_perception_string(Effect, effect), self.cfg.classifier_length, self.cfg.classifier_wildcard)
+        self.effect = _build_perception_string(Effect, effect)
         self.mark = PMark(cfg=self.cfg)
         self.q = quality
-        self.ra = rewarda
-        self.rb = rewardb
+        self.r = reward
         self.ir = immediate_reward
         self.num = numerosity
         self.exp = experience
         self.talp = talp
         self.tga = tga
-        self.tbseq = tbseq
         self.tav = tav
         self.ee = False
-        if aliased_state:
-            self.aliased_state = aliased_state
-        else:
-            self.aliased_state = Perception.empty()
-        if pai_state:
-            self.pai_state = pai_state
-        else:
-            self.pai_state = Perception.empty()
-        self.err = 0.
 
 
     def __eq__(self, other):
@@ -94,23 +77,22 @@ class Classifier:
 
 
     def __hash__(self):
-        return hash((str(self.condition), self.action, str(self.effect)))
+        return hash((str(self.condition), self.action, str(self.behavioral_sequence), str(self.effect)))
 
 
     def __repr__(self):
         return f"C:{self.condition} A:{self.action} {str(self.behavioral_sequence)} E:{str(self.effect)}\n" \
-            f"q: {self.q:<6.4} ra: {self.ra:<6.4} rb: {self.rb:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} err: {self.err:<6.4}\n" \
+            f"q: {self.q:<6.4} r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4}\n" \
             f"exp: {self.exp:<5} num: {self.num} ee: {self.ee}\n" \
-            f"Mark: {str(self.mark)} Can_be_generalized: {str(self.effect.enhanced_trace_ga)} Aliased_state: {''.join(str(attr) for attr in self.aliased_state)} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \
-            f"tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n" \
+            f"Mark: {str(self.mark)} tga: {self.tga:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n"
 
 
     @classmethod
     def copy_from(
             cls,
-            old_cls: Classifier,
+            old_cls: BaseClassifier,
             time: int
-        ) -> Classifier:
+        ) -> BaseClassifier:
         """
         Copies old classifier with given time.
         Old tav gets replaced with new value.
@@ -133,26 +115,13 @@ class Classifier:
             action=old_cls.action,
             behavioral_sequence=old_cls.behavioral_sequence,
             quality=old_cls.q,
-            rewarda=old_cls.ra,
-            rewardb=old_cls.rb,
+            reward=old_cls.r,
             immediate_reward=old_cls.ir,
             cfg=old_cls.cfg,
             tga=time,
-            tbseq=time,
             talp=time,
-            tav=old_cls.tav,
-            aliased_state=old_cls.aliased_state,
-            pai_state=old_cls.pai_state
+            tav=old_cls.tav
         )
-        new_cls.effect.effect_list = []
-        for oeffect in old_cls.effect:
-            effect_to_append = Effect.empty(new_cls.cfg.classifier_length)
-            for i in range(new_cls.cfg.classifier_length):
-                effect_to_append[i] = oeffect[i]
-            new_cls.effect.effect_list.append(effect_to_append)
-        new_cls.effect.effect_detailled_counter = old_cls.effect.effect_detailled_counter[:]
-        new_cls.effect.enhanced_trace_ga = old_cls.effect.enhanced_trace_ga[:]
-        new_cls.effect.update_enhanced_trace_ga(new_cls.cfg.classifier_length)
         return new_cls
 
 
@@ -166,14 +135,7 @@ class Classifier:
         Float
             Fitness value
         """
-        epsilon = 1e-6
-        max_r = max(self.ra, self.rb)
-        min_r = min(self.ra, self.rb)
-        diff = max_r - min_r + epsilon
-        if self.behavioral_sequence:
-            return self.q * (max_r - diff * len(self.behavioral_sequence) / self.cfg.bs_max)
-        return self.q * max_r
-        # Tmp : mountaincar sans qualité pour fitness ?
+        return self.q * self.r
 
 
     @property
@@ -198,7 +160,7 @@ class Classifier:
         bool
             True if the classifier is enhanced
         """
-        return self.effect.is_enhanced()
+        raise NotImplementedError("Subclasses should implement this method.")
 
 
     def is_experienced(self) -> bool:
@@ -251,7 +213,7 @@ class Classifier:
 
     def is_more_general(
             self,
-            other: Classifier
+            other: BaseClassifier
         ) -> bool:
         """
         Checks if the classifiers condition is formally
@@ -502,28 +464,7 @@ class Classifier:
         situation: Perception
             Perception related to a state following the action
         """
-        length = self.cfg.classifier_length
-        wildcard = self.cfg.classifier_wildcard
-        if not self.is_enhanced():
-            for idx in range(length):
-                if previous_situation[idx] != situation[idx] and self.effect[0][idx] == wildcard:
-                    self.effect[0][idx] = situation[idx]
-                    self.condition[idx] = previous_situation[idx]
-        else:
-            if self.aliased_state != previous_situation:
-                for idx in range(length):
-                    if self.aliased_state[idx] != previous_situation[idx]:
-                        self.condition[idx] = self.aliased_state[idx]
-                        self.effect.enhanced_trace_ga[idx] = False
-            else:
-                new_effect_index = len(self.effect)
-                self.effect.effect_list.append(Effect.empty(length, wildcard))
-                self.effect.effect_detailled_counter.append(1)
-                for idx in range(length):
-                    if previous_situation[idx] != situation[idx]:
-                        self.effect[new_effect_index][idx] = situation[idx]
-                        self.condition[idx] = previous_situation[idx]
-                self.effect.update_enhanced_trace_ga(length)
+        raise NotImplementedError("Subclasses should implement this method.")
 
 
     def generalize_specific_attribute_randomly(self):
@@ -535,10 +476,10 @@ class Classifier:
 
     def merge_with(
             self,
-            other_classifier: Classifier,
+            other_classifier: BaseClassifier,
             aliased_state: Perception,
             time: int
-        ) -> Classifier:
+        ) -> BaseClassifier:
         """
         Merges two classifier in an enhanced one.
 
@@ -556,14 +497,7 @@ class Classifier:
         Classifier
             New enhanced classifier
         """
-        result = Classifier.copy_from(self, time)
-        result.q = max((self.q + other_classifier.q) / 2.0, 0.5)
-        result.ra = (self.ra + other_classifier.ra) / 2.0
-        result.rb = (self.rb + other_classifier.rb) / 2.0
-        result.condition.specialize_with_condition(other_classifier.condition)
-        result.effect.enhance(other_classifier.effect, self.cfg.classifier_length)
-        result.aliased_state = aliased_state
-        return result
+        raise NotImplementedError("Subclasses should implement this method.")
 
 
     def subsumes(self, other) -> bool:

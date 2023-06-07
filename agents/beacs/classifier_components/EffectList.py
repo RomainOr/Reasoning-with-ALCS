@@ -7,9 +7,9 @@
 from __future__ import annotations
 from typing import Optional
 
-from agents.common import Perception
+from agents.common.Perception import Perception
 
-from agents.beacs.classifier_components import Effect
+from agents.beacs.classifier_components.Effect import Effect
 
 
 class EffectList():

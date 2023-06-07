@@ -4,76 +4,43 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from agents.common import Perception
+from agents.common.Perception import Perception
 from agents.common.Agent import Agent, TrialMetrics
 from agents.common.mechanisms.action_selection import choose_classifier
 
-from agents.beacs import ClassifiersList, BEACSConfiguration
-from agents.beacs.classifier_components import Classifier
+from agents.beacs.BEACSClassifiersList import BEACSClassifiersList
+from agents.beacs.BEACSConfiguration import BEACSConfiguration
+from agents.beacs.classifier_components.BEACSClassifier import BEACSClassifier
 
 class BEACS(Agent):
 
     def __init__(self,
             cfg: BEACSConfiguration,
-            population: ClassifiersList=None
+            population: BEACSClassifiersList=None
             ):
-        self.population = population or ClassifiersList()
-        self.pai_states_memory = []
         super().__init__(
             cfg=cfg,
+            population=population or BEACSClassifiersList(),
             seed=cfg.seed
         )
+        self.pai_states_memory = []
 
-    def get_population(self)-> ClassifiersList:
-        return self.population
 
-    def duplicate_population(self)-> ClassifiersList:
+    def get_pai_states_memory(self):
+        return self.pai_states_memory
+
+
+    def duplicate_population(self)-> BEACSClassifiersList:
         duplicate_population = []
         for cl in self.population:
-            cl_copy = Classifier.copy_from(cl, 0)
+            cl_copy = BEACSClassifier.copy_from(cl, 0)
             cl_copy.num = cl.num
             cl_copy.exp = cl.exp
             cl_copy.tga = cl.tga
             cl_copy.tbseq = cl.tbseq
             cl_copy.talp = cl.talp
             duplicate_population.append(cl_copy)
-        return ClassifiersList(*duplicate_population)
-
-    def get_pai_states_memory(self):
-        return self.pai_states_memory
-
-    def apply_CRACS(
-            self,
-            does_anticipate_change:bool=False,
-            is_reliable:bool=False
-        ):
-        # Remove multiple occurence of same classifiers
-        self.population = ClassifiersList(*list(dict.fromkeys(self.population)))
-        # Keep or not classifiers that anticipate changes
-        if does_anticipate_change:
-            pop = [cl for cl in self.population if cl.does_anticipate_change()]
-            self.population = ClassifiersList(*pop)
-        # Keep all classifiers or only reliable classifiers
-        if is_reliable:
-            pop = [cl for cl in self.population if cl.is_reliable()]
-            self.population = ClassifiersList(*pop)
-        # Removing subsumed classifiers and unwanted behavioral classifiers
-        classifiers_to_keep = []
-        for cl in self.population:
-            to_keep = True
-            for other in self.population:
-                if cl != other and other.subsumes(cl):
-                    to_keep = False
-                    break
-            if to_keep and cl.behavioral_sequence is not None and \
-                not cl.is_experienced():
-                to_keep = False
-            if to_keep and cl.behavioral_sequence is not None and \
-                not cl.does_anticipate_change() and len(cl.effect)==1:
-                to_keep = False
-            if to_keep:
-                classifiers_to_keep.append(cl)
-        self.population = ClassifiersList(*classifiers_to_keep)
+        return BEACSClassifiersList(*duplicate_population)
 
 
     def _run_trial_explore(
@@ -90,10 +57,10 @@ class BEACS(Agent):
         last_reward = 0
         total_reward = 0
         prev_state = Perception.empty()
-        t_2_match_set = ClassifiersList()
-        t_1_match_set = ClassifiersList()
-        match_set = ClassifiersList()
-        action_set = ClassifiersList()
+        t_2_match_set = BEACSClassifiersList()
+        t_1_match_set = BEACSClassifiersList()
+        match_set = BEACSClassifiersList()
+        action_set = BEACSClassifiersList()
         done = False
 
         # For action chunking
@@ -103,11 +70,11 @@ class BEACS(Agent):
         while not done:
             
             # Creation of the matching set
-            match_set, _, max_fitness_ra, max_fitness_rb = self.population.form_match_set(state)
+            match_set, _, max_fitness_r, max_fitness_r_bis = self.population.form_match_set(state)
 
             # Apply learning in the last action set
             if steps > 0:
-                ClassifiersList.apply_alp(
+                BEACSClassifiersList.apply_alp(
                     self.population,
                     t_2_match_set,
                     t_1_match_set,
@@ -121,10 +88,10 @@ class BEACS(Agent):
                     self.pai_states_memory,
                     self.cfg
                 )
-                ClassifiersList.apply_reinforcement_learning(
-                    action_set, last_reward, max_fitness_ra, max_fitness_rb, self.cfg.beta_rl, self.cfg.gamma
+                BEACSClassifiersList.apply_reinforcement_learning(
+                    action_set, last_reward, max_fitness_r, max_fitness_r_bis, self.cfg.beta_rl, self.cfg.gamma
                 )
-                ClassifiersList.apply_ga(
+                BEACSClassifiersList.apply_ga(
                     time + steps,
                     self.population,
                     match_set,
@@ -158,7 +125,7 @@ class BEACS(Agent):
             state = self.cfg.environment_adapter.to_genotype(env, raw_state)
             
             if done and action_classifier.behavioral_sequence:
-                action_set = match_set.form_action_set(Classifier(action=action_classifier.action, cfg=self.cfg))
+                action_set = match_set.form_action_set(BEACSClassifier(action=action_classifier.action, cfg=self.cfg))
 
             # Enter the if condition only if we have chosen a behavioral classifier
             if not done and action_classifier.behavioral_sequence :
@@ -173,16 +140,16 @@ class BEACS(Agent):
                     total_reward += last_reward
                     state = self.cfg.environment_adapter.to_genotype(env, raw_state)
                     if done:
-                        action_set = match_set.form_action_set(Classifier(action=action_classifier.action, behavioral_sequence=bseq_rescue, cfg=self.cfg))
+                        action_set = match_set.form_action_set(BEACSClassifier(action=action_classifier.action, behavioral_sequence=bseq_rescue, cfg=self.cfg))
                         break
                     steps += 1
 
             if done:
-                ClassifiersList.apply_alp(
+                BEACSClassifiersList.apply_alp(
                     self.population,
                     t_2_match_set,
                     t_1_match_set,
-                    ClassifiersList(),
+                    BEACSClassifiersList(),
                     action_set,
                     t_2_activated_classifier,
                     prev_state,
@@ -192,13 +159,13 @@ class BEACS(Agent):
                     self.pai_states_memory,
                     self.cfg
                 )
-                ClassifiersList.apply_reinforcement_learning(
+                BEACSClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, 0., 0., self.cfg.beta_rl, self.cfg.gamma
                 )
-                ClassifiersList.apply_ga(
+                BEACSClassifiersList.apply_ga(
                     time + steps,
                     self.population,
-                    ClassifiersList(),
+                    BEACSClassifiersList(),
                     action_set,
                     prev_state,
                     state,
@@ -224,18 +191,18 @@ class BEACS(Agent):
         state = self.cfg.environment_adapter.to_genotype(env, raw_state)
         last_reward = 0
         total_reward = 0
-        action_set = ClassifiersList()
+        action_set = BEACSClassifiersList()
         done = False
 
         while not done:
 
             # Compute in one run the matching set, the best matching classifier and the best matching fitness associated to the previous classifier
-            match_set, _, max_fitness_ra, max_fitness_rb = self.population.form_match_set(state)
+            match_set, _, max_fitness_r, max_fitness_r_bis = self.population.form_match_set(state)
 
             if steps > 0:
                 # Apply algorithms
-                ClassifiersList.apply_reinforcement_learning(
-                    action_set, last_reward, max_fitness_ra, max_fitness_rb, self.cfg.beta_rl, self.cfg.gamma
+                BEACSClassifiersList.apply_reinforcement_learning(
+                    action_set, last_reward, max_fitness_r, max_fitness_r_bis, self.cfg.beta_rl, self.cfg.gamma
                 )
 
             # Choose classifier
@@ -265,7 +232,7 @@ class BEACS(Agent):
 
             if done:
                 # Apply algorithms
-                ClassifiersList.apply_reinforcement_learning(
+                BEACSClassifiersList.apply_reinforcement_learning(
                     action_set, last_reward, 0., 0., self.cfg.beta_rl, self.cfg.gamma
                 )
 

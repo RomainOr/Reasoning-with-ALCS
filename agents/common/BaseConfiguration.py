@@ -6,7 +6,7 @@
 
 from typing import Callable
 
-from agents.common import EnvironmentAdapter
+from agents.common.EnvironmentAdapter import EnvironmentAdapter
 
 
 class BaseConfiguration():

@@ -6,9 +6,9 @@
 
 from typing import Optional
 
-from agents.common import Perception
+from agents.common.Perception import Perception
 
-from agents.beacs.classifier_components import Classifier
+from agents.beacs.classifier_components.BEACSClassifier import BEACSClassifier
 
 
 def updated_passthrough(
@@ -59,12 +59,12 @@ def updated_passthrough(
             child_effect[idx] = child_effect.wildcard
 
 def create_behavioral_classifier(
-        penultimate_classifier: Classifier,
-        cl: Classifier,
+        penultimate_classifier: BEACSClassifier,
+        cl: BEACSClassifier,
         p1: Perception,
         pai_state: Perception,
         time: int
-    ) -> Optional[Classifier]:
+    ) -> Optional[BEACSClassifier]:
     """
     Builds a behavioral classifier.
 
@@ -95,11 +95,11 @@ def create_behavioral_classifier(
         if cl.behavioral_sequence: 
             nb_of_action += len(cl.behavioral_sequence)
         if nb_of_action <= cl.cfg.bs_max:
-            child = Classifier(
+            child = BEACSClassifier(
                 action=penultimate_classifier.action, 
                 behavioral_sequence=[],
-                rewarda=cl.ra,
-                rewardb=cl.rb,
+                reward=cl.r,
+                reward_bis=cl.r_bis,
                 tga=time,
                 tbseq=time,
                 talp=time,

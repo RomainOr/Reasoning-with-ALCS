@@ -6,4 +6,4 @@
 
 from .Effect import Effect
 from .EffectList import EffectList
-from .Classifier import Classifier
+from .BEACSClassifier import BEACSClassifier
