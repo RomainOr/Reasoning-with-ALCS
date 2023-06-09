@@ -92,16 +92,13 @@ class BEACS(Agent):
                     action_set, last_reward, max_fitness_r, max_fitness_r_bis, self.cfg.beta_rl, self.cfg.gamma
                 )
                 BEACSClassifiersList.apply_ga(
-                    time + steps,
                     self.population,
                     match_set,
                     action_set,
                     prev_state,
                     state,
-                    self.cfg.theta_ga,
-                    self.cfg.mu,
-                    self.cfg.chi,
-                    self.cfg.theta_as
+                    time + steps,
+                    self.cfg
                 )
 
             # Record the previous match set
@@ -163,16 +160,13 @@ class BEACS(Agent):
                     action_set, last_reward, 0., 0., self.cfg.beta_rl, self.cfg.gamma
                 )
                 BEACSClassifiersList.apply_ga(
-                    time + steps,
                     self.population,
-                    BEACSClassifiersList(),
+                    match_set,
                     action_set,
                     prev_state,
                     state,
-                    self.cfg.theta_ga,
-                    self.cfg.mu,
-                    self.cfg.chi,
-                    self.cfg.theta_as
+                    time + steps,
+                    self.cfg
                 )
 
             steps += 1

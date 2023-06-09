@@ -151,18 +151,6 @@ class BaseClassifier:
         return self.condition.specificity / len(self.condition)
 
 
-    def is_enhanced(self) -> bool:
-        """
-        Checks whether the classifier is enhanced.
-
-        Returns
-        -------
-        bool
-            True if the classifier is enhanced
-        """
-        raise NotImplementedError("Subclasses should implement this method.")
-
-
     def is_experienced(self) -> bool:
         """
         Checks whether the classifier is enough experienced.
@@ -464,7 +452,10 @@ class BaseClassifier:
         situation: Perception
             Perception related to a state following the action
         """
-        raise NotImplementedError("Subclasses should implement this method.")
+        for idx in range(self.cfg.classifier_length):
+            if previous_situation[idx] != situation[idx] and self.effect[idx] == self.cfg.classifier_wildcard:
+                self.effect[idx] = situation[idx]
+                self.condition[idx] = previous_situation[idx]
 
 
     def generalize_specific_attribute_randomly(self):
@@ -472,32 +463,6 @@ class BaseClassifier:
         Generalizes one randomly attribute in the condition.
         """
         self.condition.generalize_specific_attribute_randomly()
-
-
-    def merge_with(
-            self,
-            other_classifier: BaseClassifier,
-            aliased_state: Perception,
-            time: int
-        ) -> BaseClassifier:
-        """
-        Merges two classifier in an enhanced one.
-
-        Parameters
-        ----------
-        other_classifier: Classifier
-            Classifier to merge with the self one
-        aliased_state: Perception
-            Perception related to the aliased state
-        time: int
-            Current epoch
-
-        Returns
-        -------
-        Classifier
-            New enhanced classifier
-        """
-        raise NotImplementedError("Subclasses should implement this method.")
 
 
     def subsumes(self, other) -> bool:

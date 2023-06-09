@@ -7,17 +7,18 @@
 from __future__ import annotations
 from operator import attrgetter
 from typing import Optional
-from agents.common.classifier_components.BaseClassifier import BaseClassifier
 
+import agents.common.mechanisms.alp as alp_common
 import agents.common.mechanisms.genetic_algorithms as ga
 from agents.common.Perception import Perception
-from agents.common.RandomNumberGenerator import RandomNumberGenerator
 from agents.common.BaseClassifiersList import BaseClassifiersList
+from agents.common.classifier_components.BaseClassifier import BaseClassifier
 
-import agents.beacs.mechanisms.alp as alp
-import agents.beacs.mechanisms.reinforcement_learning as rl
+import agents.beacs.mechanisms.alp as alp_beacs
 from agents.beacs.BEACSConfiguration import BEACSConfiguration
 from agents.beacs.classifier_components.BEACSClassifier import BEACSClassifier
+from agents.beacs.mechanisms.reinforcement_learning import update_classifier_double_q_learning
+from agents.beacs.mechanisms.genetic_algorithms import mutation_enhanced_trace
 
 
 class BEACSClassifiersList(BaseClassifiersList):
@@ -128,12 +129,12 @@ class BEACSClassifiersList(BaseClassifiersList):
             is_aliasing_detected = False
 
             if cl.does_anticipate_correctly(p0, p1):
-                is_aliasing_detected, new_cl = alp.expected_case(cl, p0, p1, time, cfg)
+                is_aliasing_detected, new_cl = alp_beacs.expected_case(cl, p0, time)
                 was_expected_case = True
                 if cfg.bs_max > 0 and penultimate_classifier is not None and is_aliasing_detected:
                     potential_cls_for_pai.append(cl)
             else:
-                new_cl = alp.unexpected_case(cl, p0, p1, time)
+                new_cl = alp_common.unexpected_case(cl, p0, p1, time)
 
             if cl.is_inadequate():
                 # Removes classifier from population, match set
@@ -147,22 +148,22 @@ class BEACSClassifiersList(BaseClassifiersList):
 
             if new_cl is not None:
                 if new_cl.does_match(p0):
-                    alp.add_classifier(new_cl, action_set, new_list)
+                    alp_common.add_classifier(new_cl, action_set, new_list)
                 else:
-                    alp.add_classifier(new_cl, population, new_list)
+                    alp_common.add_classifier(new_cl, population, new_list)
 
         # No classifier anticipated correctly - generate new one through covering
         # only if we are not in the case of classifiers having behavioral sequences
         if not was_expected_case:
             if (len(action_set) > 0 and action_set[0].behavioral_sequence is None) or len(action_set) == 0:
-                new_cl = alp.cover(p0, action, p1, time, cfg)
-                alp.add_classifier(new_cl, action_set, new_list)
+                new_cl = alp_common.cover(BEACSClassifier, p0, action, p1, time, cfg)
+                alp_common.add_classifier(new_cl, action_set, new_list)
 
         if cfg.do_ep:
-            alp.apply_enhanced_effect_part_check(action_set, new_list, p0, time)
+            alp_beacs.apply_enhanced_effect_part_check(action_set, new_list, p0, time)
 
         if cfg.bs_max > 0 and penultimate_classifier is not None and len(potential_cls_for_pai) > 0:
-            alp.apply_perceptual_aliasing_issue_management(population, t_2_match_set, t_1_match_set, match_set, action_set, penultimate_classifier, potential_cls_for_pai, new_list, p0, p1, time, pai_states_memory, cfg)
+            alp_beacs.apply_perceptual_aliasing_issue_management(population, t_2_match_set, t_1_match_set, match_set, action_set, penultimate_classifier, potential_cls_for_pai, new_list, p0, p1, time, pai_states_memory, cfg)
 
         # Merge classifiers from new_list into self and population
         BEACSClassifiersList.merge_newly_built_classifiers(new_list, population, match_set, action_set, p0, p1)
@@ -178,70 +179,29 @@ class BEACSClassifiersList(BaseClassifiersList):
             gamma: float
         ) -> None:
         for cl in action_set:
-            rl.update_classifier_double_q_learning(cl, reward, max_fitness_ra, max_fitness_rb, beta_rl, gamma)
+            update_classifier_double_q_learning(cl, reward, max_fitness_ra, max_fitness_rb, beta_rl, gamma)
 
 
     @staticmethod
     def apply_ga(
-            time: int,
             population: BEACSClassifiersList,
             match_set: BEACSClassifiersList,
             action_set: BEACSClassifiersList,
             p0: Perception,
             p1: Perception,
-            theta_ga: int,
-            mu: float,
-            chi: float,
-            theta_as: int
+            time: int,
+            cfg: BEACSConfiguration
         ) -> None:
-
-        if ga.should_apply(action_set, time, theta_ga):
-            ga.set_timestamps(action_set, time)
-
-            # Select parents
-            parent1, parent2 = ga.roulette_wheel_selection(
-                action_set, 
-                lambda cl: pow(cl.q, 3)
-            )
-
-            child1 = BEACSClassifier.copy_from(parent1, time)
-            child2 = BEACSClassifier.copy_from(parent2, time)
-            
-            # Execute mutation
-            ga.mutation(child1, child2, mu)
-
-            # Execute cross-over
-            if RandomNumberGenerator.random() < chi:
-                if child1.effect == child2.effect:
-                    ga.two_point_crossover(child1, child2)
-
-                    # Update quality and reward
-                    child1.q = child2.q = (child1.q + child2.q) / 2.0
-                    child1.r = child2.r = (child1.r + child2.r) / 2.0
-                    child1.r_bis = child2.r_bis = (child1.r_bis + child2.r_bis) / 2.0
-
-            child1.q /= 2
-            child2.q /= 2
-
-            # We are interested only in classifiers with specialized condition
-            children = {cl for cl in [child1, child2]
-                               if cl.condition.specificity > 0}
-
-            ga.delete_classifiers(
-                population,
-                match_set,
-                action_set,
-                len(children),
-                theta_as
-            )
-
-            new_list = BEACSClassifiersList()
-            # check for subsumers / similar classifiers
-            for child in children:
-                ga.add_classifier(
-                    child,
-                    action_set,
-                    new_list
-                )
-            # Merge classifiers from new_list into self and population
-            BEACSClassifiersList.merge_newly_built_classifiers(new_list, population, match_set, action_set, p0, p1)
+        ga.apply(
+            BEACSClassifiersList,
+            BEACSClassifier,
+            mutation_enhanced_trace,
+            ga.two_point_crossover,
+            population,
+            match_set,
+            action_set,
+            p0,
+            p1,
+            time,
+            cfg
+        )

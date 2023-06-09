@@ -6,7 +6,11 @@
 
 from typing import Callable, Dict
 
+from agents.common.BaseClassifiersList import BaseClassifiersList
+from agents.common.BaseConfiguration import BaseConfiguration
+from agents.common.Perception import Perception
 from agents.common.RandomNumberGenerator import RandomNumberGenerator
+from agents.common.classifier_components.BaseClassifier import BaseClassifier
 from agents.common.mechanisms.subsumption import does_subsume
 
 
@@ -108,7 +112,8 @@ def roulette_wheel_selection(
 
 
 def mutation(
-        cl, 
+        cl1,
+        cl2,
         mu: float
     ) -> None:
     """
@@ -116,53 +121,10 @@ def mutation(
     Specified attributes in classifier conditions are randomly
     generalized with `mu` probability.
     """
-    for idx, cond in enumerate(cl.condition):
-        if cond != cl.cfg.classifier_wildcard and RandomNumberGenerator.random() < mu:
-            cl.condition.generalize(idx)
-
-
-def mutation(
-        cl1,
-        cl2,
-        mu: float
-    ) -> None:
-    """
-    Executes a particular mutation depending on the classifiers
-
-    Parameters
-    ----------
-    cl1
-        First classifier
-    cl2
-        Second classifier
-    mu
-        Mutation rate
-    """
     for idx in range(len(cl1.condition)):
-        #
-        if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] == cl2.cfg.classifier_wildcard:
-            continue
-        #
-        if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] == cl2.cfg.classifier_wildcard:
-            if RandomNumberGenerator.random() < mu and cl1.effect.enhanced_trace_ga[idx]:
-                cl1.condition.generalize(idx)
-            continue
-        #
-        if cl1.condition[idx] == cl1.cfg.classifier_wildcard and \
-            cl2.condition[idx] != cl2.cfg.classifier_wildcard:
-            if RandomNumberGenerator.random() < mu and cl2.effect.enhanced_trace_ga[idx]:
-                cl2.condition.generalize(idx)
-            continue
-        #
-        if cl1.condition[idx] != cl1.cfg.classifier_wildcard and \
-            cl1.behavioral_sequence is None and cl1.effect.enhanced_trace_ga[idx] and \
-                RandomNumberGenerator.random() < mu:
+        if cl1.condition[idx] != cl1.cfg.classifier_wildcard and RandomNumberGenerator.random() < mu:
             cl1.condition.generalize(idx)
-        if cl2.condition[idx] != cl2.cfg.classifier_wildcard and \
-            cl2.behavioral_sequence is None and cl2.effect.enhanced_trace_ga[idx] and \
-                RandomNumberGenerator.random() < mu:
+        if cl2.condition[idx] != cl2.cfg.classifier_wildcard and RandomNumberGenerator.random() < mu:
             cl2.condition.generalize(idx)
 
 
@@ -318,3 +280,69 @@ def add_classifier(
     else:
         if not old_cl.is_marked():
             old_cl.num += child.num
+
+
+def apply(
+        cls_ClassifiersList: BaseClassifiersList,
+        cls_Classifier: BaseClassifier,
+        mutate_function: Callable,
+        crossover_function: Callable,
+        population: BaseClassifiersList,
+        match_set: BaseClassifiersList,
+        action_set: BaseClassifiersList,
+        p0: Perception,
+        p1: Perception,
+        time: int,
+        cfg: BaseConfiguration
+    ) -> None:
+
+    if should_apply(action_set, time, cfg.theta_ga):
+        set_timestamps(action_set, time)
+
+        # Select parents
+        parent1, parent2 = roulette_wheel_selection(
+            action_set, 
+            lambda cl: pow(cl.q, 3)
+        )
+
+        child1 = cls_Classifier.copy_from(parent1, time)
+        child2 = cls_Classifier.copy_from(parent2, time)
+        
+        # Execute mutation
+        mutate_function(child1, child2, cfg.mu)
+
+        # Execute cross-over
+        if RandomNumberGenerator.random() < cfg.chi:
+            if child1.effect == child2.effect:
+                crossover_function(child1, child2)
+
+                # Update quality and reward
+                child1.q = child2.q = (child1.q + child2.q) / 2.0
+                child1.r = child2.r = (child1.r + child2.r) / 2.0
+                child1.r_bis = child2.r_bis = (child1.r_bis + child2.r_bis) / 2.0
+
+        child1.q /= 2
+        child2.q /= 2
+
+        # We are interested only in classifiers with specialized condition
+        children = {cl for cl in [child1, child2]
+                            if cl.condition.specificity > 0}
+
+        delete_classifiers(
+            population,
+            match_set,
+            action_set,
+            len(children),
+            cfg.theta_as
+        )
+
+        new_list = cls_ClassifiersList()
+        # check for subsumers / similar classifiers
+        for child in children:
+            add_classifier(
+                child,
+                action_set,
+                new_list
+            )
+        # Merge classifiers from new_list into self and population
+        cls_ClassifiersList.merge_newly_built_classifiers(new_list, population, match_set, action_set, p0, p1)

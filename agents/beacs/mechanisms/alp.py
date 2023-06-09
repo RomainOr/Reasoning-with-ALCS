@@ -7,61 +7,19 @@
 from typing import Optional
 
 import agents.common.mechanisms.aliasing_detection as aliasing_detection
+import agents.common.mechanisms.alp as alp_common
+from agents.common.BaseConfiguration import BaseConfiguration
 from agents.common.Perception import Perception
-from agents.common.RandomNumberGenerator import RandomNumberGenerator
-from agents.common.mechanisms.subsumption import does_subsume
 
 import agents.beacs.mechanisms.pai_detection as pai_detection
-from agents.beacs.BEACSConfiguration import BEACSConfiguration
 from agents.beacs.classifier_components.BEACSClassifier import BEACSClassifier
 from agents.beacs.mechanisms.build_behavioral_sequences import create_behavioral_classifier
-
-
-def cover(
-        p0: Perception,
-        action: int,
-        p1: Perception,
-        time: int,
-        cfg: BEACSConfiguration
-    ) -> BEACSClassifier:
-    """
-    Covering - creates a classifier that anticipates a change correctly.
-
-    Parameters
-    ----------
-    p0: Perception
-        previous perception
-    action: int
-        chosen action
-    p1: Perception
-        current perception
-    time: int
-        current epoch
-    cfg: BEACSConfiguration
-        algorithm BEACSConfiguration class
-
-    Returns
-    -------
-    Classifier
-        new classifier
-    """
-    new_cl = BEACSClassifier(
-        action=action, 
-        tga=time,
-        tbseq=time,
-        talp=time,
-        cfg=cfg
-    )
-    new_cl.specialize(p0, p1)
-    return new_cl
 
 
 def expected_case(
         cl: BEACSClassifier,
         p0: Perception,
-        p1: Perception,
-        time: int,
-        cfg: BEACSConfiguration,
+        time: int
     ):
     """
     Controls the expected case of a classifier with the help of 
@@ -88,104 +46,7 @@ def expected_case(
         cl.increase_quality()
         return is_aliasing_detected, None
 
-    child = cl.copy_from(cl, time)
-
-    spec = cl.specificity
-    spec_new = diff.specificity
-    if spec >= child.cfg.u_max:
-        while spec >= child.cfg.u_max:
-            child.generalize_specific_attribute_randomly()
-            spec -= 1
-        while spec + spec_new > child.cfg.u_max:
-            if spec > 0 and RandomNumberGenerator.random() < 0.5:
-                child.generalize_specific_attribute_randomly()
-                spec -= 1
-            else:
-                diff.generalize_specific_attribute_randomly()
-                spec_new -= 1
-    else:
-        while spec + spec_new > child.cfg.u_max:
-            diff.generalize_specific_attribute_randomly()
-            spec_new -= 1
-
-    child.condition.specialize_with_condition(diff)
-
-    child.q = max(0.5, child.q)
-
-    return is_aliasing_detected, child
-
-
-def unexpected_case(
-        cl: BEACSClassifier,
-        p0: Perception,
-        p1: Perception,
-        time: int
-    ) -> Optional[BEACSClassifier]:
-    """
-    Controls the unexpected case of the classifier.
-
-    Returns
-    ----------
-    Specialized classifier if generation was possible, otherwise None
-    """
-    cl.decrease_quality()
-    cl.set_mark(p0)
-    # If nothing can be done, stop specialization of the classifier
-    if not cl.is_specializable(p0, p1):
-        return None
-    # If the classifier is not enhanced, directly specialize it
-    child = cl.copy_from(cl, time)
-    child.specialize(p0, p1)
-    child.q = max(0.5, child.q)
-    return child
-
-def add_classifier(
-        child, 
-        population,
-        new_list
-    ) -> None:
-    """
-    Looks for subsuming / similar classifiers in the population of classifiers
-    and those created in the current ALP run (`new_list`).
-
-    If a similar classifier was found it's quality is increased,
-    otherwise `child_cl` is added to `new_list`.
-
-    Parameters
-    ----------
-    child:
-        New classifier to examine
-    population:
-        List of classifiers
-    new_list:
-        A list of newly created classifiers in this ALP run
-    """
-    old_cl = None
-    equal_cl = None
-
-    # Look if there is a classifier that subsumes the insertion candidate
-    for cl in population:
-        if does_subsume(cl, child):
-            if old_cl is None or cl.is_more_general(old_cl):
-                old_cl = cl
-        elif cl == child:
-            equal_cl = cl
-
-    # Check if there is similar classifier already in the population, previously found
-    if old_cl is None:
-        old_cl = equal_cl
-
-    # Check if any similar classifier was in this ALP run
-    if old_cl is None:
-        for cl in new_list:
-            if cl == child:
-                old_cl = cl
-                break
-
-    if old_cl is None:
-        new_list.append(child)
-    else:
-        old_cl.increase_quality()
+    return is_aliasing_detected, alp_common.specification_unchanging_components(cl, diff, time)
 
     
 def apply_enhanced_effect_part_check(
@@ -208,7 +69,7 @@ def apply_enhanced_effect_part_check(
             (cl1.aliased_state == Perception.empty() or cl1.aliased_state == p0) and \
             (cl2.aliased_state == Perception.empty() or cl2.aliased_state == p0):
                 new_classifier = cl1.merge_with(cl2, p0, time)
-                add_classifier(new_classifier, action_set, new_list)
+                alp_common.add_classifier(new_classifier, action_set, new_list)
                 break
 
 
@@ -225,7 +86,7 @@ def apply_perceptual_aliasing_issue_management(
         p1: Perception,
         time: int,
         pai_states_memory,
-        cfg: BEACSConfiguration
+        cfg: BaseConfiguration
     ) -> None:
     """
     Used to manage the detection of PAI and to manage the behavioral classifiers
@@ -262,4 +123,4 @@ def apply_perceptual_aliasing_issue_management(
         for candidate in potential_cls_for_pai:
             new_cl = create_behavioral_classifier(penultimate_classifier, candidate, p1, p0, time)
             if new_cl:
-                add_classifier(new_cl, t_2_match_set, new_list)
+                alp_common.add_classifier(new_cl, t_2_match_set, new_list)
