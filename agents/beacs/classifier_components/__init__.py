@@ -4,6 +4,5 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from .Effect import Effect
 from .EffectList import EffectList
 from .BEACSClassifier import BEACSClassifier

@@ -321,8 +321,7 @@ class BaseClassifier:
     def does_anticipate_correctly(
             self,
             previous_situation: Perception,
-            situation: Perception,
-            update_counter: bool = True
+            situation: Perception
         ) -> bool:
         """
         Checks anticipation. While the pass-through symbols in the effect part
@@ -344,7 +343,7 @@ class BaseClassifier:
         bool
             True if classifier's effect pat anticipates correctly
         """
-        return self.effect.does_anticipate_correctly(previous_situation, situation, update_counter)
+        return self.effect.does_anticipate_correctly(previous_situation, situation)
 
 
     def does_predict_successfully(
@@ -375,7 +374,7 @@ class BaseClassifier:
         """
         if self.does_match(p0):
             if self.action == action:
-                if self.does_anticipate_correctly(p0, p1, False):
+                if self.does_anticipate_correctly(p0, p1):
                     return True
         return False
 
@@ -456,6 +455,11 @@ class BaseClassifier:
             if previous_situation[idx] != situation[idx] and self.effect[idx] == self.cfg.classifier_wildcard:
                 self.effect[idx] = situation[idx]
                 self.condition[idx] = previous_situation[idx]
+
+
+    def average_fitnesses_from_other_cl(self, other):
+        self.q = other.q = (self.q + other.q) / 2.0
+        self.r = other.r = (self.r + other.r) / 2.0
 
 
     def generalize_specific_attribute_randomly(self):

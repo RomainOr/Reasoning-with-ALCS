@@ -22,7 +22,7 @@ matplotlib.rcParams['ps.fonttype'] = 42
 
 # Provide a wrapper for plotting
 
-def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metrics_exploit, number_of_exploit_steps):
+def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metrics_exploit):
     # Load both metrics into data frame
     explore_df = pd.DataFrame(metrics_explore)
     exploit_df = pd.DataFrame(metrics_exploit)
@@ -35,10 +35,6 @@ def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metric
     df = pd.concat([explore_df, exploit_df])
     df.set_index('trial', inplace=True)
     return df
-
-def find_best_classifier(population, situation, cfg):
-    unused_match_set, best_classifier, unused_max_fitness_ra, unused_max_fitness_rb = population.form_match_set(situation)
-    return best_classifier
 
 def update_matrix_index(original, tmp_x, tmp_y, action):
     if action == 0 and original[(tmp_x, tmp_y)]== 0:
@@ -63,7 +59,7 @@ def update_matrix_index(original, tmp_x, tmp_y, action):
         tmp_y -= 1
     return tmp_x, tmp_y
 
-def build_fitness_matrix(env, population, cfg):
+def build_fitness_matrix(env, population):
     original = env.env.maze.matrix
     fitness = original.copy()
     # Think about more 'functional' way of doing this
@@ -71,7 +67,7 @@ def build_fitness_matrix(env, population, cfg):
         # Path or obstacle - best classfier fitness
         if x == 0 or x == 3:
             perception = env.env.maze.perception(index[1], index[0])
-            best_cl = find_best_classifier(population, perception, cfg)
+            best_cl = population.find_best_classifier(perception)
             if best_cl:
                 fitness[index] = max(best_cl.fitness, fitness[index])
                 if best_cl.behavioral_sequence:
@@ -93,7 +89,7 @@ def build_fitness_matrix(env, population, cfg):
             fitness[index] = fitness.max() + 500
     return fitness
 
-def build_action_matrix(env, population, cfg, fitness_matrix):
+def build_action_matrix(env, population):
     ACTION_LOOKUP = {
         0: u'↑', 1: u'↗', 2: u'→', 3: u'↘',
         4: u'↓', 5: u'↙', 6: u'←', 7: u'↖'
@@ -107,7 +103,7 @@ def build_action_matrix(env, population, cfg, fitness_matrix):
         # Path or Obstacle - best classfier fitness
         if x == 0 or x ==3:
             perception = env.env.maze.perception(index[1], index[0])
-            best_cl = find_best_classifier(population, perception, cfg)
+            best_cl = population.find_best_classifier(perception)
             if best_cl:
                 if action[index].find(ACTION_LOOKUP[best_cl.action]) == -1:
                     action[index] += ACTION_LOOKUP[best_cl.action]
@@ -124,15 +120,15 @@ def build_action_matrix(env, population, cfg, fitness_matrix):
             action[index] = 'R'
     return action
 
-def plot_policy(env, agent, cfg, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12):
+def plot_policy(env, agent, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12):
     if ax is None:
         ax = plt.gca()
     ax.set_aspect("equal")
     # Handy variables
     max_x = env.env.maze.max_x
     max_y = env.env.maze.max_y
-    fitness_matrix = build_fitness_matrix(env, agent.population, cfg)
-    action_matrix = build_action_matrix(env, agent.population, cfg, fitness_matrix)
+    fitness_matrix = build_fitness_matrix(env, agent.population)
+    action_matrix = build_action_matrix(env, agent.population)
     # Render maze as image
     plt.imshow(fitness_matrix, interpolation='nearest', cmap='Reds', aspect='auto',
            extent=[0, max_x, max_y, 0])
@@ -148,7 +144,7 @@ def plot_policy(env, agent, cfg, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12)
     ax.set_yticks(range(0, max_y+1))
     ax.grid(True)
 
-def plot_knowledge(df, metrics_trial_frequency_explore, number_of_exploit_steps, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12):
+def plot_knowledge(df, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12):
     if ax is None:
         ax = plt.gca()
     explore_df = df.query("phase == 'explore'")
@@ -158,15 +154,15 @@ def plot_knowledge(df, metrics_trial_frequency_explore, number_of_exploit_steps,
     ax.set_ylabel("Knowledge [%]", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylim([0, 105])
 
-def plot_performance(agent, maze, metrics_df, cfg, env_name, metrics_trial_frequency_explore, number_of_exploit_steps):
+def plot_performance(agent, maze, metrics_df, env_name, metrics_trial_frequency_explore, number_of_exploit_steps):
     plt.figure(figsize=(13, 10), dpi=100)
     plt.suptitle(f'ALCS Performance in {env_name} environment', fontsize=32)
     ax1 = plt.subplot(221)
-    plot_policy(maze, agent, cfg, ax1)
+    plot_policy(maze, agent, ax1)
     ax2 = plt.subplot(222)
-    plot_knowledge(metrics_df,metrics_trial_frequency_explore, number_of_exploit_steps, ax2)
+    plot_knowledge(metrics_df, ax2)
     ax3 = plt.subplot(223)
-    plot_classifiers(metrics_df,metrics_trial_frequency_explore, number_of_exploit_steps, ax3)
+    plot_classifiers(metrics_df, ax3)
     ax4 = plt.subplot(224)
     plot_steps(metrics_df,metrics_trial_frequency_explore, number_of_exploit_steps, ax4)
     plt.subplots_adjust(top=0.86, wspace=0.3, hspace=0.3)

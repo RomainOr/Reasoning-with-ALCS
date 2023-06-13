@@ -21,7 +21,7 @@ matplotlib.rcParams['ps.fonttype'] = 42
 
 # Provide a wrapper for plotting
 
-def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metrics_exploit, number_of_exploit_steps):
+def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metrics_exploit):
     # Load both metrics into data frame
     explore_df = pd.DataFrame(metrics_explore)
     exploit_df = pd.DataFrame(metrics_exploit)
@@ -35,11 +35,11 @@ def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metric
     df.set_index('trial', inplace=True)
     return df
 
-def plot_mountaincar_performance(agent, cartpole_env, metrics_df, cfg, env_name, metrics_trial_frequency_explore, number_of_exploit_steps):
+def plot_mountaincar_performance(metrics_df, env_name, metrics_trial_frequency_explore, number_of_exploit_steps):
     plt.figure(figsize=(13, 10), dpi=100)
     plt.suptitle(f'ALCS Performance in {env_name} environment', fontsize=32)
     ax1 = plt.subplot(221)
-    plot_classifiers(metrics_df,metrics_trial_frequency_explore, number_of_exploit_steps, ax1)
+    plot_classifiers(metrics_df, ax1)
     ax2 = plt.subplot(222)
     plot_rewards(metrics_df,metrics_trial_frequency_explore, number_of_exploit_steps, ax2)
     plt.subplots_adjust(top=0.86, wspace=0.3, hspace=0.3)

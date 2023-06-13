@@ -4,8 +4,6 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from typing import Optional
-
 import agents.common.mechanisms.aliasing_detection as aliasing_detection
 import agents.common.mechanisms.alp as alp_common
 from agents.common.BaseConfiguration import BaseConfiguration

@@ -49,25 +49,14 @@ class Agent:
         raise NotImplementedError("Subclasses should implement this method.")
 
 
-    def apply_CRACS(
-            self,
-            does_anticipate_change:bool=False,
-            is_reliable:bool=False
-        ):
-        # Keep or not classifiers that anticipate changes
-        if does_anticipate_change:
-            pop = [cl for cl in self.population if cl.does_anticipate_change()]
-            self.population = BaseClassifiersList(*pop)
-        # Keep all classifiers or only reliable classifiers
-        if is_reliable:
-            pop = [cl for cl in self.population if cl.is_reliable()]
-            self.population = BaseClassifiersList(*pop)
+    def apply_CRACS(self):
         # Removing subsumed classifiers and unwanted behavioral classifiers
         classifiers_to_keep = []
         for cl in self.population:
             to_keep = True
             for other in self.population:
                 if cl != other and other.subsumes(cl):
+                    cl.average_fitnesses_from_other_cl(other)
                     to_keep = False
                     break
             if to_keep and cl.behavioral_sequence is not None and \
@@ -78,9 +67,14 @@ class Agent:
                 to_keep = False
             if to_keep:
                 classifiers_to_keep.append(cl)
-        for cl in self.population:
-            if cl not in classifiers_to_keep:
-                self.population.safe_remove(cl)
+        idx = 0
+        population_length = len(self.population)
+        while(idx < population_length):
+            if self.population[idx] not in classifiers_to_keep:
+                self.population.safe_remove(self.population[idx])
+                idx -= 1
+                population_length -= 1
+            idx += 1
 
 
     def explore(self, env, trials) -> Tuple:

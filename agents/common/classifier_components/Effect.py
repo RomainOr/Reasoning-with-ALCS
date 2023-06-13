@@ -56,8 +56,32 @@ class Effect(AbstractPerception):
         return True
 
 
-    def anticipates_correctly(self, p0: Perception, p1: Perception) -> bool:
-        def item_anticipate_change(item, p0_item, p1_item, wildcard) -> bool:
+    def does_anticipate_correctly(
+            self,
+            p0: Perception,
+            p1: Perception
+        ) -> bool:
+        """
+        Determines if the effect anticipates correctly changes from `p0` to `p1`.
+
+        Parameters
+        ----------
+        p0: Perception
+            Previous perception
+        p1: Perception
+            Current perception
+
+        Returns
+        -------
+        bool
+            True the anticipation is correct
+        """
+        def item_anticipate_change(
+                item,
+                p0_item,
+                p1_item,
+                wildcard
+            ) -> bool:
             if item == wildcard:
                 if p0_item != p1_item: return False
             else:
@@ -79,7 +103,3 @@ class Effect(AbstractPerception):
             return {int(perception[index]):1.0}
         else:
             return {int(self[index]): 1.0}
-
-
-    def __str__(self):
-        return ''.join(str(attr) for attr in self)

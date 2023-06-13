@@ -21,7 +21,7 @@ matplotlib.rcParams['ps.fonttype'] = 42
 
 # Provide a wrapper for plotting
 
-def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metrics_exploit, number_of_exploit_steps):
+def parse_metrics_to_df(metrics_explore, metrics_trial_frequency_explore, metrics_exploit):
     # Load both metrics into data frame
     explore_df = pd.DataFrame(metrics_explore)
     exploit_df = pd.DataFrame(metrics_exploit)

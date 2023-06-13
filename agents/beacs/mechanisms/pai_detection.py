@@ -5,9 +5,9 @@
 """
 
 from agents.common import Perception
+from agents.common.classifier_components.Effect import Effect
 
 from agents.beacs.BEACSConfiguration import BEACSConfiguration
-from agents.beacs.classifier_components.Effect import Effect
 
 
 def should_pai_detection_apply(

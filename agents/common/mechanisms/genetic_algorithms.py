@@ -317,9 +317,7 @@ def apply(
                 crossover_function(child1, child2)
 
                 # Update quality and reward
-                child1.q = child2.q = (child1.q + child2.q) / 2.0
-                child1.r = child2.r = (child1.r + child2.r) / 2.0
-                child1.r_bis = child2.r_bis = (child1.r_bis + child2.r_bis) / 2.0
+                child1.average_fitnesses_from_other_cl(child2)
 
         child1.q /= 2
         child2.q /= 2

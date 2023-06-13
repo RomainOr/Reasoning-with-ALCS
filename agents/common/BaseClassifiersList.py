@@ -5,6 +5,7 @@
 """
 
 from __future__ import annotations
+from operator import attrgetter
 from itertools import chain
 from typing import List
 
@@ -62,6 +63,13 @@ class BaseClassifiersList(TypedList):
         The action set
         """
         raise NotImplementedError("Subclasses should implement this method.")
+    
+
+    def find_best_classifier(
+            self,
+            situation: Perception
+        ):
+        return max([cl for cl in self if cl.does_match(situation) and cl.does_anticipate_change()],key=attrgetter('fitness'),default=None)
 
 
     def expand(self) -> List[BaseClassifier]:

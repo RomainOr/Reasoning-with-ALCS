@@ -9,11 +9,11 @@ from typing import Optional, Union, List
 
 from agents.common import Perception
 from agents.common.classifier_components.Condition import Condition
+from agents.common.classifier_components.Effect import Effect
 from agents.common.classifier_components.BaseClassifier import BaseClassifier
 
 from agents.beacs.BEACSConfiguration import BEACSConfiguration
 from agents.beacs.classifier_components.EffectList import EffectList
-from agents.beacs.classifier_components.Effect import Effect
 
 
 class BEACSClassifier(BaseClassifier):
@@ -166,6 +166,35 @@ class BEACSClassifier(BaseClassifier):
         return self.effect.is_enhanced()
 
 
+    def does_anticipate_correctly(
+            self,
+            previous_situation: Perception,
+            situation: Perception,
+            update_counter: bool = True
+        ) -> bool:
+        """
+        Checks anticipation. While the pass-through symbols in the effect part
+        of a classifier directly anticipate that these attributes stay the same
+        after the execution of an action, the specified attributes anticipate
+        a change to the specified value. Thus, if the perceived value did not
+        change to the anticipated but actually stayed at the value, the
+        classifier anticipates incorrectly.
+
+        Parameters
+        ----------
+        previous_situation: Perception
+            Perception related to a state preceding the action
+        situation: Perception
+            Perception related to a state following the action
+
+        Returns
+        -------
+        bool
+            True if classifier's effect pat anticipates correctly
+        """
+        return self.effect.does_anticipate_correctly(previous_situation, situation, update_counter)
+
+
     def specialize(
             self,
             previous_situation: Perception,
@@ -205,6 +234,12 @@ class BEACSClassifier(BaseClassifier):
                         self.effect[new_effect_index][idx] = situation[idx]
                         self.condition[idx] = previous_situation[idx]
                 self.effect.update_enhanced_trace_ga(length)
+
+
+    def average_fitnesses_from_other_cl(self, other):
+        self.q = other.q = (self.q + other.q) / 2.0
+        self.r = other.r = (self.r + other.r) / 2.0
+        self.r_bis = other.r_bis = (self.r_bis + other.r_bis) / 2.0
 
 
     def merge_with(

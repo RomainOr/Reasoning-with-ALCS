@@ -8,8 +8,8 @@ from __future__ import annotations
 from typing import Optional
 
 from agents.common.Perception import Perception
+from agents.common.classifier_components.Effect import Effect
 
-from agents.beacs.classifier_components.Effect import Effect
 
 
 class EffectList():
@@ -221,15 +221,3 @@ class EffectList():
             else:
                 result[int(effect[index])] = result.get(int(effect[index]), 0) + self.effect_detailled_counter[idx] / total_counter
         return result
-
-
-    def sum_effect_counter(self) -> float:
-        """
-        Computes the sum of all observations in the effect list
-
-        Returns
-        -------
-        float
-            The respective probabilities
-        """
-        return float(sum(self.effect_detailled_counter))

@@ -53,3 +53,6 @@ class AbstractPerception:
 
     def __repr__(self):
         return ''.join(map(str, self._items))
+
+    def __str__(self):
+        return ''.join(str(attr) for attr in self)

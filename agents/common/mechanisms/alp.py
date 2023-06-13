@@ -46,7 +46,6 @@ def cover(
     new_cl = cls(
         action=action, 
         tga=time,
-        tbseq=time,
         talp=time,
         cfg=cfg
     )

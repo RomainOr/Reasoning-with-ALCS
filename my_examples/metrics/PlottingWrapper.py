@@ -47,7 +47,7 @@ def plot_rewards(df, metrics_trial_frequency_explore, number_of_exploit_steps, a
     ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylabel("Rewards", fontsize=AXIS_TEXT_SIZE)
 
-def plot_classifiers(df, metrics_trial_frequency_explore, number_of_exploit_steps, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12, LEGEND_TEXT_SIZE=14):
+def plot_classifiers(df, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12, LEGEND_TEXT_SIZE=14):
     if ax is None:
         ax = plt.gca()
     explore_df = df.query("phase == 'explore'")

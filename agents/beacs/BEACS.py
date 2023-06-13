@@ -89,7 +89,11 @@ class BEACS(Agent):
                     self.cfg
                 )
                 BEACSClassifiersList.apply_reinforcement_learning(
-                    action_set, last_reward, max_fitness_r, max_fitness_r_bis, self.cfg.beta_rl, self.cfg.gamma
+                    action_set,
+                    last_reward,
+                    max_fitness_r,
+                    max_fitness_r_bis, 
+                    self.cfg
                 )
                 BEACSClassifiersList.apply_ga(
                     self.population,
@@ -157,7 +161,11 @@ class BEACS(Agent):
                     self.cfg
                 )
                 BEACSClassifiersList.apply_reinforcement_learning(
-                    action_set, last_reward, 0., 0., self.cfg.beta_rl, self.cfg.gamma
+                    action_set,
+                    last_reward, 
+                    0.,
+                    0.,
+                    self.cfg
                 )
                 BEACSClassifiersList.apply_ga(
                     self.population,
@@ -196,7 +204,11 @@ class BEACS(Agent):
             if steps > 0:
                 # Apply algorithms
                 BEACSClassifiersList.apply_reinforcement_learning(
-                    action_set, last_reward, max_fitness_r, max_fitness_r_bis, self.cfg.beta_rl, self.cfg.gamma
+                    action_set,
+                    last_reward,
+                    max_fitness_r,
+                    max_fitness_r_bis, 
+                    self.cfg
                 )
 
             # Choose classifier
@@ -227,7 +239,11 @@ class BEACS(Agent):
             if done:
                 # Apply algorithms
                 BEACSClassifiersList.apply_reinforcement_learning(
-                    action_set, last_reward, 0., 0., self.cfg.beta_rl, self.cfg.gamma
+                    action_set,
+                    last_reward, 
+                    0.,
+                    0.,
+                    self.cfg
                 )
 
             steps += 1

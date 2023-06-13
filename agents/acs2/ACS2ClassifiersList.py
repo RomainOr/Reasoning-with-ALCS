@@ -7,33 +7,29 @@
 from __future__ import annotations
 from operator import attrgetter
 from typing import Optional
+from agents.common.BaseConfiguration import BaseConfiguration
 
 import agents.common.mechanisms.alp as alp_common
 import agents.common.mechanisms.genetic_algorithms as ga
 from agents.common.Perception import Perception
 from agents.common.BaseClassifiersList import BaseClassifiersList
 from agents.common.classifier_components.BaseClassifier import BaseClassifier
-
-import agents.beacs.mechanisms.alp as alp_beacs
-from agents.beacs.BEACSConfiguration import BEACSConfiguration
-from agents.beacs.classifier_components.BEACSClassifier import BEACSClassifier
-from agents.beacs.mechanisms.reinforcement_learning import update_classifier_double_q_learning
-from agents.beacs.mechanisms.genetic_algorithms import mutation_enhanced_trace
+from agents.common.mechanisms.reinforcement_learning import update_classifier_q_learning
 
 
-class BEACSClassifiersList(BaseClassifiersList):
+class ACS2ClassifiersList(BaseClassifiersList):
     """
     Represents overall population, match/action sets
     """
 
     def __init__(self, *args) -> None:
-        super().__init__((BEACSClassifier, ),*args)
+        super().__init__((BaseClassifier, ),*args)
 
 
     def form_match_set(
             self,
             situation: Perception
-        ) -> BEACSClassifiersList:
+        ) -> ACS2ClassifiersList:
         """
         Builds the BEACSClassifiersList from the whole population with all classifiers whose condition
         matches the current situation.
@@ -48,12 +44,16 @@ class BEACSClassifiersList(BaseClassifiersList):
         BEACSClassifiersList
             The whole set of matching classifiers
         """
-        matching = [cl for cl in self if cl.does_match(situation)]
-        matching_with_change_anticipated = [cl for cl in matching if cl.does_anticipate_change()]
-        best_classifier = max(matching_with_change_anticipated,key=attrgetter('fitness'),default=None)
-        max_fitness_r = max((cl.q*cl.r for cl in matching_with_change_anticipated), default=0.)
-        max_fitness_r_bis = max((cl.q*cl.r_bis for cl in matching_with_change_anticipated), default=0.)
-        return BEACSClassifiersList(*matching), best_classifier, max_fitness_r, max_fitness_r_bis
+        best_classifier = None
+        best_fitness = 0.0
+        matching = []
+        for cl in self:
+            if cl.condition.does_match(situation):
+                matching.append(cl)
+                if cl.does_anticipate_change() and cl.fitness > best_fitness:
+                    best_classifier = cl
+                    best_fitness = cl.fitness
+        return ACS2ClassifiersList(*matching), best_classifier, best_fitness
     
 
     def form_action_set(
@@ -61,7 +61,7 @@ class BEACSClassifiersList(BaseClassifiersList):
             action_classifier: BaseClassifier
         ):
         """
-        Builds theBaseClassifiersList from the match set with all classifiers whose actions
+        Builds the BaseClassifiersList from the match set with all classifiers whose actions
         match the ones of the selected classifier.
 
         Parameters
@@ -74,23 +74,19 @@ class BEACSClassifiersList(BaseClassifiersList):
         The action set
         """
         matching = [cl for cl in self if cl.behavioral_sequence == action_classifier.behavioral_sequence and cl.action == action_classifier.action]
-        return BEACSClassifiersList(*matching)
+        return ACS2ClassifiersList(*matching)
 
 
     @staticmethod
     def apply_alp(
-            population: BEACSClassifiersList,
-            t_2_match_set: BEACSClassifiersList,
-            t_1_match_set: BEACSClassifiersList,
-            match_set: BEACSClassifiersList,
-            action_set: BEACSClassifiersList,
-            penultimate_classifier: BEACSClassifier,
+            population: ACS2ClassifiersList,
+            match_set: ACS2ClassifiersList,
+            action_set: ACS2ClassifiersList,
             p0: Perception,
             action: int,
             p1: Perception,
             time: int,
-            pai_states_memory,
-            cfg: BEACSConfiguration
+            cfg: BaseConfiguration
         ) -> None:
         """
         The Anticipatory Learning Process. Handles all updates by the ALP,
@@ -110,29 +106,25 @@ class BEACSClassifiersList(BaseClassifiersList):
         p1: Perception
         time: int
         pai_states_memory
-        cfg:BEACSConfiguration
+        cfg: BaseConfiguration
         """
-        new_list = BEACSClassifiersList()
-        new_cl: Optional[BEACSClassifier] = None
+        new_list = ACS2ClassifiersList()
+        new_cl: Optional[BaseClassifier] = None
         was_expected_case = False
 
         idx = 0
         action_set_length = 0
         if action_set: action_set_length = len(action_set)
-        if cfg.bs_max > 0 and penultimate_classifier is not None: potential_cls_for_pai = []
 
         #Main ALP loop on the action set
         while(idx < action_set_length):
             cl = action_set[idx]
             cl.increase_experience()
             cl.set_alp_timestamp(time)
-            is_aliasing_detected = False
 
             if cl.does_anticipate_correctly(p0, p1):
-                is_aliasing_detected, new_cl = alp_beacs.expected_case(cl, p0, time)
+                new_cl = alp_common.expected_case(cl, p0, time)
                 was_expected_case = True
-                if cfg.bs_max > 0 and penultimate_classifier is not None and is_aliasing_detected:
-                    potential_cls_for_pai.append(cl)
             else:
                 new_cl = alp_common.unexpected_case(cl, p0, p1, time)
 
@@ -147,55 +139,42 @@ class BEACSClassifiersList(BaseClassifiersList):
             idx += 1
 
             if new_cl is not None:
-                if new_cl.does_match(p0):
-                    alp_common.add_classifier(new_cl, action_set, new_list)
-                else:
-                    alp_common.add_classifier(new_cl, population, new_list)
-
-        # No classifier anticipated correctly - generate new one through covering
-        # only if we are not in the case of classifiers having behavioral sequences
-        if not was_expected_case:
-            if (len(action_set) > 0 and action_set[0].behavioral_sequence is None) or len(action_set) == 0:
-                new_cl = alp_common.cover(BEACSClassifier, p0, action, p1, time, cfg)
-                new_cl.tbseq = time
                 alp_common.add_classifier(new_cl, action_set, new_list)
 
-        if cfg.do_ep:
-            alp_beacs.apply_enhanced_effect_part_check(action_set, new_list, p0, time)
-
-        if cfg.bs_max > 0 and penultimate_classifier is not None and len(potential_cls_for_pai) > 0:
-            alp_beacs.apply_perceptual_aliasing_issue_management(population, t_2_match_set, t_1_match_set, match_set, action_set, penultimate_classifier, potential_cls_for_pai, new_list, p0, p1, time, pai_states_memory, cfg)
+        # No classifier anticipated correctly - generate new one through covering
+        if not was_expected_case:
+            new_cl = alp_common.cover(BaseClassifier, p0, action, p1, time, cfg)
+            alp_common.add_classifier(new_cl, action_set, new_list)
 
         # Merge classifiers from new_list into self and population
-        BEACSClassifiersList.merge_newly_built_classifiers(new_list, population, match_set, action_set, p0, p1)
+        ACS2ClassifiersList.merge_newly_built_classifiers(new_list, population, match_set, action_set, p0, p1)
 
 
     @staticmethod
     def apply_reinforcement_learning(
-            action_set: BEACSClassifiersList,
+            action_set: ACS2ClassifiersList,
             reward: int,
-            max_fitness_ra: float,
-            max_fitness_rb: float,
-            cfg: BEACSConfiguration
+            max_fitness: float,
+            cfg: BaseConfiguration
         ) -> None:
         for cl in action_set:
-            update_classifier_double_q_learning(cl, reward, max_fitness_ra, max_fitness_rb, cfg.beta_rl, cfg.gamma)
+            update_classifier_q_learning(cl, reward, max_fitness, cfg.beta_rl, cfg.gamma)
 
 
     @staticmethod
     def apply_ga(
-            population: BEACSClassifiersList,
-            match_set: BEACSClassifiersList,
-            action_set: BEACSClassifiersList,
+            population: ACS2ClassifiersList,
+            match_set: ACS2ClassifiersList,
+            action_set: ACS2ClassifiersList,
             p0: Perception,
             p1: Perception,
             time: int,
-            cfg: BEACSConfiguration
+            cfg: BaseConfiguration
         ) -> None:
         ga.apply(
-            BEACSClassifiersList,
-            BEACSClassifier,
-            mutation_enhanced_trace,
+            ACS2ClassifiersList,
+            BaseClassifier,
+            ga.mutation,
             ga.two_point_crossover,
             population,
             match_set,
