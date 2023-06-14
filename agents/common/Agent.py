@@ -56,7 +56,7 @@ class Agent:
             to_keep = True
             for other in self.population:
                 if cl != other and other.subsumes(cl):
-                    cl.average_fitnesses_from_other_cl(other)
+                    other.weighted_average_rewards_from_other_cl(cl)
                     to_keep = False
                     break
             if to_keep and cl.behavioral_sequence is not None and \

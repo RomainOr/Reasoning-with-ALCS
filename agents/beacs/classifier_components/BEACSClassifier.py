@@ -237,9 +237,13 @@ class BEACSClassifier(BaseClassifier):
 
 
     def average_fitnesses_from_other_cl(self, other):
-        self.q = other.q = (self.q + other.q) / 2.0
-        self.r = other.r = (self.r + other.r) / 2.0
+        super().average_fitnesses_from_other_cl(other)
         self.r_bis = other.r_bis = (self.r_bis + other.r_bis) / 2.0
+
+
+    def weighted_average_rewards_from_other_cl(self, other):
+        super().weighted_average_rewards_from_other_cl(other)
+        self.r_bis = (self.exp * self.r_bis + other.exp * other.r_bis) / (self.exp + other.exp)
 
 
     def merge_with(

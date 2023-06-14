@@ -462,6 +462,10 @@ class BaseClassifier:
         self.r = other.r = (self.r + other.r) / 2.0
 
 
+    def weighted_average_rewards_from_other_cl(self, other):
+        self.r = (self.exp * self.r + other.exp * other.r) / (self.exp + other.exp)
+
+
     def generalize_specific_attribute_randomly(self):
         """
         Generalizes one randomly attribute in the condition.
