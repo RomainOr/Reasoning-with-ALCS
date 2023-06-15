@@ -4,8 +4,6 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from agents.common.RandomNumberGenerator import RandomNumberGenerator
-
 
 def update_classifier_q_learning(
         cl, 

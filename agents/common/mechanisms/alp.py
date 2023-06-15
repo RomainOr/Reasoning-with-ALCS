@@ -56,7 +56,8 @@ def cover(
 def expected_case(
         cl: BaseClassifier,
         p0: Perception,
-        time: int
+        time: int,
+        p1: Perception=None
     ):
     """
     Controls the expected case of a classifier with the help of 
@@ -71,13 +72,14 @@ def expected_case(
         cl.increase_quality()
         return None
 
-    return specification_unchanging_components(cl, diff, time)
+    return specification_unchanging_components(cl, diff, time, p1)
 
 
 def specification_unchanging_components(
         cl: BaseClassifier,
         diff: Condition,
-        time: int
+        time: int,
+        p1: Perception=None
     ):
     """
     Controls the expected case of a classifier with the help of 
@@ -87,9 +89,7 @@ def specification_unchanging_components(
     ----------
     Bool related to aliasing, New classifier or None
     """
-
-    child = cl.copy_from(cl, time)
-
+    child = cl.copy_from(old_cl=cl, time=time, perception=p1)
     spec = cl.specificity
     spec_new = diff.specificity
     if spec >= child.cfg.u_max:
@@ -107,11 +107,8 @@ def specification_unchanging_components(
         while spec + spec_new > child.cfg.u_max:
             diff.generalize_specific_attribute_randomly()
             spec_new -= 1
-
     child.condition.specialize_with_condition(diff)
-
     child.q = max(0.5, child.q)
-
     return child
 
 
@@ -130,11 +127,9 @@ def unexpected_case(
     """
     cl.decrease_quality()
     cl.set_mark(p0)
-    # If nothing can be done, stop specialization of the classifier
     if not cl.is_specializable(p0, p1):
         return None
-    # If the classifier is not enhanced, directly specialize it
-    child = cl.copy_from(cl, time)
+    child = cl.copy_from(old_cl=cl, time=time, perception=p1)
     child.specialize(p0, p1)
     child.q = max(0.5, child.q)
     return child
@@ -163,7 +158,6 @@ def add_classifier(
     """
     old_cl = None
     equal_cl = None
-
     # Look if there is a classifier that subsumes the insertion candidate
     for cl in population:
         if does_subsume(cl, child):
@@ -171,18 +165,15 @@ def add_classifier(
                 old_cl = cl
         elif cl == child:
             equal_cl = cl
-
     # Check if there is similar classifier already in the population, previously found
     if old_cl is None:
         old_cl = equal_cl
-
     # Check if any similar classifier was in this ALP run
     if old_cl is None:
         for cl in new_list:
             if cl == child:
                 old_cl = cl
                 break
-
     if old_cl is None:
         new_list.append(child)
     else:

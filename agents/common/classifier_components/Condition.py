@@ -12,7 +12,6 @@ from agents.common.RandomNumberGenerator import RandomNumberGenerator
 from agents.common.classifier_components.AbstractPerception import AbstractPerception
 
 
-
 class Condition(AbstractPerception):
     """
     Specifies the set of situations (perceptions) in which the classifier

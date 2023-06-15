@@ -188,7 +188,6 @@ def delete_classifiers(
             if RandomNumberGenerator.random() < .3:
                 if _is_preferred_to_delete(cl_del, cl):
                     cl_del = cl
-
         if cl_del.num > 1:
             cl_del.num -= 1
         else:
@@ -221,14 +220,12 @@ def _is_preferred_to_delete(
     """
     if cl.q - cl_del.q < -0.1:
         return True
-
     if abs(cl.q - cl_del.q) <= 0.1:
         if cl.is_marked() and not cl_del.is_marked():
             return True
         elif cl.is_marked() or not cl_del.is_marked():
             if cl.tav > cl_del.tav:
                 return True
-
     return False
 
 
@@ -255,7 +252,6 @@ def add_classifier(
     """
     old_cl = None
     equal_cl = None
-
     # Look if there is a classifier that subsumes the insertion candidate
     for cl in population:
         if does_subsume(cl, child):
@@ -263,18 +259,15 @@ def add_classifier(
                 old_cl = cl
         elif cl == child:
             equal_cl = cl
-
     # Check if there is similar classifier already in the population, previously found
     if old_cl is None:
         old_cl = equal_cl
-
     # Check if any similar classifier was in this GA run
     if old_cl is None:
         for cl in new_list:
             if cl == child:
                 old_cl = cl
                 break
-
     if old_cl is None:
         new_list.append(child)
     else:
@@ -298,34 +291,25 @@ def apply(
 
     if should_apply(action_set, time, cfg.theta_ga):
         set_timestamps(action_set, time)
-
         # Select parents
         parent1, parent2 = roulette_wheel_selection(
             action_set, 
             lambda cl: pow(cl.q, 3)
         )
-
-        child1 = cls_Classifier.copy_from(parent1, time)
-        child2 = cls_Classifier.copy_from(parent2, time)
-        
+        child1 = cls_Classifier.copy_from(old_cl=parent1, time=time, perception=p1)
+        child2 = cls_Classifier.copy_from(old_cl=parent2, time=time, perception=p1)
         # Execute mutation
         mutate_function(child1, child2, cfg.mu)
-
         # Execute cross-over
         if RandomNumberGenerator.random() < cfg.chi:
             if child1.effect == child2.effect:
                 crossover_function(child1, child2)
-
                 # Update quality and reward
                 child1.average_fitnesses_from_other_cl(child2)
-
         child1.q /= 2
         child2.q /= 2
-
         # We are interested only in classifiers with specialized condition
-        children = {cl for cl in [child1, child2]
-                            if cl.condition.specificity > 0}
-
+        children = {cl for cl in [child1, child2] if cl.condition.specificity > 0}
         delete_classifiers(
             population,
             match_set,
@@ -333,7 +317,6 @@ def apply(
             len(children),
             cfg.theta_as
         )
-
         new_list = cls_ClassifiersList()
         # check for subsumers / similar classifiers
         for child in children:

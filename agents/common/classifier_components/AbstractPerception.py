@@ -6,7 +6,6 @@ class AbstractPerception:
         self._items = tuple(observation)
         self.wildcard = wildcard
 
-
     @classmethod
     def empty(cls, length: int, wildcard='#', oktypes=(str)):
         """

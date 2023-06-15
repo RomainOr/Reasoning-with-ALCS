@@ -12,6 +12,7 @@ from agents.beacs.BEACSClassifiersList import BEACSClassifiersList
 from agents.beacs.BEACSConfiguration import BEACSConfiguration
 from agents.beacs.classifier_components.BEACSClassifier import BEACSClassifier
 
+
 class BEACS(Agent):
 
     def __init__(self,
@@ -33,7 +34,7 @@ class BEACS(Agent):
     def duplicate_population(self)-> BEACSClassifiersList:
         duplicate_population = []
         for cl in self.population:
-            cl_copy = BEACSClassifier.copy_from(cl, 0)
+            cl_copy = BEACSClassifier.copy_from(old_cl=cl, time=0)
             cl_copy.num = cl.num
             cl_copy.exp = cl.exp
             cl_copy.tga = cl.tga
@@ -109,7 +110,7 @@ class BEACS(Agent):
             t_2_match_set = t_1_match_set
             t_1_match_set = match_set
             # Choose classifier
-            action_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
+            action_classifier = choose_classifier(match_set, self.cfg)
             # Tmp : Mountaincar -> epsilon degréssif : max(0.01, self.cfg.epsilon-current_trial/10000)
             # Record last activated classifier
             t_2_activated_classifier = t_1_activated_classifier
@@ -180,6 +181,7 @@ class BEACS(Agent):
             steps += 1
         return TrialMetrics(steps, total_reward)
 
+
     def _run_trial_exploit(
             self,
             env,
@@ -212,7 +214,7 @@ class BEACS(Agent):
                 )
 
             # Choose classifier
-            best_classifier = choose_classifier(match_set, self.cfg, self.cfg.epsilon)
+            best_classifier = choose_classifier(match_set, self.cfg)
             # Create action set
             action_set = match_set.form_action_set(best_classifier)
             # Use environment adapter

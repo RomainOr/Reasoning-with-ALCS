@@ -58,6 +58,7 @@ def updated_passthrough(
         if child_effect[idx] != child_effect.wildcard and child_effect[idx] == child_condition[idx]:
             child_effect[idx] = child_effect.wildcard
 
+
 def create_behavioral_classifier(
         penultimate_classifier: BEACSClassifier,
         cl: BEACSClassifier,

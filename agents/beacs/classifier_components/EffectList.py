@@ -11,7 +11,6 @@ from agents.common.Perception import Perception
 from agents.common.classifier_components.Effect import Effect
 
 
-
 class EffectList():
     """
     List of anticipations

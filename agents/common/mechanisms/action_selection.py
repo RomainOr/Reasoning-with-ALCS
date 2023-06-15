@@ -12,8 +12,7 @@ from agents.common.classifier_components.BaseClassifier import BaseClassifier
 
 def choose_classifier(
         cll,
-        cfg,
-        epsilon: float
+        cfg
     ) -> BaseClassifier:
     """
     Chooses which classifier to use given matching set through an
@@ -32,9 +31,8 @@ def choose_classifier(
     -------
     Classifier
     """
-    if RandomNumberGenerator.random() < epsilon:
+    if RandomNumberGenerator.random() < cfg.epsilon:
         return explore(cll, cfg)
-
     return choose_fittest_classifier(cll, cfg)
 
 
@@ -77,7 +75,7 @@ def choose_latest_action(
         cfg
     )-> BaseClassifier:
     """
-    Computes latest executed action ("action delay bias") and return 
+    Computes latest executed action ("action delay bias") and return 
     a corresponding classifier.
 
     Parameters
@@ -128,23 +126,22 @@ def choose_action_from_knowledge_array(
     Classifier
     """
     knowledge_array = {i: 0.0 for i in range(cfg.number_of_possible_actions)}
-
     if len(cll) > 0:
+        #Sort and build knowledge array
         cll.sort(key=lambda cl: cl.action)
-
         for _action, _clss in groupby(cll, lambda cl: cl.action):
             _classifiers = [cl for cl in _clss]
             agg_q = sum(cl.q * cl.num for cl in _classifiers)
             agg_num = sum(cl.num for cl in _classifiers)
             knowledge_array[_action] = agg_q / float(agg_num)
         by_quality = sorted(knowledge_array.items(), key=lambda el: el[1])
+        #Find action and retrun one related classifier
         action = by_quality[0][0]
-
         classifiers_that_match_action = [cl for cl in cll if cl.action == action]
         if len(classifiers_that_match_action) > 0:
-            idx = RandomNumberGenerator.integers(len(classifiers_that_match_action))
-            return classifiers_that_match_action[idx]
-
+            return RandomNumberGenerator.choice(classifiers_that_match_action)
+        else:
+            return BaseClassifier(action=action, cfg=cfg)
     return choose_random_classifiers(cll, cfg)
 
 

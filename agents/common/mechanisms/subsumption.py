@@ -31,5 +31,4 @@ def does_subsume(
                     cl.behavioral_sequence == other_cl.behavioral_sequence and \
                         cl.effect.subsumes(other_cl.effect):
         return True
-
     return False

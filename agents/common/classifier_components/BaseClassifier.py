@@ -90,8 +90,9 @@ class BaseClassifier:
     @classmethod
     def copy_from(
             cls,
-            old_cls: BaseClassifier,
-            time: int
+            old_cl: BaseClassifier,
+            time: int,
+            perception: Perception = None
         ) -> BaseClassifier:
         """
         Copies old classifier with given time.
@@ -100,7 +101,7 @@ class BaseClassifier:
 
         Parameters
         ----------
-        old_cls: Classifier
+        old_cl: Classifier
             Classifier to copy from
         time: int
             Current epoch
@@ -111,16 +112,16 @@ class BaseClassifier:
             New copied classifier - Hard copy
         """
         new_cls = cls(
-            condition=Condition(old_cls.condition, old_cls.cfg.classifier_wildcard),
-            action=old_cls.action,
-            behavioral_sequence=old_cls.behavioral_sequence,
-            quality=old_cls.q,
-            reward=old_cls.r,
-            immediate_reward=old_cls.ir,
-            cfg=old_cls.cfg,
+            condition=Condition(old_cl.condition, old_cl.cfg.classifier_wildcard),
+            action=old_cl.action,
+            behavioral_sequence=old_cl.behavioral_sequence,
+            quality=old_cl.q,
+            reward=old_cl.r,
+            immediate_reward=old_cl.ir,
+            cfg=old_cl.cfg,
             tga=time,
             talp=time,
-            tav=old_cls.tav
+            tav=old_cl.tav
         )
         return new_cls
 

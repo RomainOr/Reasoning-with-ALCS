@@ -6,10 +6,10 @@
 
 import agents.common.mechanisms.aliasing_detection as aliasing_detection
 import agents.common.mechanisms.alp as alp_common
-from agents.common.BaseConfiguration import BaseConfiguration
 from agents.common.Perception import Perception
 
 import agents.beacs.mechanisms.pai_detection as pai_detection
+from agents.beacs.BEACSConfiguration import BEACSConfiguration
 from agents.beacs.classifier_components.BEACSClassifier import BEACSClassifier
 from agents.beacs.mechanisms.build_behavioral_sequences import create_behavioral_classifier
 
@@ -84,7 +84,7 @@ def apply_perceptual_aliasing_issue_management(
         p1: Perception,
         time: int,
         pai_states_memory,
-        cfg: BaseConfiguration
+        cfg: BEACSConfiguration
     ) -> None:
     """
     Used to manage the detection of PAI and to manage the behavioral classifiers
