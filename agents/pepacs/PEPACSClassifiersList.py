@@ -8,11 +8,11 @@ from __future__ import annotations
 from typing import Optional
 from agents.common.RandomNumberGenerator import RandomNumberGenerator
 
-
 import agents.common.mechanisms.alp as alp_common
 import agents.common.mechanisms.genetic_algorithms as ga
 from agents.common.Perception import Perception
 from agents.common.BaseClassifiersList import BaseClassifiersList
+from agents.common.classifier_components.BaseClassifier import BaseClassifier
 from agents.common.mechanisms.reinforcement_learning import update_classifier_q_learning
 
 import agents.pepacs.mechanisms.alp as alp_pepacs
@@ -47,21 +47,19 @@ class PEPACSClassifiersList(BaseClassifiersList):
         PEPACSClassifiersList
             The whole set of matching classifiers
         """
-        best_classifier = None
         best_fitness = 0.0
         matching = []
         for cl in self:
             if cl.does_match(situation):
                 matching.append(cl)
                 if cl.does_anticipate_change() and cl.fitness > best_fitness:
-                    best_classifier = cl
                     best_fitness = cl.fitness
-        return PEPACSClassifiersList(*matching), best_classifier, best_fitness
+        return PEPACSClassifiersList(*matching), best_fitness
 
 
     def form_action_set(
             self,
-            action_classifier: PEPACSClassifier
+            action_classifier: BaseClassifier
         ):
         """
         Builds the ACS2ClassifiersList from the match set with all classifiers whose actions
@@ -77,7 +75,7 @@ class PEPACSClassifiersList(BaseClassifiersList):
         ACS2ClassifiersList
             The action set
         """
-        matching = [cl for cl in self if cl.behavioral_sequence == action_classifier.behavioral_sequence and cl.action == action_classifier.action]
+        matching = [cl for cl in self if cl.action == action_classifier.action]
         return PEPACSClassifiersList(*matching)
 
 

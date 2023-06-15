@@ -54,17 +54,13 @@ class ACS2(Agent):
         steps = 0
         raw_state, _info = env.reset()
         state = self.cfg.environment_adapter.to_genotype(env, raw_state)
-        last_reward = 0
         total_reward = 0
-        prev_state = Perception.empty()
-        match_set = ACS2ClassifiersList()
-        action_set = ACS2ClassifiersList()
         done = False
 
         while not done:
             
             # Creation of the matching set
-            match_set, _, best_fitness = self.population.form_match_set(state)
+            match_set, best_fitness = self.population.form_match_set(state)
 
             # Apply learning in the last action set
             if steps > 0:
@@ -149,15 +145,13 @@ class ACS2(Agent):
         steps = 0
         raw_state, _info = env.reset()
         state = self.cfg.environment_adapter.to_genotype(env, raw_state)
-        last_reward = 0
         total_reward = 0
-        action_set = ACS2ClassifiersList()
         done = False
 
         while not done:
 
             # Compute in one run the matching set and the best matching classifier
-            match_set, best_classifier, best_fitness = self.population.form_match_set(state)
+            match_set, best_fitness = self.population.form_match_set(state)
 
             if steps > 0:
                 # Apply algorithms
@@ -168,6 +162,8 @@ class ACS2(Agent):
                     self.cfg
                 )
 
+            # Choose classifier
+            best_classifier = choose_classifier(match_set, self.cfg)
             # Create action set
             action_set = match_set.form_action_set(best_classifier)
             # Use environment adapter

@@ -55,23 +55,19 @@ class BEACS(Agent):
         steps = 0
         raw_state, _info = env.reset()
         state = self.cfg.environment_adapter.to_genotype(env, raw_state)
-        last_reward = 0
         total_reward = 0
-        prev_state = Perception.empty()
-        t_2_match_set = BEACSClassifiersList()
-        t_1_match_set = BEACSClassifiersList()
-        match_set = BEACSClassifiersList()
-        action_set = BEACSClassifiersList()
         done = False
 
         # For action chunking
+        t_2_match_set = BEACSClassifiersList()
+        t_1_match_set = BEACSClassifiersList()
         t_2_activated_classifier = None
         t_1_activated_classifier = None
 
         while not done:
             
             # Creation of the matching set
-            match_set, _, max_fitness_r, max_fitness_r_bis = self.population.form_match_set(state)
+            match_set, max_fitness_r, max_fitness_r_bis = self.population.form_match_set(state)
 
             # Apply learning in the last action set
             if steps > 0:
@@ -111,7 +107,6 @@ class BEACS(Agent):
             t_1_match_set = match_set
             # Choose classifier
             action_classifier = choose_classifier(match_set, self.cfg)
-            # Tmp : Mountaincar -> epsilon degréssif : max(0.01, self.cfg.epsilon-current_trial/10000)
             # Record last activated classifier
             t_2_activated_classifier = t_1_activated_classifier
             t_1_activated_classifier = action_classifier
@@ -193,15 +188,13 @@ class BEACS(Agent):
         steps = 0
         raw_state, _info = env.reset()
         state = self.cfg.environment_adapter.to_genotype(env, raw_state)
-        last_reward = 0
         total_reward = 0
-        action_set = BEACSClassifiersList()
         done = False
 
         while not done:
 
             # Compute in one run the matching set, the best matching classifier and the best matching fitness associated to the previous classifier
-            match_set, _, max_fitness_r, max_fitness_r_bis = self.population.form_match_set(state)
+            match_set, max_fitness_r, max_fitness_r_bis = self.population.form_match_set(state)
 
             if steps > 0:
                 # Apply algorithms

@@ -174,7 +174,8 @@ class PEPEffect(Effect):
             if attr1 == wildcard and attr2 == wildcard: continue
             if attr1 == wildcard: attr1 = perception[i]
             if attr2 == wildcard: attr2 = perception[i]
-            result[i] = ProbabilityEnhancedAttribute.merged_attributes(attr1, attr2)
+            if attr1 != attr2:
+                result[i] = ProbabilityEnhancedAttribute.merged_attributes(attr1, attr2)
         return result
     
     

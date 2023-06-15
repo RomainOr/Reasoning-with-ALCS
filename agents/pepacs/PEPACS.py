@@ -49,17 +49,13 @@ class PEPACS(Agent):
         steps = 0
         raw_state, _info = env.reset()
         state = self.cfg.environment_adapter.to_genotype(env,raw_state)
-        last_reward = 0
         total_reward = 0
-        prev_state = Perception.empty()
-        match_set = PEPACSClassifiersList()
-        action_set = PEPACSClassifiersList()
         done = False
 
         while not done:
             
             # Creation of the matching set
-            match_set, _, best_fitness = self.population.form_match_set(state)
+            match_set, best_fitness = self.population.form_match_set(state)
 
             if steps > 0:
                 PEPACSClassifiersList.apply_alp(
@@ -141,17 +137,15 @@ class PEPACS(Agent):
 
         # Initial conditions
         steps = 0
-        raw_state = env.reset()
+        raw_state, _info = env.reset()
         state = self.cfg.environment_adapter.to_genotype(env,raw_state)
-        last_reward = 0
         total_reward = 0
-        action_set = PEPACSClassifiersList()
         done = False
 
         while not done:
 
-            # Compute in one run the matching set, the best matching classifier and the best matching fitness associated to the previous classifier
-            match_set, best_classifier, best_fitness = self.population.form_match_set(state)
+            # Compute in one run the matching set and the best matching fitness
+            match_set, best_fitness = self.population.form_match_set(state)
 
             if steps > 0:
                 PEPACSClassifiersList.apply_reinforcement_learning(
@@ -160,7 +154,9 @@ class PEPACS(Agent):
                     best_fitness,
                     self.cfg
                 )
-                
+
+            # Choose classifier
+            best_classifier = choose_classifier(match_set, self.cfg)
             # Create action set
             action_set = match_set.form_action_set(best_classifier)
             # Use environment adapter
@@ -181,5 +177,4 @@ class PEPACS(Agent):
                 )
 
             steps += 1
-
         return TrialMetrics(steps, total_reward)

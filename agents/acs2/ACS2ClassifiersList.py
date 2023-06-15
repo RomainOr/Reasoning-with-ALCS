@@ -43,16 +43,14 @@ class ACS2ClassifiersList(BaseClassifiersList):
         ACS2ClassifiersList
             The whole set of matching classifiers
         """
-        best_classifier = None
         best_fitness = 0.0
         matching = []
         for cl in self:
             if cl.does_match(situation):
                 matching.append(cl)
                 if cl.does_anticipate_change() and cl.fitness > best_fitness:
-                    best_classifier = cl
                     best_fitness = cl.fitness
-        return ACS2ClassifiersList(*matching), best_classifier, best_fitness
+        return ACS2ClassifiersList(*matching), best_fitness
     
 
     def form_action_set(
@@ -73,7 +71,7 @@ class ACS2ClassifiersList(BaseClassifiersList):
         ACS2ClassifiersList
             The action set
         """
-        matching = [cl for cl in self if cl.behavioral_sequence == action_classifier.behavioral_sequence and cl.action == action_classifier.action]
+        matching = [cl for cl in self if cl.action == action_classifier.action]
         return ACS2ClassifiersList(*matching)
 
 

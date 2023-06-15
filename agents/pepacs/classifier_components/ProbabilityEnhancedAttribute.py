@@ -48,21 +48,6 @@ class ProbabilityEnhancedAttribute(dict):
         return self.keys() >= other.keys()
 
 
-    def symbols_specified(self):
-        return {k for k, v in self.items() if v > 0.0}
-
-
-    def is_similar(self, other):
-        """
-        Determines if the two lists specify the same characters.
-        Order and probabilities are not considered.
-        """
-        if isinstance(other, ProbabilityEnhancedAttribute):
-            return self.symbols_specified() == other.symbols_specified()
-        else:
-            return self.symbols_specified() == {other}
-
-
     def make_compact(self):
         for symbol, prob in list(self.items()):
             if prob == 0.0:
@@ -85,6 +70,10 @@ class ProbabilityEnhancedAttribute(dict):
         self.adjust_probabilities(1.0 + update_delta)
 
 
+    def symbols_specified(self):
+        return {k for k, v in self.items() if v > 0.0}
+
+
     def insert_symbol(self, symbol):
         self[symbol] = self.get(symbol, 0.0) + 1.0 / len(self)
         self.adjust_probabilities()
@@ -105,6 +94,17 @@ class ProbabilityEnhancedAttribute(dict):
 
     def sorted_items(self):
         return sorted(self.items(), key=lambda x: x[1], reverse=True)
+
+
+    def is_similar(self, other):
+        """
+        Determines if the two lists specify the same characters.
+        Order and probabilities are not considered.
+        """
+        if isinstance(other, ProbabilityEnhancedAttribute):
+            return self.symbols_specified() == other.symbols_specified()
+        else:
+            return self.symbols_specified() == {other}
 
 
     def __eq__(self, other):
