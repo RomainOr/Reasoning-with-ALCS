@@ -5,7 +5,6 @@
 """
 
 from agents.common.BaseConfiguration import BaseConfiguration
-from agents.common.Perception import Perception
 from agents.common.Agent import Agent, TrialMetrics
 from agents.common.classifier_components import BaseClassifier
 from agents.common.mechanisms.action_selection import choose_classifier
@@ -24,10 +23,6 @@ class ACS2(Agent):
             population=population or ACS2ClassifiersList(),
             seed=cfg.seed
         )
-
-
-    def get_pai_states_memory(self):
-        return self.pai_states_memory
 
 
     def duplicate_population(self)-> ACS2ClassifiersList:

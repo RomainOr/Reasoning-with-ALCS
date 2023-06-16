@@ -5,7 +5,6 @@
 """
 
 from __future__ import annotations
-from operator import attrgetter
 from typing import Optional
 
 import agents.common.mechanisms.alp as alp_common
@@ -58,9 +57,9 @@ class BEACSClassifiersList(BaseClassifiersList):
     def form_action_set(
             self,
             action_classifier: BaseClassifier
-        ):
+        ) -> BEACSClassifiersList:
         """
-        Builds theBaseClassifiersList from the match set with all classifiers whose actions
+        Builds the BEACSClassifiersList from the match set with all classifiers whose actions
         match the ones of the selected classifier.
 
         Parameters
@@ -70,7 +69,8 @@ class BEACSClassifiersList(BaseClassifiersList):
 
         Returns
         ----------
-        The action set
+        BEACSClassifiersList
+            The action set
         """
         matching = [cl for cl in self if cl.behavioral_sequence == action_classifier.behavioral_sequence and cl.action == action_classifier.action]
         return BEACSClassifiersList(*matching)
@@ -109,7 +109,7 @@ class BEACSClassifiersList(BaseClassifiersList):
         p1: Perception
         time: int
         pai_states_memory
-        cfg:BEACSConfiguration
+        cfg: BEACSConfiguration
         """
         new_list = BEACSClassifiersList()
         new_cl: Optional[BEACSClassifier] = None

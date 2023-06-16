@@ -24,7 +24,7 @@ class BaseClassifier:
             condition: Union[Condition, str, None] = None,
             action: Optional[int] = None,
             behavioral_sequence: Optional[List[int]] = None,
-            effect: Optional[Effect] = None,
+            effect: Union[Effect, str, None] = None,
             quality: float=0.5,
             reward: float=0.,
             immediate_reward: float=0.0,
@@ -114,6 +114,7 @@ class BaseClassifier:
         new_cls = cls(
             condition=Condition(old_cl.condition, old_cl.cfg.classifier_wildcard),
             action=old_cl.action,
+            effect=Effect(old_cl.effect, old_cl.cfg.classifier_wildcard),
             behavioral_sequence=old_cl.behavioral_sequence,
             quality=old_cl.q,
             reward=old_cl.r,
