@@ -5,8 +5,7 @@
 """
 
 from __future__ import annotations
-from itertools import chain
-from typing import Optional, List
+from typing import Optional
 
 import agents.common.mechanisms.alp as alp_common
 import agents.common.mechanisms.genetic_algorithms as ga
@@ -245,7 +244,6 @@ class BACSClassifiersList(BaseClassifiersList):
 
         ga.apply(
             BACSClassifiersList,
-            BaseClassifier,
             ga.mutation,
             ga.two_point_crossover,
             population,

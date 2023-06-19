@@ -28,7 +28,7 @@ class ACS2(Agent):
     def duplicate_population(self)-> ACS2ClassifiersList:
         duplicate_population = []
         for cl in self.population:
-            cl_copy = BaseClassifier.copy_from(old_cl=cl, time=0)
+            cl_copy = cl.copy(0)
             cl_copy.num = cl.num
             cl_copy.exp = cl.exp
             cl_copy.tga = cl.tga

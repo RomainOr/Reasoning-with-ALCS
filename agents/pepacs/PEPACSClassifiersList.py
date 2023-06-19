@@ -173,7 +173,6 @@ class PEPACSClassifiersList(BaseClassifiersList):
         ) -> None:
         ga.apply(
             PEPACSClassifiersList,
-            PEPACSClassifier,
             ga.mutation,
             ga.two_point_crossover,
             population,

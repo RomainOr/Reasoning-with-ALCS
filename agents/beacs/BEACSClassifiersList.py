@@ -193,7 +193,6 @@ class BEACSClassifiersList(BaseClassifiersList):
         ) -> None:
         ga.apply(
             BEACSClassifiersList,
-            BEACSClassifier,
             mutation_enhanced_trace,
             ga.two_point_crossover,
             population,

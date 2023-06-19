@@ -59,8 +59,11 @@ class PEPACSClassifier(BaseClassifier):
         self.effect = _build_perception_string(PEPEffect, effect)
 
 
-    @classmethod
-    def copy_from(cls, old_cl: PEPACSClassifier, time: int, perception: Perception = None):
+    def copy(
+            self, 
+            time: int, 
+            perception: Perception = None
+        ) -> PEPACSClassifier:
         """
         Copies old classifier with given time (tga, talp).
         Old tav gets replaced with new value.
@@ -68,27 +71,27 @@ class PEPACSClassifier(BaseClassifier):
 
         Parameters
         ----------
-        old_cl: Classifier
+        self: PEPACSClassifier
             classifier to copy from
         time: int
             time of creation / current epoch
 
         Returns
         -------
-        Classifier
+        PEPACSClassifier
             copied classifier
         """
-        new_cls = cls(
-            condition=Condition(old_cl.condition, old_cl.cfg.classifier_wildcard),
-            action=old_cl.action,
-            effect=PEPEffect(old_cl.effect, old_cl.cfg.classifier_wildcard),
-            quality=old_cl.q,
-            reward=old_cl.r,
-            immediate_reward=old_cl.ir,
-            cfg=old_cl.cfg,
+        new_cls = PEPACSClassifier(
+            condition=Condition(self.condition, self.cfg.classifier_wildcard),
+            action=self.action,
+            effect=PEPEffect(self.effect, self.cfg.classifier_wildcard),
+            quality=self.q,
+            reward=self.r,
+            immediate_reward=self.ir,
+            cfg=self.cfg,
             tga=time,
             talp=time,
-            tav=old_cl.tav
+            tav=self.tav
         )
         if perception and new_cls.is_enhanced():
             for idx, ei in enumerate(new_cls.effect):

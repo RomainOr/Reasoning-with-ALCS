@@ -171,7 +171,6 @@ class ACS2ClassifiersList(BaseClassifiersList):
         ) -> None:
         ga.apply(
             ACS2ClassifiersList,
-            BaseClassifier,
             ga.mutation,
             ga.two_point_crossover,
             population,

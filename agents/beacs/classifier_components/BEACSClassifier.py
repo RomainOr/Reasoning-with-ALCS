@@ -84,10 +84,8 @@ class BEACSClassifier(BaseClassifier):
             f"tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n" \
 
 
-    @classmethod
-    def copy_from(
-            cls,
-            old_cl: BEACSClassifier,
+    def copy(
+            self: BEACSClassifier,
             time: int,
             perception: Perception = None
         ) -> BEACSClassifier:
@@ -98,7 +96,7 @@ class BEACSClassifier(BaseClassifier):
 
         Parameters
         ----------
-        old_cl: Classifier
+        self: Classifier
             Classifier to copy from
         time: int
             Current epoch
@@ -108,30 +106,30 @@ class BEACSClassifier(BaseClassifier):
         Classifier
             New copied classifier - Hard copy
         """
-        new_cls = cls(
-            condition=Condition(old_cl.condition, old_cl.cfg.classifier_wildcard),
-            action=old_cl.action,
-            behavioral_sequence=old_cl.behavioral_sequence,
-            quality=old_cl.q,
-            reward=old_cl.r,
-            reward_bis=old_cl.r_bis,
-            immediate_reward=old_cl.ir,
-            cfg=old_cl.cfg,
+        new_cls = BEACSClassifier(
+            condition=Condition(self.condition, self.cfg.classifier_wildcard),
+            action=self.action,
+            behavioral_sequence=self.behavioral_sequence,
+            quality=self.q,
+            reward=self.r,
+            reward_bis=self.r_bis,
+            immediate_reward=self.ir,
+            cfg=self.cfg,
             tga=time,
             tbseq=time,
             talp=time,
-            tav=old_cl.tav,
-            aliased_state=old_cl.aliased_state,
-            pai_state=old_cl.pai_state
+            tav=self.tav,
+            aliased_state=self.aliased_state,
+            pai_state=self.pai_state
         )
         new_cls.effect.effect_list = []
-        for oeffect in old_cl.effect:
+        for oeffect in self.effect:
             effect_to_append = Effect.empty(new_cls.cfg.classifier_length)
             for i in range(new_cls.cfg.classifier_length):
                 effect_to_append[i] = oeffect[i]
             new_cls.effect.effect_list.append(effect_to_append)
-        new_cls.effect.effect_detailled_counter = old_cl.effect.effect_detailled_counter[:]
-        new_cls.effect.enhanced_trace_ga = old_cl.effect.enhanced_trace_ga[:]
+        new_cls.effect.effect_detailled_counter = self.effect.effect_detailled_counter[:]
+        new_cls.effect.enhanced_trace_ga = self.effect.enhanced_trace_ga[:]
         new_cls.effect.update_enhanced_trace_ga(new_cls.cfg.classifier_length)
         return new_cls
 
@@ -270,7 +268,7 @@ class BEACSClassifier(BaseClassifier):
         Classifier
             New enhanced classifier
         """
-        result = BEACSClassifier.copy_from(old_cl=self, time=time)
+        result = self.copy(time=time)
         result.q = max((self.q + other_classifier.q) / 2.0, 0.5)
         result.r = (self.r + other_classifier.r) / 2.0
         result.r_bis = (self.r_bis + other_classifier.r_bis) / 2.0

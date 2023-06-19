@@ -10,7 +10,6 @@ from agents.common.mechanisms.action_selection import choose_classifier
 
 from agents.pepacs.PEPACSConfiguration import PEPACSConfiguration
 from agents.pepacs.PEPACSClassifiersList import PEPACSClassifiersList
-from agents.pepacs.classifier_components.PEPACSClassifier import PEPACSClassifier
 
 
 class PEPACS(Agent):
@@ -29,7 +28,7 @@ class PEPACS(Agent):
     def duplicate_population(self)-> PEPACSClassifiersList:
         duplicate_population = []
         for cl in self.population:
-            cl_copy = PEPACSClassifier.copy_from(old_cl=cl, time=0, Perception=None)
+            cl_copy = cl.copy(time=0, Perception=None)
             cl_copy.num = cl.num
             cl_copy.exp = cl.exp
             cl_copy.tga = cl.tga

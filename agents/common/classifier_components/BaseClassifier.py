@@ -87,10 +87,8 @@ class BaseClassifier:
             f"Mark: {str(self.mark)} tga: {self.tga:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n"
 
 
-    @classmethod
-    def copy_from(
-            cls,
-            old_cl: BaseClassifier,
+    def copy(
+            self,
             time: int,
             perception: Perception = None
         ) -> BaseClassifier:
@@ -101,7 +99,7 @@ class BaseClassifier:
 
         Parameters
         ----------
-        old_cl: Classifier
+        self: Classifier
             Classifier to copy from
         time: int
             Current epoch
@@ -111,18 +109,18 @@ class BaseClassifier:
         Classifier
             New copied classifier - Hard copy
         """
-        new_cls = cls(
-            condition=Condition(old_cl.condition, old_cl.cfg.classifier_wildcard),
-            action=old_cl.action,
-            effect=Effect(old_cl.effect, old_cl.cfg.classifier_wildcard),
-            behavioral_sequence=old_cl.behavioral_sequence,
-            quality=old_cl.q,
-            reward=old_cl.r,
-            immediate_reward=old_cl.ir,
-            cfg=old_cl.cfg,
+        new_cls = BaseClassifier(
+            condition=Condition(self.condition, self.cfg.classifier_wildcard),
+            action=self.action,
+            effect=Effect(self.effect, self.cfg.classifier_wildcard),
+            behavioral_sequence=self.behavioral_sequence,
+            quality=self.q,
+            reward=self.r,
+            immediate_reward=self.ir,
+            cfg=self.cfg,
             tga=time,
             talp=time,
-            tav=old_cl.tav
+            tav=self.tav
         )
         return new_cls
 

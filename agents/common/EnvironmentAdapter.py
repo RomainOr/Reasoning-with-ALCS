@@ -12,8 +12,7 @@ class EnvironmentAdapter:
     This implementation works for environments which provide LCS-compatible
     state and action representations (no conversion needed).
 
-    Subclass this class in PyALCS integration to provide an adapter
-    for a specific environment.
+    Subclass this class to provide an adapter for a specific environment.
     """
 
     @staticmethod

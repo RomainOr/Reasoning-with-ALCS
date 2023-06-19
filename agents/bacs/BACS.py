@@ -11,6 +11,7 @@ from agents.common.mechanisms.action_selection import choose_classifier
 from agents.bacs.BACSConfiguration import BACSConfiguration
 from agents.bacs.BACSClassifiersList import BACSClassifiersList
 
+
 class BACS(Agent):
 
     def __init__(
@@ -28,7 +29,7 @@ class BACS(Agent):
     def duplicate_population(self)-> BACSClassifiersList:
         duplicate_population = []
         for cl in self.population:
-            cl_copy = BaseClassifier.copy_from(cl, 0)
+            cl_copy = cl.copy(0)
             cl_copy.num = cl.num
             cl_copy.exp = cl.exp
             cl_copy.tga = cl.tga

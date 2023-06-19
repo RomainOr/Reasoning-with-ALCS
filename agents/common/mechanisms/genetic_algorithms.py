@@ -277,7 +277,6 @@ def add_classifier(
 
 def apply(
         cls_ClassifiersList: BaseClassifiersList,
-        cls_Classifier: BaseClassifier,
         mutate_function: Callable,
         crossover_function: Callable,
         population: BaseClassifiersList,
@@ -296,8 +295,8 @@ def apply(
             action_set, 
             lambda cl: pow(cl.q, 3)
         )
-        child1 = cls_Classifier.copy_from(old_cl=parent1, time=time, perception=p1)
-        child2 = cls_Classifier.copy_from(old_cl=parent2, time=time, perception=p1)
+        child1 = parent1.copy(time=time, perception=p1)
+        child2 = parent2.copy(time=time, perception=p1)
         # Execute mutation
         mutate_function(child1, child2, cfg.mu)
         # Execute cross-over

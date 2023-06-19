@@ -70,14 +70,6 @@ def build_fitness_matrix(env, population):
             best_cl = population.find_best_classifier(perception)
             if best_cl:
                 fitness[index] = max(best_cl.fitness, fitness[index])
-                if best_cl.behavioral_sequence:
-                    tmp_x, tmp_y = update_matrix_index(original, index[0], index[1], best_cl.action)
-                    fitness[(tmp_x, tmp_y)] = max(fitness[(tmp_x, tmp_y)], best_cl.fitness)
-                    if len(best_cl.behavioral_sequence) > 1:
-                        for idx, seq in enumerate(best_cl.behavioral_sequence):
-                            if idx != len(best_cl.behavioral_sequence) -1:
-                                tmp_x, tmp_y = update_matrix_index(original, tmp_x, tmp_y, seq)
-                                fitness[(tmp_x, tmp_y)] = max(fitness[(tmp_x, tmp_y)], best_cl.fitness)
             else:
                 fitness[index] = -1
     for index, x in np.ndenumerate(original):

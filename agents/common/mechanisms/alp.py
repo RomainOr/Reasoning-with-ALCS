@@ -89,7 +89,7 @@ def specification_unchanging_components(
     ----------
     Bool related to aliasing, New classifier or None
     """
-    child = cl.copy_from(old_cl=cl, time=time, perception=p1)
+    child = cl.copy(time=time, perception=p1)
     spec = cl.specificity
     spec_new = diff.specificity
     if spec >= child.cfg.u_max:
@@ -129,7 +129,7 @@ def unexpected_case(
     cl.set_mark(p0)
     if not cl.is_specializable(p0, p1):
         return None
-    child = cl.copy_from(old_cl=cl, time=time, perception=p1)
+    child = cl.copy(time=time, perception=p1)
     child.specialize(p0, p1)
     child.q = max(0.5, child.q)
     return child
