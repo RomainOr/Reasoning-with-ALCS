@@ -134,6 +134,22 @@ class BEACSClassifier(BaseClassifier):
         return new_cls
 
 
+    def copy_time_num_exp_from_other_cl(
+            self,
+            other
+        ):
+        """
+        Copies internal parameters from other classifier cl
+
+        Parameters
+        ----------
+        self: Classifier
+            Classifier to copy from
+        """
+        super().copy_time_num_exp_from_other_cl(other)
+        self.tbseq = other.tbseq
+
+
     @property
     def fitness(self) -> float:
         """

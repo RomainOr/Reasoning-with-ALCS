@@ -25,6 +25,15 @@ class Agent:
         RandomNumberGenerator.seed(seed)
 
 
+    def duplicate_population(self):
+        duplicate_population = []
+        for cl in self.population:
+            cl_copy = cl.copy(0)
+            cl_copy.copy_time_num_exp_from_other_cl(cl)
+            duplicate_population.append(cl_copy)
+        return type(self.population)(*duplicate_population)
+
+
     def _run_trial_explore(self, env, trials, current_trial) -> TrialMetrics:
         raise NotImplementedError("Subclasses should implement this method.")
 

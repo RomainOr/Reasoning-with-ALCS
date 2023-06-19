@@ -125,6 +125,24 @@ class BaseClassifier:
         return new_cls
 
 
+    def copy_time_num_exp_from_other_cl(
+            self,
+            other
+        ):
+        """
+        Copies internal parameters from other classifier cl
+
+        Parameters
+        ----------
+        self: Classifier
+            Classifier to copy from
+        """
+        self.num = other.num
+        self.exp = other.exp
+        self.tga = other.tga
+        self.talp = other.talp
+
+
     @property
     def fitness(self) -> float:
         """

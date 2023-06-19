@@ -52,28 +52,6 @@ class BEACSClassifiersList(BaseClassifiersList):
         max_fitness_r = max((cl.q*cl.r for cl in matching_with_change_anticipated), default=0.)
         max_fitness_r_bis = max((cl.q*cl.r_bis for cl in matching_with_change_anticipated), default=0.)
         return BEACSClassifiersList(*matching), max_fitness_r, max_fitness_r_bis
-    
-
-    def form_action_set(
-            self,
-            action_classifier: BaseClassifier
-        ) -> BEACSClassifiersList:
-        """
-        Builds the BEACSClassifiersList from the match set with all classifiers whose actions
-        match the ones of the selected classifier.
-
-        Parameters
-        ----------
-        action_classifier: Classifier
-            Classifier choosen by policies
-
-        Returns
-        ----------
-        BEACSClassifiersList
-            The action set
-        """
-        matching = [cl for cl in self if cl.behavioral_sequence == action_classifier.behavioral_sequence and cl.action == action_classifier.action]
-        return BEACSClassifiersList(*matching)
 
 
     @staticmethod

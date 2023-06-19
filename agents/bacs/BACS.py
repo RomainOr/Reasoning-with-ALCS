@@ -26,18 +26,6 @@ class BACS(Agent):
         )
 
 
-    def duplicate_population(self)-> BACSClassifiersList:
-        duplicate_population = []
-        for cl in self.population:
-            cl_copy = cl.copy(0)
-            cl_copy.num = cl.num
-            cl_copy.exp = cl.exp
-            cl_copy.tga = cl.tga
-            cl_copy.talp = cl.talp
-            duplicate_population.append(cl_copy)
-        return BACSClassifiersList(*duplicate_population)
-
-
     def _run_trial_explore(
             self,
             env,

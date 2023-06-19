@@ -29,56 +29,6 @@ class PEPACSClassifiersList(BaseClassifiersList):
         super().__init__((PEPACSClassifier, ), *args)
 
 
-    def form_match_set(
-            self,
-            situation: Perception
-        ) -> PEPACSClassifiersList:
-        """
-        Builds the PEPACSClassifiersList from the whole population with all classifiers whose condition
-        matches the current situation.
-
-        Parameters
-        ----------
-        situation: Perception
-            Current perception
-
-        Returns
-        ----------
-        PEPACSClassifiersList
-            The whole set of matching classifiers
-        """
-        best_fitness = 0.0
-        matching = []
-        for cl in self:
-            if cl.does_match(situation):
-                matching.append(cl)
-                if cl.does_anticipate_change() and cl.fitness > best_fitness:
-                    best_fitness = cl.fitness
-        return PEPACSClassifiersList(*matching), best_fitness
-
-
-    def form_action_set(
-            self,
-            action_classifier: BaseClassifier
-        ):
-        """
-        Builds the ACS2ClassifiersList from the match set with all classifiers whose actions
-        match the ones of the selected classifier.
-
-        Parameters
-        ----------
-        action_classifier: Classifier
-            Classifier choosen by policies
-
-        Returns
-        ----------
-        ACS2ClassifiersList
-            The action set
-        """
-        matching = [cl for cl in self if cl.action == action_classifier.action]
-        return PEPACSClassifiersList(*matching)
-
-
     @staticmethod
     def apply_alp(
             population: PEPACSClassifiersList,

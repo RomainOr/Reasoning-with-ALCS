@@ -30,19 +30,6 @@ class BEACS(Agent):
         return self.pai_states_memory
 
 
-    def duplicate_population(self)-> BEACSClassifiersList:
-        duplicate_population = []
-        for cl in self.population:
-            cl_copy = cl.copy(time=0)
-            cl_copy.num = cl.num
-            cl_copy.exp = cl.exp
-            cl_copy.tga = cl.tga
-            cl_copy.tbseq = cl.tbseq
-            cl_copy.talp = cl.talp
-            duplicate_population.append(cl_copy)
-        return BEACSClassifiersList(*duplicate_population)
-
-
     def _run_trial_explore(
             self,
             env,

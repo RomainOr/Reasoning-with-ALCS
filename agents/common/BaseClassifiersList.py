@@ -41,7 +41,14 @@ class BaseClassifiersList(TypedList):
         ----------
         The whole set of matching classifiers
         """
-        raise NotImplementedError("Subclasses should implement this method.")
+        best_fitness = 0.0
+        matching = []
+        for cl in self:
+            if cl.does_match(situation):
+                matching.append(cl)
+                if cl.does_anticipate_change() and cl.fitness > best_fitness:
+                    best_fitness = cl.fitness
+        return type(self)(*matching), best_fitness
 
 
 
@@ -62,7 +69,8 @@ class BaseClassifiersList(TypedList):
         ----------
         The action set
         """
-        raise NotImplementedError("Subclasses should implement this method.")
+        matching = [cl for cl in self if cl.behavioral_sequence == action_classifier.behavioral_sequence and cl.action == action_classifier.action]
+        return type(self)(*matching)
     
 
     def find_best_classifier(

@@ -23,18 +23,6 @@ class PEPACS(Agent):
             population=population or PEPACSClassifiersList(),
             seed=cfg.seed
         )
-
-
-    def duplicate_population(self)-> PEPACSClassifiersList:
-        duplicate_population = []
-        for cl in self.population:
-            cl_copy = cl.copy(time=0, Perception=None)
-            cl_copy.num = cl.num
-            cl_copy.exp = cl.exp
-            cl_copy.tga = cl.tga
-            cl_copy.talp = cl.talp
-            duplicate_population.append(cl_copy)
-        return PEPACSClassifiersList(*duplicate_population)
     
     
     def _run_trial_explore(

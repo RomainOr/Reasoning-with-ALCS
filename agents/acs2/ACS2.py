@@ -25,19 +25,6 @@ class ACS2(Agent):
         )
 
 
-    def duplicate_population(self)-> ACS2ClassifiersList:
-        duplicate_population = []
-        for cl in self.population:
-            cl_copy = cl.copy(0)
-            cl_copy.num = cl.num
-            cl_copy.exp = cl.exp
-            cl_copy.tga = cl.tga
-            cl_copy.tbseq = cl.tbseq
-            cl_copy.talp = cl.talp
-            duplicate_population.append(cl_copy)
-        return ACS2ClassifiersList(*duplicate_population)
-
-
     def _run_trial_explore(
             self,
             env,
