@@ -19,7 +19,7 @@ class RandomNumberGenerator(Singleton):
     rng = np.random.default_rng()
 
     @classmethod
-    def seed(cls, seed):
+    def seed(cls, seed) -> None:
         cls.rng = np.random.default_rng(seed)
 
     @classmethod

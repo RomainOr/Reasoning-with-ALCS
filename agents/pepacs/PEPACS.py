@@ -13,6 +13,9 @@ from agents.pepacs.PEPACSClassifiersList import PEPACSClassifiersList
 
 
 class PEPACS(Agent):
+    """
+    Represents a PEPACS agent
+    """
 
     def __init__(self,
             cfg: PEPACSConfiguration,

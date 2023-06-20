@@ -71,15 +71,12 @@ class PEPACSClassifier(BaseClassifier):
 
         Parameters
         ----------
-        self: PEPACSClassifier
-            classifier to copy from
-        time: int
-            time of creation / current epoch
+            time: int
+            perception: Perception = None
 
         Returns
         -------
         PEPACSClassifier
-            copied classifier
         """
         new_cls = PEPACSClassifier(
             condition=Condition(self.condition, self.cfg.classifier_wildcard),
@@ -107,7 +104,6 @@ class PEPACSClassifier(BaseClassifier):
         Returns
         -------
         bool
-            True if the classifier is enhanced
         """
         return self.effect.is_enhanced()
 
@@ -123,8 +119,8 @@ class PEPACSClassifier(BaseClassifier):
 
         Parameters
         ----------
-        previous_situation: Perception
-        situation: Perception
+            previous_situation: Perception
+            situation: Perception
         """
         for idx, _ in enumerate(situation):
             if self.effect[idx] != self.cfg.classifier_wildcard:
@@ -140,32 +136,25 @@ class PEPACSClassifier(BaseClassifier):
                 self.condition[idx] = previous_situation[idx]
 
 
-    @property
-    def specified_unchanging_attributes(self) -> List[int]:
+    def merge_with(
+            self,
+            other_classifier: PEPACSClassifier,
+            perception: Perception,
+            time: int
+        ) -> PEPACSClassifier:
         """
-        Determines the number of specified unchanging attributes in
-        the classifier. An unchanging attribute is one that is anticipated
-        not to change in the effect part.
+        Merges two classifiers in an enhanced one.
+
+        Parameters
+        ----------
+            other_classifier: PEPACSClassifier
+            perception: Perception
+            time: int
 
         Returns
         -------
-        List[int]
-            list specified unchanging attributes indices
+        PEPACSClassifier
         """
-        indices = []
-        for idx, (cpi, epi) in enumerate(zip(self.condition, self.effect)):
-            if isinstance(epi, ProbabilityEnhancedAttribute):
-                if cpi != self.cfg.classifier_wildcard and \
-                        epi.does_contain(cpi):
-                    indices.append(idx)
-            else:
-                if cpi != self.cfg.classifier_wildcard and \
-                        epi == self.cfg.classifier_wildcard:
-                    indices.append(idx)
-        return indices
-
-
-    def merge_with(self, other_classifier, perception, time):
         result = PEPACSClassifier(
             action = self.action,
             quality = max((self.q + other_classifier.q) / 2.0, 0.5),

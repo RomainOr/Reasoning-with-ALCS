@@ -4,6 +4,11 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from agents.beacs.BEACSClassifiersList import BEACSClassifiersList
+
 import agents.common.mechanisms.aliasing_detection as aliasing_detection
 import agents.common.mechanisms.alp as alp_common
 from agents.common.Perception import Perception
@@ -18,14 +23,21 @@ def expected_case(
         cl: BEACSClassifier,
         p0: Perception,
         time: int
-    ):
+    ) -> (tuple[bool, None] | tuple[bool, BEACSClassifier]):
     """
     Controls the expected case of a classifier with the help of 
     Specification of Unchanging Components.
 
+    Parameters
+    ----------
+        cl: BEACSClassifier
+        p0: Perception
+        time: int
+
     Returns
     ----------
-    Bool related to aliasing, New classifier or None
+    tuple
+        Bool related to aliasing, New classifier or None
     """
     is_aliasing_detected = False
 
@@ -48,13 +60,20 @@ def expected_case(
 
     
 def apply_enhanced_effect_part_check(
-        action_set,
-        new_list,
+        action_set: BEACSClassifiersList,
+        new_list: BEACSClassifiersList,
         p0: Perception,
         time: int
     ) -> None:
     """
     Used to build enhanced classifiers
+
+    Parameters
+    ----------
+        action_set: BEACSClassifiersList
+        new_list: BEACSClassifiersList
+        p0: Perception
+        time: int
     """
     candidates = [cl for cl in action_set if cl.ee]
     if len(candidates) < 2:
@@ -72,22 +91,38 @@ def apply_enhanced_effect_part_check(
 
 
 def apply_perceptual_aliasing_issue_management(
-        population,
-        t_2_match_set,
-        t_1_match_set,
-        match_set,
-        action_set,
+        population: BEACSClassifiersList,
+        t_2_match_set: BEACSClassifiersList,
+        t_1_match_set: BEACSClassifiersList,
+        match_set: BEACSClassifiersList,
+        action_set: BEACSClassifiersList,
         penultimate_classifier: BEACSClassifier,
-        potential_cls_for_pai,
-        new_list,
+        potential_cls_for_pai: list(BEACSClassifier),
+        new_list: list(BEACSClassifier),
         p0: Perception,
         p1: Perception,
         time: int,
-        pai_states_memory,
+        pai_states_memory: list(Perception),
         cfg: BEACSConfiguration
     ) -> None:
     """
-    Used to manage the detection of PAI and to manage the behavioral classifiers
+    Used to manage the detection of PAI and the behavioral classifiers
+
+    Parameters
+    ----------
+        population: BEACSClassifiersList
+        t_2_match_set: BEACSClassifiersList
+        t_1_match_set: BEACSClassifiersList
+        match_set: BEACSClassifiersList
+        action_set: BEACSClassifiersList
+        penultimate_classifier: BEACSClassifier
+        potential_cls_for_pai: list(BEACSClassifier)
+        new_list: list(BEACSClassifier)
+        p0: Perception
+        p1: Perception
+        time: int
+        pai_states_memory: list(Perception)
+        cfg: BEACSConfiguration
     """
     # First, try to detect if it is time to detect a pai state - no need to compute this every time
     knowledge_from_match_set = [cl for cl in t_1_match_set if

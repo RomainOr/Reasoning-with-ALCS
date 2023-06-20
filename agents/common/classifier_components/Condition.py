@@ -27,7 +27,6 @@ class Condition(AbstractPerception):
         Returns
         -------
         int
-            Number of not generic (wildcards) attributes
         """
         return sum(1 for attr in self if attr != self.wildcard)
 
@@ -40,7 +39,6 @@ class Condition(AbstractPerception):
         Returns
         -------
         int
-            Number of generic (wildcards) attributes
         """
         return sum(1 for attr in self if attr == self.wildcard)
 
@@ -54,8 +52,7 @@ class Condition(AbstractPerception):
 
         Parameters
         ----------
-        other: Condition
-            Condition object
+            other: Condition
         """
         for idx, new_el in enumerate(other):
             if new_el != self.wildcard:
@@ -65,14 +62,13 @@ class Condition(AbstractPerception):
     def generalize(
             self,
             position: int
-        ):
+        ) -> None:
         """
         Generalizes the condition at the given position.
 
         Parameters
         ----------
-        position: int
-            Index to update
+            position: int
         """
         self[position] = self.wildcard
 
@@ -86,9 +82,7 @@ class Condition(AbstractPerception):
 
         Parameters
         ----------
-        func: Callable
-            Function for choosing which ID to generalize from the list of
-            available ones
+            func: Callable
         """
         specific_ids = [i for i, c in enumerate(self) if c != self.wildcard]
         if len(specific_ids) > 0:
@@ -107,12 +101,10 @@ class Condition(AbstractPerception):
         Parameters
         ----------
         other: Union[Perception, Condition]
-            Perception or condition object
 
         Returns
         -------
         bool
-            True if condition match given list, False otherwise
         """
         for ci, oi in zip(self, other):
             if ci != self.wildcard and oi != self.wildcard and ci != oi:
@@ -129,13 +121,11 @@ class Condition(AbstractPerception):
 
         Parameters
         ----------
-        other: Condition
-            Other condition
+            other: Condition
 
         Returns
         -------
         bool
-            True if self subsumes other
         """
         for ci, oi in zip(self, other):
             if ci != self.wildcard and oi != self.wildcard and ci != oi:

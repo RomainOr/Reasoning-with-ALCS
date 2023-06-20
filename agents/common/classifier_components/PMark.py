@@ -69,7 +69,6 @@ class PMark(TypedList):
         Returns
         ----------
         bool
-            True if they correspond
         """
         if not self.one_situation_in_mark():
             return False
@@ -136,7 +135,7 @@ class PMark(TypedList):
         return True
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         def compact_set_str(s):
             if len(s) == 0:
                 return self.cfg.classifier_wildcard

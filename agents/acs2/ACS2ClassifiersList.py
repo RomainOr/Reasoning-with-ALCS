@@ -37,24 +37,19 @@ class ACS2ClassifiersList(BaseClassifiersList):
             cfg: BaseConfiguration
         ) -> None:
         """
-        The Anticipatory Learning Process. Handles all updates by the ALP,
-        insertion of new classifiers in pop and possibly matchSet, and
-        deletion of inadequate classifiers in pop and possibly matchSet.
+        The Anticipatory Learning Process. Handles insertion, update and deletion
+        of new classifiers in population and possibly other sets.
 
         Parameters
         ----------
-        population
-        t_2_match_set
-        t_1_match_set
-        match_set
-        action_set
-        penultimate_classifier
-        p0: Perception
-        action: int
-        p1: Perception
-        time: int
-        pai_states_memory
-        cfg: BaseConfiguration
+            population: ACS2ClassifiersList
+            match_set: ACS2ClassifiersList
+            action_set: ACS2ClassifiersList
+            p0: Perception
+            action: int
+            p1: Perception
+            time: int
+            cfg: BaseConfiguration
         """
         new_list = ACS2ClassifiersList()
         new_cl: Optional[BaseClassifier] = None
@@ -105,6 +100,16 @@ class ACS2ClassifiersList(BaseClassifiersList):
             max_fitness: float,
             cfg: BaseConfiguration
         ) -> None:
+        """
+        The Reinforcement Learning Process. Handles all reward updates.
+
+        Parameters
+        ----------
+            action_set: ACS2ClassifiersList
+            reward: int
+            max_fitness: float
+            cfg: BaseConfiguration
+        """
         for cl in action_set:
             update_classifier_q_learning(cl, reward, max_fitness, cfg.beta_rl, cfg.gamma)
 
@@ -119,6 +124,20 @@ class ACS2ClassifiersList(BaseClassifiersList):
             time: int,
             cfg: BaseConfiguration
         ) -> None:
+        """
+        The Genetic Generalization mechanism. Handles insertion, update and deletion
+        of new classifiers in population and possibly other sets.
+
+        Parameters
+        ----------
+            population: ACS2ClassifiersList
+            match_set: ACS2ClassifiersList
+            action_set: ACS2ClassifiersList
+            p0: Perception
+            p1: Perception
+            time: int
+            cfg: BaseConfiguration
+        """
         ga.apply(
             ACS2ClassifiersList,
             ga.mutation,

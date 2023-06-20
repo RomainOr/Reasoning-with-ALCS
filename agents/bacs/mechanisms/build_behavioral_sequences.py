@@ -8,28 +8,26 @@ from typing import Optional
 
 from agents.common.Perception import Perception
 from agents.common.classifier_components.BaseClassifier import BaseClassifier
+from agents.common.classifier_components.Condition import Condition
+from agents.common.classifier_components.Effect import Effect
 
 
 def _updated_passthrough(
-        child_effect, 
-        penultimate_effect, 
-        last_effect, 
-        perception,
-        child_condition
-    ):
+        child_effect: Effect, 
+        penultimate_effect: Effect, 
+        last_effect: Effect,
+        child_condition: Condition
+    ) -> None:
     """
     Passthrough operator defined by Stolzmann that we have refined.
     It is only used on the effect component of classifiers.
 
     Parameters
     ----------
-    result
-        The effect component to compute
-    penultimate_classifier
-    last_effect
-    perception
-    condition
-        Condition component to remove unnecessary specification of effect attributes
+        child_effect: Effect
+        penultimate_effect: Effect
+        last_effect: Effect
+        child_condition: Condition
     """
     for i in range(len(child_effect)):
         if last_effect[i] == child_effect.wildcard:
@@ -45,7 +43,6 @@ def _updated_passthrough(
 def create_behavioral_classifier(
         last_activated_classifier: BaseClassifier,
         cl: BaseClassifier,
-        p1: Perception,
         time: int
     ) -> Optional[BaseClassifier]:
     """
@@ -53,9 +50,9 @@ def create_behavioral_classifier(
 
     Parameters
     ----------
-    last_activated_classifier
-    cl
-    p1
+        last_activated_classifier: BaseClassifier
+        cl: BaseClassifier
+        time: int
 
     Returns
     ----------
@@ -88,6 +85,6 @@ def create_behavioral_classifier(
             # Thus, we garantee the creation of a classifier that can be used within the environment.
             child.condition = last_activated_classifier.condition
             # Passthrough operation on child effect
-            _updated_passthrough(child.effect, last_activated_classifier.effect, cl.effect, p1, child.condition)
+            _updated_passthrough(child.effect, last_activated_classifier.effect, cl.effect, child.condition)
             return child
     return None

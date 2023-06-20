@@ -63,7 +63,7 @@ class BaseClassifier:
         self.ee = False
 
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if self.condition == other.condition and \
                 self.action == other.action and \
                 self.behavioral_sequence == other.behavioral_sequence and \
@@ -72,15 +72,15 @@ class BaseClassifier:
         return False
 
 
-    def __ne__(self, other):
+    def __ne__(self, other) -> bool:
         return not self.__eq__(other)
 
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((str(self.condition), self.action, str(self.behavioral_sequence), str(self.effect)))
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"C:{self.condition} A:{self.action} {str(self.behavioral_sequence)} E:{str(self.effect)}\n" \
             f"q: {self.q:<6.4} r: {self.r:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4}\n" \
             f"exp: {self.exp:<5} num: {self.num} ee: {self.ee}\n" \
@@ -99,15 +99,11 @@ class BaseClassifier:
 
         Parameters
         ----------
-        self: Classifier
-            Classifier to copy from
-        time: int
-            Current epoch
+            time: int
 
         Returns
         -------
         Classifier
-            New copied classifier - Hard copy
         """
         new_cls = BaseClassifier(
             condition=Condition(self.condition, self.cfg.classifier_wildcard),
@@ -128,14 +124,13 @@ class BaseClassifier:
     def copy_time_num_exp_from_other_cl(
             self,
             other
-        ):
+        ) -> None:
         """
         Copies internal parameters from other classifier cl
 
         Parameters
         ----------
-        self: Classifier
-            Classifier to copy from
+            self: Classifier
         """
         self.num = other.num
         self.exp = other.exp
@@ -151,7 +146,6 @@ class BaseClassifier:
         Returns
         -------
         Float
-            Fitness value
         """
         return self.q * self.r
 
@@ -176,7 +170,6 @@ class BaseClassifier:
         Returns
         -------
         bool
-            True if the classifier is enough experienced
         """
         return self.exp > self.cfg.theta_exp
 
@@ -188,7 +181,6 @@ class BaseClassifier:
         Returns
         -------
         bool
-            True if the classifier is inadequate
         """
         return self.q < self.cfg.theta_i
 
@@ -200,7 +192,6 @@ class BaseClassifier:
         Returns
         -------
         bool
-            True if the classifier is reliable
         """
         return self.q > self.cfg.theta_r
 
@@ -212,7 +203,6 @@ class BaseClassifier:
         Returns
         -------
         bool
-            True if the classifier is marked
         """
         return self.mark.is_marked()
 
@@ -227,30 +217,29 @@ class BaseClassifier:
 
         Parameters
         ----------
-        other: Classifier
-            Other classifier to compare
+            other: BaseClassifier
 
         Returns
         -------
         bool
-            True if classifier is more general than other
         """
         return self.condition.specificity <= other.condition.specificity
 
 
-    def is_hard_subsumer_criteria_satisfied(self, other) -> bool:
+    def is_hard_subsumer_criteria_satisfied(
+            self,
+            other: BaseClassifier
+        ) -> bool:
         """
         Determines whether the classifier satisfies the hard subsumer criteria.
 
         Parameters
         ----------
-        other: Classifier
-            Other classifier to compare
+            other: BaseClassifier
 
         Returns
         -------
         bool
-            True if the classifier satisfies the subsumer criteria.
         """
         if self.is_reliable() and self.is_experienced():
             if not self.is_marked():
@@ -260,19 +249,20 @@ class BaseClassifier:
         return False
 
 
-    def is_soft_subsumer_criteria_satisfied(self, other) -> bool:
+    def is_soft_subsumer_criteria_satisfied(
+            self,
+            other: BaseClassifier
+        ) -> bool:
         """
         Determines whether the classifier satisfies the soft subsumer criteria.
 
         Parameters
         ----------
-        other: Classifier
-            Other classifier to compare
+            other: BaseClassifier
 
         Returns
         -------
         bool
-            True if the classifier satisfies the subsumer criteria.
         """
         if self.is_reliable() or (self.q > other.q):
             if not self.is_marked():
@@ -293,15 +283,12 @@ class BaseClassifier:
 
         Parameters
         ----------
-        previous_situation: Perception
-            Previous perception
-        situation: Perception
-            Current perception
+            previous_situation: Perception
+            situation: Perception
 
         Returns
         -------
         bool
-            True if specializable
         """
         return self.effect.is_specializable(previous_situation, situation)
 
@@ -313,7 +300,6 @@ class BaseClassifier:
         Returns
         -------
         bool
-            True if the effect part contains any specified attributes
         """
         return self.effect.specify_change
 
@@ -326,8 +312,8 @@ class BaseClassifier:
         Returns if the classifier matches the situation.
 
         Parameters
-        -------
-        situation
+        ----------
+            other: Union[Perception, Condition]
 
         Returns
         -------
@@ -351,15 +337,12 @@ class BaseClassifier:
 
         Parameters
         ----------
-        previous_situation: Perception
-            Perception related to a state preceding the action
-        situation: Perception
-            Perception related to a state following the action
+            previous_situation: Perception
+            situation: Perception
 
         Returns
         -------
         bool
-            True if classifier's effect pat anticipates correctly
         """
         return self.effect.does_anticipate_correctly(previous_situation, situation)
 
@@ -378,17 +361,13 @@ class BaseClassifier:
 
         Parameters
         ----------
-        p0: Perception
-            Previous situation
-        action: int
-            Action
-        p1: Perception
-            Anticipated situation
+            p0: Perception
+            action: int
+            p1: Perception
 
         Returns
         -------
         bool
-            True if classifier makes successful predictions
         """
         if self.does_match(p0):
             if self.action == action:
@@ -397,21 +376,21 @@ class BaseClassifier:
         return False
 
 
-    def increase_experience(self):
+    def increase_experience(self) -> None:
         """
         Increases the experience of a classifier.
         """
         self.exp += 1
 
 
-    def increase_quality(self):
+    def increase_quality(self) -> None:
         """
         Increases the quality of a classifier.
         """
         self.q += self.cfg.beta_alp * (1 - self.q)
 
 
-    def decrease_quality(self):
+    def decrease_quality(self) -> None:
         """
         Decreases the quality of a classifier.
         """
@@ -427,8 +406,7 @@ class BaseClassifier:
 
         Parameters
         ----------
-        perception: Perception
-            Current situation
+            perception: Perception
         """
         self.ee = self.mark.set_mark(perception, self.ee)
 
@@ -442,8 +420,7 @@ class BaseClassifier:
 
         Parameters
         ----------
-        time: int
-            Current step
+            time: int
         """
         if self.exp < 1. / self.cfg.beta_alp:
             self.tav += (time - self.talp - self.tav) / self.exp
@@ -464,10 +441,8 @@ class BaseClassifier:
 
         Parameters
         ----------
-        previous_situation: Perception
-            Perception related to a state preceding the action
-        situation: Perception
-            Perception related to a state following the action
+            previous_situation: Perception
+            situation: Perception
         """
         for idx in range(self.cfg.classifier_length):
             if previous_situation[idx] != situation[idx] and self.effect[idx] == self.cfg.classifier_wildcard:
@@ -475,37 +450,59 @@ class BaseClassifier:
                 self.condition[idx] = previous_situation[idx]
 
 
-    def average_fitnesses_from_other_cl(self, other):
+    def average_fitnesses_from_other_cl(
+            self, 
+            other: BaseClassifier
+        ) -> None:
+        """
+        Average fitnesses from other BaseClassifier cl (q, r).
+        Carefull, both fitnesses are modified.
+
+        Parameters
+        ----------
+            other: BaseClassifier
+        """
         self.q = other.q = (self.q + other.q) / 2.0
         self.r = other.r = (self.r + other.r) / 2.0
 
 
-    def weighted_average_rewards_from_other_cl(self, other):
+    def weighted_average_rewards_from_other_cl(
+            self, 
+            other: BaseClassifier
+        ) -> None:
+        """
+        Average fitnesses depending on experience of both classifiers (q, r).
+        Carefull, both fitnesses are modified.
+
+        Parameters
+        ----------
+            other: BaseClassifier
+        """
         self.r = (self.exp * self.r + other.exp * other.r) / (self.exp + other.exp)
 
 
-    def generalize_specific_attribute_randomly(self):
+    def generalize_specific_attribute_randomly(self) -> None:
         """
         Generalizes one randomly attribute in the condition.
         """
         self.condition.generalize_specific_attribute_randomly()
 
 
-    def subsumes(self, other) -> bool:
+    def subsumes(
+            self,
+            other: BaseClassifier
+        ) -> bool:
 
         """
         Check if one classifier can subsume another one.
-        Can be used anywhere and anytime...
 
         Parameters
         ----------
-        self: Classifier
-        other: Classifier
+            other: BaseClassifier
 
         Returns
         -------
         bool
-            True if self sulbsumes other
         """
         if self.condition.subsumes(other.condition) and \
                 self.action == other.action and \

@@ -4,6 +4,11 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
+from __future__ import annotations
+from typing import TYPE_CHECKING, Literal
+if TYPE_CHECKING:
+    from agents.beacs.BEACSClassifiersList import BEACSClassifiersList
+
 from agents.common import Perception
 from agents.common.classifier_components.Effect import Effect
 
@@ -11,28 +16,25 @@ from agents.beacs.BEACSConfiguration import BEACSConfiguration
 
 
 def should_pai_detection_apply(
-        match_set,
+        match_set: BEACSClassifiersList,
         time: int, 
         theta_bseq: int
     ) -> bool:
     """
     Checks the average last PAI detection to determine if a new detection is needed.
     If no classifier is in the current set, no detection is applied!
+    match_set is the set of classifiers having no mark or a mark that corresponds to p0
+    and whose condition matches p0, without the behavioral ones.
 
     Parameters
     ----------
-    match_set
-        Population of classifiers having no mark or a mark that corresponds to p0
-        and whose condition matches p0, without the behavioral ones.
-    time: int
-        Current epoch
-    theta_bseq: int
-        The pai detection threshold (θga ∈ N) controls the PAI detection frequency.
+        match_set: BEACSClassifiersList
+        time: int
+        theta_bseq: int
 
     Returns
     -------
     bool
-        True if pai detection should be applied, False otherwise
     """
     if match_set is None:
         return False
@@ -50,46 +52,43 @@ def should_pai_detection_apply(
 
 
 def set_pai_detection_timestamps(
-        match_set, 
+        match_set: BEACSClassifiersList, 
         epoch: int
     ) -> None:
     """
     Sets the pai detection time stamps to the current time to control
     the detection frequency.
     Each classifier `tbseq` property in population is updated with current
-    epoch
+    epoch.
+    match_set is the set of classifiers having no mark or a mark that corresponds to p0
+    and whose condition matches p0, without the behavioral ones.
 
     Parameters
     ----------
-    match_set
-        Population of classifiers having no mark or a mark that corresponds to p0
-        and whose condition matches p0, without the behavioral ones.
-    epoch: int
-        Current epoch
+        match_set: BEACSClassifiersList
+        epoch: int
     """
     for cl in match_set:
         cl.tbseq = epoch
 
 
 def enough_information_to_try_PAI_detection(
-        match_set,
+        match_set: BEACSClassifiersList,
         cfg: BEACSConfiguration
-    ):
+    ) -> (tuple[Literal[False], None] | tuple[Literal[True], dict]):
     """
-    Check if we can collect enough information from the match set to try to detect if the state related to the match set is a PAI state
+    Check if we can collect enough information from the match set to try to detect if the state related to the match set is a PAI state.
+    match_set is the set of classifiers having no mark or a mark that corresponds to p0
+    and whose condition matches p0, without the behavioral ones.
 
     Parameters
     ----------
-    match_set
-        Population of classifiers having no mark or a mark that corresponds to p0
-        and whose condition matches p0, without the behavioral ones.
-    cfg: BEACSConfiguration
-        BEACSConfiguration used in the ALCS
+        match_set: BEACSClassifiersList
+        cfg: BEACSConfiguration
 
     Returns
     -------
     bool, dict
-        True if we can try to detect if the aliased state is a PAI one and the related classifiers in a dict
     """
 
     nbr_of_actions = cfg.number_of_possible_actions
@@ -119,17 +118,13 @@ def is_perceptual_aliasing_state(
 
     Parameters
     ----------
-    classifiers: dict
-        Classifiers to do the detection that are the most experienced and reliable for each action
-    p0: Perception
-        Perception of the state in the previous step
-    cfg: BEACSConfiguration
-        BEACSConfiguration used in the ALCS
+        most_experienced_classifiers: dict
+        p0: Perception
+        cfg: BEACSConfiguration
 
     Returns
     -------
     bool
-        True if the aliased state is associated to the Perceptual Aliasing Issue
     """
 
     def _build_anticipation(
@@ -141,15 +136,12 @@ def is_perceptual_aliasing_state(
 
         Parameters
         ----------
-        p0: Perception
-            Perception of the state in the previous step
-        effect: Effect
-            Anticipation associated to a classifier
+            p0: Perception
+            effect: Effect
 
         Returns
         -------
         tuple
-            Complete expected anticipation as a tuple
         """
         anticipation = list(p0)
         for idx, ei in enumerate(effect):

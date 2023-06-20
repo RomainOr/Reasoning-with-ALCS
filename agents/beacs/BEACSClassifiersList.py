@@ -34,18 +34,16 @@ class BEACSClassifiersList(BaseClassifiersList):
             situation: Perception
         ) -> BEACSClassifiersList:
         """
-        Builds the BEACSClassifiersList from the whole population with all classifiers whose condition
+        Builds the match set from the whole population with all classifiers whose condition
         matches the current situation.
 
         Parameters
         ----------
-        situation: Perception
-            Current perception
+            situation: Perception 
 
         Returns
         ----------
         BEACSClassifiersList
-            The whole set of matching classifiers
         """
         matching = [cl for cl in self if cl.does_match(situation)]
         matching_with_change_anticipated = [cl for cl in matching if cl.does_anticipate_change()]
@@ -66,28 +64,27 @@ class BEACSClassifiersList(BaseClassifiersList):
             action: int,
             p1: Perception,
             time: int,
-            pai_states_memory,
+            pai_states_memory: list(Perception),
             cfg: BEACSConfiguration
         ) -> None:
         """
-        The Anticipatory Learning Process. Handles all updates by the ALP,
-        insertion of new classifiers in pop and possibly matchSet, and
-        deletion of inadequate classifiers in pop and possibly matchSet.
+        The Anticipatory Learning Process. Handles insertion, update and deletion
+        of new classifiers in population and possibly other sets.
 
         Parameters
         ----------
-        population
-        t_2_match_set
-        t_1_match_set
-        match_set
-        action_set
-        penultimate_classifier
-        p0: Perception
-        action: int
-        p1: Perception
-        time: int
-        pai_states_memory
-        cfg: BEACSConfiguration
+            population: BEACSClassifiersList
+            t_2_match_set: BEACSClassifiersList
+            t_1_match_set: BEACSClassifiersList
+            match_set: BEACSClassifiersList
+            action_set: BEACSClassifiersList
+            penultimate_classifier: BEACSClassifier
+            p0: Perception
+            action: int
+            p1: Perception
+            time: int
+            pai_states_memory: list(Perception)
+            cfg: BEACSConfiguration
         """
         new_list = BEACSClassifiersList()
         new_cl: Optional[BEACSClassifier] = None
@@ -155,6 +152,17 @@ class BEACSClassifiersList(BaseClassifiersList):
             max_fitness_rb: float,
             cfg: BEACSConfiguration
         ) -> None:
+        """
+        The Reinforcement Learning Process. Handles all reward updates.
+
+        Parameters
+        ----------
+            action_set: BEACSClassifiersList
+            reward: int
+            max_fitness_ra: float
+            max_fitness_rb: float
+            cfg: BEACSConfiguration
+        """
         for cl in action_set:
             update_classifier_double_q_learning(cl, reward, max_fitness_ra, max_fitness_rb, cfg.beta_rl, cfg.gamma)
 
@@ -169,6 +177,20 @@ class BEACSClassifiersList(BaseClassifiersList):
             time: int,
             cfg: BEACSConfiguration
         ) -> None:
+        """
+        The Genetic Generalization mechanism. Handles insertion, update and deletion
+        of new classifiers in population and possibly other sets.
+
+        Parameters
+        ----------
+            population: BEACSClassifiersList
+            match_set: BEACSClassifiersList
+            action_set: BEACSClassifiersList
+            p0: Perception
+            p1: Perception
+            time: int
+            cfg: BEACSConfiguration
+        """
         ga.apply(
             BEACSClassifiersList,
             mutation_enhanced_trace,

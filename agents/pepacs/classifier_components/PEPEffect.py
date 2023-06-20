@@ -7,7 +7,6 @@
 from __future__ import annotations
 
 from agents.common.Perception import Perception
-from agents.common.classifier_components.AbstractPerception import AbstractPerception
 from agents.common.classifier_components.Effect import Effect
 
 from agents.pepacs.classifier_components.ProbabilityEnhancedAttribute import ProbabilityEnhancedAttribute
@@ -19,14 +18,18 @@ class PEPEffect(Effect):
     to be caused by the specified action.
     """
 
-    def __init__(self, observation, wildcard='#', oktypes=(str, dict)):
+    def __init__(
+            self,
+            observation,
+            wildcard='#'
+        ) -> None:
         # Convert dict to ProbabilityEnhancedAttribute
         if not all( isinstance(attr, ProbabilityEnhancedAttribute) for attr in observation):
             observation = (ProbabilityEnhancedAttribute(attr)
                            if isinstance(attr, dict)
                            else attr
                            for attr in observation)
-        super().__init__(observation, wildcard, oktypes)
+        super().__init__(observation, wildcard)
 
 
     @property
@@ -38,7 +41,6 @@ class PEPEffect(Effect):
         Returns
         -------
         bool
-            True if the effect part predicts a change, False otherwise
         """
         if self.is_enhanced():
             return True
@@ -46,27 +48,46 @@ class PEPEffect(Effect):
             return super().specify_change
 
 
-    def is_specializable(self, p0: Perception, p1: Perception) -> bool:
+    def is_specializable(
+            self,
+            p0: Perception,
+            p1: Perception
+        ) -> bool:
         """
         Determines if the effect part can be modified to anticipate
         changes from `p0` to `p1` correctly by only specializing attributes.
+
         Parameters
         ----------
-        p0: Perception
-            previous perception
-        p1: Perception
-            current perception
+            p0: Perception
+            p1: Perception
+
         Returns
         -------
         bool
-            True if specializable, false otherwise
         """
         if self.is_enhanced():
             return True
         return super().is_specializable(p0, p1)
 
 
-    def does_anticipate_correctly(self, p0: Perception, p1: Perception) -> bool:
+    def does_anticipate_correctly(
+            self,
+            p0: Perception,
+            p1: Perception
+        ) -> bool:
+        """
+        Determines if the effect list anticipates correctly changes from `p0` to `p1`.
+
+        Parameters
+        ----------
+            p0: Perception
+            p1: Perception
+
+        Returns
+        -------
+        bool
+        """
         def item_anticipate_change(item, p0_item, p1_item, wildcard) -> bool:
             if not isinstance(item, ProbabilityEnhancedAttribute):
                 if item == wildcard:
@@ -82,7 +103,21 @@ class PEPEffect(Effect):
         return all(item_anticipate_change(eitem, p0[idx], p1[idx], self.wildcard) for idx, eitem in enumerate(self))
 
 
-    def subsumes(self, other: Effect) -> bool:
+    def subsumes(
+            self, 
+            other: Effect
+        ) -> bool:
+        """
+        Determines if the effect subsumes another effect.
+
+        Parameters
+        ----------
+            other: Effect
+
+        Returns
+        -------
+        bool
+        """
         for si, oi in zip(self, other):
             if isinstance(si, ProbabilityEnhancedAttribute):
                 if isinstance(oi, ProbabilityEnhancedAttribute):
@@ -99,24 +134,20 @@ class PEPEffect(Effect):
     
     def getEffectAttribute(
             self,
-            perception,
+            perception: Perception,
             index: int
-        ) -> tuple:
+        ) -> dict:
         """
-        Computes from raw observations the probability to get each effect attribute
-        for a position in the anticipation.
+        Get the probabilities for each effect attribute.
 
         Parameters
         ----------
-        perception
-            Related anticipation
-        index: int
-            Position in the anticipation
+            perception: Perception,
+            index: int
 
         Returns
         -------
-        tuple
-            The respective probabilities
+        dict
         """
         if isinstance(self[index], ProbabilityEnhancedAttribute):
             return {int(k):v for k,v in self[index].items()}
@@ -125,6 +156,9 @@ class PEPEffect(Effect):
 
 
     def clean(self):
+        """
+        Remove if not necessary the PEP.
+        """
         for idx, ei in enumerate(self):
             if isinstance(ei, ProbabilityEnhancedAttribute):
                 if len(ei) == 1:
@@ -140,7 +174,6 @@ class PEPEffect(Effect):
         Returns
         -------
         bool
-            True if there is a Probability-Enhanced Effect, False otherwise
         """
         return any(isinstance(elem, ProbabilityEnhancedAttribute) for elem in self)
 
@@ -150,6 +183,14 @@ class PEPEffect(Effect):
             perception: Perception, 
             update_rate: float
         ):
+        """
+        Updates from raw observations the probability of each effect attribute.
+
+        Parameters
+        ----------
+            perception: Perception
+            update_rate: float
+        """
         for i, elem in enumerate(self):
             if isinstance(elem, ProbabilityEnhancedAttribute):
                 elem.make_compact()
@@ -160,12 +201,22 @@ class PEPEffect(Effect):
     @classmethod
     def enhanced_effect(
             cls, 
-            effect1, 
-            effect2,
-            perception: AbstractPerception = None
-        ):
+            effect1: PEPEffect,
+            effect2: PEPEffect,
+            perception: Perception
+        ) -> PEPEffect:
         """
-        Create a new enhanced effect part.
+        Merges two PEPeffects in an enhanced one.
+
+        Parameters
+        ----------
+            effect1: PEPEffect,
+            effect2: PEPEffect,
+            perception: Perception
+
+        Returns
+        -------
+        BEACSClassifier
         """
         result = cls(observation=effect1)
         wildcard = effect1.wildcard

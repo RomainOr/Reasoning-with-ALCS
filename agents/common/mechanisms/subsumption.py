@@ -4,25 +4,24 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
+from agents.common.classifier_components.BaseClassifier import BaseClassifier
+
 
 def does_subsume(
-        cl,
-        other_cl
+        cl: BaseClassifier,
+        other_cl: BaseClassifier
     ) -> bool:
     """
     Returns if a classifier `cl` subsumes `other_cl` classifier when a classifier has to be added to a set of classifiers.
 
     Parameters
     ----------
-    cl:
-        Subsumer classifier
-    other_cl:
-        Other classifier
+        cl: BaseClassifier
+        other_cl: BaseClassifier
 
     Returns
     -------
     bool
-        True if `other_cl` classifier is subsumed
     """
     if cl.is_hard_subsumer_criteria_satisfied(other_cl) and \
         cl.is_more_general(other_cl) and \

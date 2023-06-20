@@ -65,7 +65,7 @@ class BEACSConfiguration(BaseConfiguration):
         self.do_ep = do_ep
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "BEACS additional parameters:" \
             "\n\t- Theta_bseq: [{}]" \
             "\n\t- bs_max: [{}]" \

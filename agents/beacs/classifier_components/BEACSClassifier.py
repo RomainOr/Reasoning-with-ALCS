@@ -17,6 +17,9 @@ from agents.beacs.classifier_components.EffectList import EffectList
 
 
 class BEACSClassifier(BaseClassifier):
+    """
+    Represents a BEACS classifier
+    """
 
     def __init__(
             self,
@@ -76,7 +79,7 @@ class BEACSClassifier(BaseClassifier):
         self.err = 0.
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"C:{self.condition} A:{self.action} {str(self.behavioral_sequence)} E:{str(self.effect)}\n" \
             f"q: {self.q:<6.4} r: {self.r:<6.4} r_bis: {self.r_bis:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} err: {self.err:<6.4}\n" \
             f"exp: {self.exp:<5} num: {self.num} ee: {self.ee}\n" \
@@ -96,14 +99,11 @@ class BEACSClassifier(BaseClassifier):
 
         Parameters
         ----------
-        self: Classifier
-            Classifier to copy from
-        time: int
-            Current epoch
+            time: int
 
         Returns
         -------
-        Classifier
+        BEACSClassifier
             New copied classifier - Hard copy
         """
         new_cls = BEACSClassifier(
@@ -136,15 +136,15 @@ class BEACSClassifier(BaseClassifier):
 
     def copy_time_num_exp_from_other_cl(
             self,
-            other
-        ):
+            other: BEACSClassifier
+        ) -> None:
         """
-        Copies internal parameters from other classifier cl
+        Copies internal parameters (tga, tbseq, talp, exp, num)
+        from other classifier
 
         Parameters
         ----------
-        self: Classifier
-            Classifier to copy from
+            other: BEACSClassifier
         """
         super().copy_time_num_exp_from_other_cl(other)
         self.tbseq = other.tbseq
@@ -157,7 +157,7 @@ class BEACSClassifier(BaseClassifier):
 
         Returns
         -------
-        Float
+        float
             Fitness value
         """
         epsilon = 1e-6
@@ -171,12 +171,11 @@ class BEACSClassifier(BaseClassifier):
 
     def is_enhanced(self) -> bool:
         """
-        Checks whether the classifier is enhanced.
+        Checks whether the classifier is enhanced by EP.
 
         Returns
         -------
         bool
-            True if the classifier is enhanced
         """
         return self.effect.is_enhanced()
 
@@ -194,18 +193,18 @@ class BEACSClassifier(BaseClassifier):
         a change to the specified value. Thus, if the perceived value did not
         change to the anticipated but actually stayed at the value, the
         classifier anticipates incorrectly.
+        update_counter is used to indicate if the counters related to the EP have
+        to be updated.
 
         Parameters
         ----------
-        previous_situation: Perception
-            Perception related to a state preceding the action
-        situation: Perception
-            Perception related to a state following the action
+            previous_situation: Perception
+            situation: Perception
+            update_counter: bool = True
 
         Returns
         -------
         bool
-            True if classifier's effect pat anticipates correctly
         """
         return self.effect.does_anticipate_correctly(previous_situation, situation, update_counter)
 
@@ -222,10 +221,8 @@ class BEACSClassifier(BaseClassifier):
 
         Parameters
         ----------
-        previous_situation: Perception
-            Perception related to a state preceding the action
-        situation: Perception
-            Perception related to a state following the action
+            previous_situation: Perception
+            situation: Perception
         """
         length = self.cfg.classifier_length
         wildcard = self.cfg.classifier_wildcard
@@ -251,12 +248,34 @@ class BEACSClassifier(BaseClassifier):
                 self.effect.update_enhanced_trace_ga(length)
 
 
-    def average_fitnesses_from_other_cl(self, other):
+    def average_fitnesses_from_other_cl(
+            self,
+            other: BEACSClassifier
+        ) -> None:
+        """
+        Average fitnesses from other BEACSClassifier cl (q, r and r_bis).
+        Carefull, both fitnesses are modified.
+
+        Parameters
+        ----------
+            other: BEACSClassifier
+        """
         super().average_fitnesses_from_other_cl(other)
         self.r_bis = other.r_bis = (self.r_bis + other.r_bis) / 2.0
 
 
-    def weighted_average_rewards_from_other_cl(self, other):
+    def weighted_average_rewards_from_other_cl(
+            self,
+            other: BEACSClassifier
+        ) -> None:
+        """
+        Average fitnesses depending on experience of both classifiers (q, r and r_bis).
+        Carefull, both fitnesses are modified.
+
+        Parameters
+        ----------
+            other: BEACSClassifier
+        """
         super().weighted_average_rewards_from_other_cl(other)
         self.r_bis = (self.exp * self.r_bis + other.exp * other.r_bis) / (self.exp + other.exp)
 
@@ -272,17 +291,13 @@ class BEACSClassifier(BaseClassifier):
 
         Parameters
         ----------
-        other_classifier: Classifier
-            Classifier to merge with the self one
-        aliased_state: Perception
-            Perception related to the aliased state
-        time: int
-            Current epoch
+            other_classifier: BEACSClassifier
+            aliased_state: Perception
+            time: int
 
         Returns
         -------
-        Classifier
-            New enhanced classifier
+        BEACSClassifier
         """
         result = self.copy(time=time)
         result.q = max((self.q + other_classifier.q) / 2.0, 0.5)

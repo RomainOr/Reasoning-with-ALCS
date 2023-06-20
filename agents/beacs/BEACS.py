@@ -13,11 +13,14 @@ from agents.beacs.classifier_components.BEACSClassifier import BEACSClassifier
 
 
 class BEACS(Agent):
+    """
+    Represents a BEACS agent
+    """
 
     def __init__(self,
             cfg: BEACSConfiguration,
             population: BEACSClassifiersList=None
-            ):
+            ) -> None:
         super().__init__(
             cfg=cfg,
             population=population or BEACSClassifiersList(),
@@ -26,7 +29,15 @@ class BEACS(Agent):
         self.pai_states_memory = []
 
 
-    def get_pai_states_memory(self):
+    def get_pai_states_memory(self) -> list:
+        """
+        Return the list of states perceived as related to the Perceptual Aliasing Issue.
+
+        Returns
+        ----------
+        list
+            The list of states related to the PAI
+        """
         return self.pai_states_memory
 
 

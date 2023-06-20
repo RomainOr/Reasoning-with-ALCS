@@ -19,13 +19,13 @@ class Agent:
     def __init__(self,
             cfg: BaseConfiguration,
             population: BaseClassifiersList,
-            seed):
+            seed) -> None:
         self.cfg = cfg
         self.population = population
         RandomNumberGenerator.seed(seed)
 
 
-    def duplicate_population(self):
+    def duplicate_population(self) -> BaseClassifiersList:
         duplicate_population = []
         for cl in self.population:
             cl_copy = cl.copy(0)
@@ -42,11 +42,11 @@ class Agent:
         raise NotImplementedError("Subclasses should implement this method.")
 
 
-    def get_population(self):
+    def get_population(self) -> BaseClassifiersList:
         raise NotImplementedError("Subclasses should implement this method.")
 
 
-    def get_cfg(self):
+    def get_cfg(self) -> BaseConfiguration:
         return self.cfg
 
 
@@ -58,7 +58,7 @@ class Agent:
         raise NotImplementedError("Subclasses should implement this method.")
 
 
-    def apply_CRACS(self):
+    def apply_CRACS(self) -> None:
         # Removing subsumed classifiers and unwanted behavioral classifiers
         classifiers_to_keep = []
         for cl in self.population:

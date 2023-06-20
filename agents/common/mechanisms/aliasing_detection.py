@@ -20,17 +20,13 @@ def is_state_aliased(
 
     Parameters
     ----------
-    condition: Condition
-        Condition of the classifier used to check if the state is aliased
-    mark: PMark
-        Mark of the classifier used to check if the state is aliased
-    p0: Perception
-        Perception of the state in the previous step
+        condition: Condition
+        mark: PMark
+        p0: Perception
 
     Returns
     -------
     bool
-        True if the state p0 is aliased
     """
     if mark.one_situation_in_mark():
         situation = Condition(condition)

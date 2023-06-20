@@ -15,7 +15,7 @@ from agents.common.mechanisms.subsumption import does_subsume
 
 
 def should_apply(
-        action_set, 
+        action_set: BaseClassifiersList, 
         time: int, 
         theta_ga: int
     ) -> bool:
@@ -26,19 +26,13 @@ def should_apply(
 
     Parameters
     ----------
-    action_set
-        Population of classifiers (with `num` and `tga` properties)
-    time: int
-        Current epoch
-    theta_ga: int
-        The GA application threshold (θga ∈ N) controls the GA frequency.
-        A GA is applied in an action set if the average delay of the last GA
-        application of the classifiers in the set is greater than θga.
+        action_set: BaseClassifiersList
+        time: int
+        theta_ga: int
 
     Returns
     -------
     bool
-        True if GA should be applied, False otherwise
     """
     if action_set is None or not action_set:
         return False
@@ -56,7 +50,7 @@ def should_apply(
 
 
 def set_timestamps(
-        action_set,
+        action_set: BaseClassifiersList,
         epoch: int
     ) -> None:
     """
@@ -67,17 +61,15 @@ def set_timestamps(
 
     Parameters
     ----------
-    action_set
-        Population of classifiers
-    epoch: int
-        Current epoch
+        action_set: BaseClassifiersList
+        epoch: int
     """
     for cl in action_set:
         cl.tga = epoch
 
 
 def roulette_wheel_selection(
-        population,
+        population: BaseClassifiersList,
         fitnessfunc: Callable
     ) -> tuple:
     """
@@ -86,15 +78,12 @@ def roulette_wheel_selection(
 
     Parameters
     ----------
-    population
-        Population of classifiers
-    fitnessfunc: Callable
-        Function evaluating fitness for each classifier.
+        population: BaseClassifiersList
+        fitnessfunc: Callable
 
     Returns
     -------
     tuple
-        Two classifiers selected as parents
     """
     def _weighted_random_choice(choices: Dict):
         maximum = sum(choices.values())
@@ -112,14 +101,20 @@ def roulette_wheel_selection(
 
 
 def mutation(
-        cl1,
-        cl2,
+        cl1: BaseClassifier,
+        cl2: BaseClassifier,
         mu: float
     ) -> None:
     """
     Executes mutation in one classifier.
     Specified attributes in classifier conditions are randomly
     generalized with `mu` probability.
+
+    Parameters
+    ----------
+        cl1: BaseClassifier
+        cl2: BaseClassifier
+        mu: float
     """
     for idx in range(len(cl1.condition)):
         if cl1.condition[idx] != cl1.cfg.classifier_wildcard and RandomNumberGenerator.random() < mu:
@@ -129,8 +124,8 @@ def mutation(
 
 
 def two_point_crossover(
-        parent,
-        donor
+        parent: BaseClassifier,
+        donor: BaseClassifier
     ) -> None:
     """
     Executes two-point crossover using condition parts of two classifiers.
@@ -138,10 +133,8 @@ def two_point_crossover(
 
     Parameters
     ----------
-    parent
-        Classifier
-    donor
-        Classifier
+        parent: BaseClassifier
+        donor: BaseClassifier
     """
     left, right = sorted(RandomNumberGenerator.choice(
         range(0, parent.cfg.classifier_length + 1), 2, replace=False))
@@ -157,9 +150,9 @@ def two_point_crossover(
 
 
 def delete_classifiers(
-        population,
-        match_set,
-        action_set,
+        population: BaseClassifiersList,
+        match_set: BaseClassifiersList,
+        action_set: BaseClassifiersList,
         insize: int, 
         theta_as: int
     ) -> None:
@@ -168,17 +161,11 @@ def delete_classifiers(
 
     Parameters
     ----------
-    population:
-        Whole population of classifiers
-    match_set:
-        Population of classifiers that match p0
-    action_set:
-        Population of classifiers from the matching that have the selection action
-    insize: int
-        number of children that will be inserted
-    theta_as: int
-        The action set size threshold (θas ∈ N) specifies
-        the maximal number of classifiers in an action set.
+        population: BaseClassifiersList
+        match_set: BaseClassifiersList
+        action_set: BaseClassifiersList
+        insize: int
+        theta_as: int
     """
     while (insize + sum(cl.num for cl in action_set)) > theta_as: 
         # We must delete at least one
@@ -199,8 +186,8 @@ def delete_classifiers(
 
 
 def _is_preferred_to_delete(
-        cl_del,
-        cl
+        cl_del: BaseClassifier,
+        cl: BaseClassifier
     ) -> bool:
     """
     Compares two classifiers `cl_del` (marked for deletion) with `cl` to
@@ -208,15 +195,12 @@ def _is_preferred_to_delete(
 
     Parameters
     ----------
-    cl_del
-        Classifier marked for deletion
-    cl
-        Examined classifier
+        cl_del: BaseClassifier
+        cl: BaseClassifier
 
     Returns
     -------
     bool
-        True if `cl` is "worse" than `cl_del`. False otherwise
     """
     if cl.q - cl_del.q < -0.1:
         return True
@@ -230,9 +214,9 @@ def _is_preferred_to_delete(
 
 
 def add_classifier(
-        child, 
-        population,
-        new_list
+        child: BaseClassifier, 
+        population: BaseClassifiersList,
+        new_list: list
     )-> None:
     """
     Looks for subsuming / similar classifiers in the population of classifiers
@@ -243,12 +227,9 @@ def add_classifier(
 
     Parameters
     ----------
-    child:
-        New classifier to examine
-    population:
-        List of classifiers
-    new_list:
-        A list of newly created classifiers in this GA run
+        child: BaseClassifier
+        population: BaseClassifiersList
+        new_list: list
     """
     old_cl = None
     equal_cl = None
@@ -287,6 +268,22 @@ def apply(
         time: int,
         cfg: BaseConfiguration
     ) -> None:
+    """
+    Apply the whole genetic generalization mechanism to the action set.
+
+    Parameters
+    ----------
+        cls_ClassifiersList: BaseClassifiersList
+        mutate_function: Callable
+        crossover_function: Callable
+        population: BaseClassifiersList
+        match_set: BaseClassifiersList
+        action_set: BaseClassifiersList
+        p0: Perception
+        p1: Perception
+        time: int
+        cfg: BaseConfiguration
+    """
 
     if should_apply(action_set, time, cfg.theta_ga):
         set_timestamps(action_set, time)

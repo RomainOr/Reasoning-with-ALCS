@@ -40,21 +40,20 @@ class BACSClassifiersList(BaseClassifiersList):
             cfg: BACSConfiguration
         ) -> None:
         """
-        The Anticipatory Learning Process. Handles all updates by the ALP,
-        insertion of new classifiers in pop and possibly matchSet, and
-        deletion of inadequate classifiers in pop and possibly matchSet.
+        The Anticipatory Learning Process. Handles insertion, update and deletion
+        of new classifiers in population and possibly other sets.
 
         Parameters
         ----------
-        population
-        match_set
-        action_set
-        p0: Perception
-        action: int
-        p1: Perception
-        last_activated_classifier: BaseClassifier
-        time: int
-        cfg: BaseConfiguration
+            population: BACSClassifiersList
+            match_set: BACSClassifiersList
+            action_set: BACSClassifiersList
+            last_activated_classifier: BaseClassifier,
+            p0: Perception
+            action: int
+            p1: Perception
+            time: int
+            cfg: BACSConfiguration
         """
         new_list = BACSClassifiersList()
         new_cl: Optional[BaseClassifier] = None
@@ -108,21 +107,20 @@ class BACSClassifiersList(BaseClassifiersList):
             action_set: BACSClassifiersList,
             p0: Perception,
             p1: Perception,
-            time: int,
-            cfg: BACSConfiguration
+            time: int
         ) -> None:
         """
-        The Anticipatory Learning Process when a behavioral sequence has been executed
+        The Anticipatory Learning Process. Handles insertion, update and deletion
+        of new behavioral classifiers in population and possibly other sets.
 
         Parameters
         ----------
-        population
-        match_set
-        action_set
-        p0: Perception
-        p1: Perception
-        time: int
-        cfg: BaseConfiguration
+            population: BACSClassifiersList
+            match_set: BACSClassifiersList
+            action_set: BACSClassifiersList
+            p0: Perception
+            p1: Perception
+            time: int
         """
         new_list = BACSClassifiersList()
         new_cl: Optional[BaseClassifier] = None
@@ -172,6 +170,16 @@ class BACSClassifiersList(BaseClassifiersList):
             max_fitness: float,
             cfg: BACSConfiguration
         ) -> None:
+        """
+        The Reinforcement Learning Process. Handles all reward updates.
+
+        Parameters
+        ----------
+            action_set: BACSClassifiersList
+            reward: int
+            max_fitness: float
+            cfg: BaseConfiguration
+        """
         for cl in action_set:
             update_classifier_q_learning(cl, reward, max_fitness, cfg.beta_rl, cfg.gamma)
 
@@ -186,6 +194,20 @@ class BACSClassifiersList(BaseClassifiersList):
             time: int,
             cfg: BACSConfiguration
         ) -> None:
+        """
+        The Genetic Generalization mechanism. Handles insertion, update and deletion
+        of new classifiers in population and possibly other sets.
+
+        Parameters
+        ----------
+            population: BACSClassifiersList
+            match_set: BACSClassifiersList
+            action_set: BACSClassifiersList
+            p0: Perception
+            p1: Perception
+            time: int
+            cfg: BACSConfiguration
+        """
         if action_set is None or not action_set:
             return False
         

@@ -11,7 +11,6 @@ from agents.common.classifier_components.BaseClassifier import BaseClassifier
 import agents.common.mechanisms.aliasing_detection as aliasing_detection
 import agents.common.mechanisms.alp as alp_common
 
-
 from agents.bacs.mechanisms.build_behavioral_sequences import create_behavioral_classifier
 
 
@@ -31,11 +30,11 @@ def expected_case(
 
     Parameters
     ----------
-    last_activated_classifier
-    cl
-    p0
-    p1
-    time
+        last_activated_classifier: BaseClassifier
+        cl: BaseClassifier
+        p0: Perception
+        p1: Perception
+        time: int
 
     Returns
     ----------
@@ -44,7 +43,7 @@ def expected_case(
 
     if aliasing_detection.is_state_aliased(cl.condition, cl.mark, p0):
         if cl.cfg.bs_max != 0 and last_activated_classifier is not None:
-            child = create_behavioral_classifier(last_activated_classifier, cl, p1, time)
+            child = create_behavioral_classifier(last_activated_classifier, cl, time)
             if child:
                 return child
 

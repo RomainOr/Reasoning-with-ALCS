@@ -13,12 +13,15 @@ from agents.bacs.BACSClassifiersList import BACSClassifiersList
 
 
 class BACS(Agent):
+    """
+    Represents a BACS agent
+    """
 
     def __init__(
             self,
             cfg: BACSConfiguration,
             population: BACSClassifiersList=None
-        ):
+        ) -> None:
         super().__init__(
             cfg=cfg,
             population=population or BACSClassifiersList(),
@@ -61,8 +64,7 @@ class BACS(Agent):
                         action_set,
                         prev_state,
                         state,
-                        time + steps,
-                        self.cfg
+                        time + steps
                     )
                 else:
                     BACSClassifiersList.apply_alp(
@@ -153,8 +155,7 @@ class BACS(Agent):
                         action_set,
                         prev_state,
                         state,
-                        time + steps,
-                        self.cfg
+                        time + steps
                     )
                 else:
                     BACSClassifiersList.apply_alp(

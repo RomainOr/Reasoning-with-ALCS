@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import collections.abc
 
 
@@ -9,7 +11,7 @@ class Perception(collections.abc.Sequence):
 
     __slots__ = ['_items', 'oktypes']
 
-    def __init__(self, observation, oktypes=(str,)):
+    def __init__(self, observation, oktypes=(str,)) -> None:
         self._items = list()
 
         for el in observation:
@@ -19,22 +21,22 @@ class Perception(collections.abc.Sequence):
         self._items.extend(list(observation))
 
     @classmethod
-    def empty(cls):
+    def empty(cls) -> Perception:
         return cls([], oktypes=(None,))
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return len(self._items) == 0
 
-    def __getitem__(self, i):
+    def __getitem__(self, i) -> str:
         return self._items[i]
 
     def __len__(self) -> int:
         return len(self._items)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return ''.join(map(str, self))
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if len(self) != len(other):
             return False 
         for si, oi in zip(self, other):
@@ -42,5 +44,5 @@ class Perception(collections.abc.Sequence):
                 return False
         return True
 
-    def __ne__(self, other):
+    def __ne__(self, other) -> bool:
         return not self.__eq__(other)

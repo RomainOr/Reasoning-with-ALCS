@@ -13,10 +13,16 @@ from agents.common.classifier_components.Effect import Effect
 
 class EffectList():
     """
-    List of anticipations
+    List of anticipations with counters 
+    that depicts the number of occurence of each anticipations.
     """
 
-    def __init__(self, effect: Optional[Effect] = None, length: Optional[int] = None, wildcard='#'):
+    def __init__(
+            self,
+            effect: Optional[Effect] = None,
+            length: Optional[int] = None,
+            wildcard='#'
+        ) -> None:
         if effect:
             self.effect_list = [effect]
             self.effect_detailled_counter = [1]
@@ -27,15 +33,15 @@ class EffectList():
         self.wildcard = wildcard
 
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return set(other.effect_list) == set(self.effect_list)
 
 
-    def __ne__(self, other):
+    def __ne__(self, other) -> bool:
         return not self.__eq__(other)
 
 
-    def __getitem__(self, i):
+    def __getitem__(self, i) -> Effect:
         return self.effect_list[i]
 
 
@@ -43,7 +49,7 @@ class EffectList():
         return len(self.effect_list)
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "("+", ".join("{}:{}".format(str(effect), counter) for effect, counter in zip(self.effect_list, self.effect_detailled_counter)) + ")"
 
 
@@ -51,18 +57,14 @@ class EffectList():
             self,
             other: EffectList,
             length: int
-        ):
+        ) -> None:
         """
-        Creates a new enhanced effectlist by merging two effect lists.
+        Creates a new enhanced prediction by merging self with other in self.
 
         Parameters
         ----------
-        self: EffectList
-            First effect list
-        other: EffectList
-            Second effect list
-        length: int
-            Classifier effect length
+            other: EffectList
+            length: int
         """
         for oi, oeffect in enumerate(other):
             if oeffect not in self:
@@ -80,7 +82,15 @@ class EffectList():
     def update_enhanced_trace_ga(
             self,
             length: int
-        ):
+        ) -> None:
+        """
+        Update the enhanced trace to indicate whether the related item in condition
+        can be generalized.
+
+        Parameters
+        ----------
+            length: int
+        """
         for idx in range(length):
             symbols = []
             for effect in self:
@@ -92,13 +102,12 @@ class EffectList():
     @property
     def specify_change(self) -> bool:
         """
-        Checks whether there is any attribute in the effect part that
+        Checks whether there is any attribute in the most anticipated effect that
         is not "pass-through" - so predicts a change.
 
         Returns
         -------
         bool
-            True if the effect list predicts a change
         """
         index = self.effect_detailled_counter.index(max(self.effect_detailled_counter))
         return self[index].specify_change
@@ -111,7 +120,6 @@ class EffectList():
         Returns
         -------
         bool
-            True if self is enhanced
         """
         return len(self) > 1
 
@@ -129,15 +137,12 @@ class EffectList():
 
         Parameters
         ----------
-        p0: Perception
-            Previous perception
-        p1: Perception
-            Current perception
+            p0: Perception
+            p1: Perception
 
         Returns
         -------
         bool
-            True if specializable
         """
         return self.is_enhanced() or self[0].is_specializable(p0, p1)
 
@@ -153,15 +158,13 @@ class EffectList():
 
         Parameters
         ----------
-        p0: Perception
-            Previous perception
-        p1: Perception
-            Current perception
+            p0: Perception
+            p1: Perception
+            update_counters: bool = True
 
         Returns
         -------
         bool
-            True the anticipation is correct
         """
         for idx, effect in enumerate(self):
             if effect.does_anticipate_correctly(p0, p1):
@@ -180,36 +183,32 @@ class EffectList():
 
         Parameters
         ----------
-        other: EffectList
-            Other EffectList
+            other: EffectList
 
         Returns
         -------
         bool
-            True if self subsumes other
         """
         return set(other.effect_list) <= set(self.effect_list)
 
 
     def getEffectAttribute(
             self,
-            perception,
+            perception: Perception,
             index: int
-        ) -> tuple:
+        ) -> dict:
         """
         Computes from raw observations the probability to get each effect attribute
         for a position in the anticipation.
 
         Parameters
         ----------
-        perception
-            Related anticipation
-        index: int
-            Position in the anticipation
+            perception: Perception,
+            index: int
 
         Returns
         -------
-        tuple
+        dict
             The respective probabilities
         """
         total_counter = float(sum(self.effect_detailled_counter))

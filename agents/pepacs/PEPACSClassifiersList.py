@@ -41,20 +41,19 @@ class PEPACSClassifiersList(BaseClassifiersList):
             cfg: PEPACSConfiguration
         ) -> None:
         """
-        The Anticipatory Learning Process. Handles all updates by the ALP,
-        insertion of new classifiers in pop and possibly matchSet, and
-        deletion of inadequate classifiers in pop and possibly matchSet.
+        The Anticipatory Learning Process. Handles insertion, update and deletion
+        of new classifiers in population and possibly other sets.
 
         Parameters
         ----------
-        population
-        match_set
-        action_set
-        p0: Perception
-        action: int
-        p1: Perception
-        time: int
-        cfg: Configuration
+            population: PEPACSClassifiersList
+            match_set: PEPACSClassifiersList
+            action_set: PEPACSClassifiersList
+            p0: Perception
+            action: int
+            p1: Perception
+            time: int
+            cfg: PEPACSConfiguration
         """
         new_list = PEPACSClassifiersList()
         new_cl: Optional[PEPACSClassifier] = None
@@ -89,7 +88,7 @@ class PEPACSClassifiersList(BaseClassifiersList):
                 new_cl.tga = time
                 alp_common.add_classifier(new_cl, action_set, new_list)
 
-        PEPACSClassifiersList.apply_enhanced_effect_part_check(action_set, new_list, p0, time, cfg)
+        alp_pepacs.apply_enhanced_effect_part_check(action_set, new_list, p0, time)
 
         # No classifier anticipated correctly - generate new one
         if not was_expected_case:
@@ -107,6 +106,16 @@ class PEPACSClassifiersList(BaseClassifiersList):
             max_fitness: float,
             cfg: PEPACSConfiguration
         ) -> None:
+        """
+        The Reinforcement Learning Process. Handles all reward updates.
+
+        Parameters
+        ----------
+            action_set: PEPACSClassifiersList
+            reward: int
+            max_fitness: float
+            cfg: PEPACSConfiguration
+        """
         for cl in action_set:
             update_classifier_q_learning(cl, reward, max_fitness, cfg.beta_rl, cfg.gamma)
 
@@ -121,6 +130,20 @@ class PEPACSClassifiersList(BaseClassifiersList):
             time: int,
             cfg: PEPACSConfiguration
         ) -> None:
+        """
+        The Genetic Generalization mechanism. Handles insertion, update and deletion
+        of new classifiers in population and possibly other sets.
+
+        Parameters
+        ----------
+            population: PEPACSClassifiersList
+            match_set: PEPACSClassifiersList
+            action_set: PEPACSClassifiersList
+            p0: Perception
+            p1: Perception
+            time: int
+            cfg: PEPACSConfiguration
+        """
         ga.apply(
             PEPACSClassifiersList,
             ga.mutation,
@@ -133,27 +156,3 @@ class PEPACSClassifiersList(BaseClassifiersList):
             time,
             cfg
         )
-            
-
-    @staticmethod
-    def apply_enhanced_effect_part_check(
-            action_set: PEPACSClassifiersList,
-            new_list: PEPACSClassifiersList,
-            previous_situation: Perception,
-            time: int,
-            cfg: PEPACSConfiguration
-        ):
-        # Create a list of candidates.
-        # Every enhanceable classifier is a candidate.
-        candidates = [cl for cl in action_set if cl.ee]
-        # If there are less than 2 candidates, don't do it
-        if len(candidates) < 2:
-            return
-        for candidate in candidates:
-            candidates2 = [cl for cl in candidates if candidate != cl and cl.mark == candidate.mark]
-            if len(candidates2) > 0:
-                merger = RandomNumberGenerator.choice(candidates2)
-                new_classifier = candidate.merge_with(merger, previous_situation, time)
-                if new_classifier is not None:
-                    alp_common.add_classifier(new_classifier, action_set, new_list)
-        return new_list

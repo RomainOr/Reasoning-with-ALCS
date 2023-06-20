@@ -4,7 +4,10 @@
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
 
-from typing import Optional
+from __future__ import annotations
+from typing import TYPE_CHECKING, Optional
+if TYPE_CHECKING:
+    from agents.common.BaseClassifiersList import BaseClassifiersList
 
 from agents.common.BaseConfiguration import BaseConfiguration
 from agents.common.Perception import Perception
@@ -15,7 +18,7 @@ from agents.common.mechanisms.subsumption import does_subsume
 
 
 def cover(
-        cls,
+        cls: BaseClassifier,
         p0: Perception,
         action: int,
         p1: Perception,
@@ -27,21 +30,16 @@ def cover(
 
     Parameters
     ----------
-    p0: Perception
-        previous perception
-    action: int
-        chosen action
-    p1: Perception
-        current perception
-    time: int
-        current epoch
-    cfg: BaseConfiguration
-        algorithm BaseConfiguration class
+        cls: BaseClassifier
+        p0: Perception
+        action: int
+        p1: Perception
+        time: int
+        cfg: BaseConfiguration
 
     Returns
     -------
-    Classifier
-        new classifier
+    BaseClassifier
     """
     new_cl = cls(
         action=action, 
@@ -58,14 +56,21 @@ def expected_case(
         p0: Perception,
         time: int,
         p1: Perception=None
-    ):
+    ) -> Optional[BaseClassifier]:
     """
     Controls the expected case of a classifier with the help of 
     Specification of Unchanging Components.
 
+    Parameters
+    ----------
+        cls: BaseClassifier
+        p0: Perception
+        time: int
+        p1: Perception
+
     Returns
     ----------
-    Bool related to aliasing, New classifier or None
+    BaseClassifier
     """
     diff = cl.mark.get_differences(p0)
     if diff.specificity == 0:
@@ -80,14 +85,21 @@ def specification_unchanging_components(
         diff: Condition,
         time: int,
         p1: Perception=None
-    ):
+    ) -> BaseClassifier:
     """
     Controls the expected case of a classifier with the help of 
     Specification of Unchanging Components.
 
+    Parameters
+    ----------
+        cls: BaseClassifier
+        p0: Perception
+        time: int
+        p1: Perception
+
     Returns
     ----------
-    Bool related to aliasing, New classifier or None
+    BaseClassifier
     """
     child = cl.copy(time=time, perception=p1)
     spec = cl.specificity
@@ -121,9 +133,16 @@ def unexpected_case(
     """
     Controls the unexpected case of the classifier.
 
+    Parameters
+    ----------
+        cls: BaseClassifier
+        p0: Perception
+        p1: Perception
+        time: int
+
     Returns
     ----------
-    Specialized classifier if generation was possible, otherwise None
+    BaseClassifier
     """
     cl.decrease_quality()
     cl.set_mark(p0)
@@ -136,9 +155,9 @@ def unexpected_case(
 
 
 def add_classifier(
-        child, 
-        population,
-        new_list
+        child: BaseClassifier, 
+        population: BaseClassifiersList,
+        new_list: list(BaseClassifier)
     ) -> None:
     """
     Looks for subsuming / similar classifiers in the population of classifiers
@@ -149,12 +168,9 @@ def add_classifier(
 
     Parameters
     ----------
-    child:
-        New classifier to examine
-    population:
-        List of classifiers
-    new_list:
-        A list of newly created classifiers in this ALP run
+        child: BaseClassifier
+        population: BaseClassifiersList
+        new_list: list(BaseClassifier)
     """
     old_cl = None
     equal_cl = None

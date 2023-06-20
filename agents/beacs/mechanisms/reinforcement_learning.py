@@ -6,9 +6,11 @@
 
 from agents.common.RandomNumberGenerator import RandomNumberGenerator
 
+from agents.beacs.classifier_components import BEACSClassifier
+
 
 def update_classifier_double_q_learning(
-        cl, 
+        cl: BEACSClassifier, 
         step_reward: int, 
         max_fitness_r: float,
         max_fitness_r_bis: float,
@@ -17,22 +19,16 @@ def update_classifier_double_q_learning(
     ) -> None:
     """
     Applies adapted Double Q-Learning according to current reinforcement
-    `reward` and back-propagated reinforcement `maximum_fitness`.
+    `step_reward` and back-propagated reinforcement max_fitness_r and max_fitness_r_bis.
 
     Parameters
     ----------
-    cl:
-        Classifier with `r` and `ir` properties
-    step_reward: int
-        Current reward obtained from the environment after executing step
-    max_fitness_r: float
-        Maximum fitness from the action set and from the Q_r function
-    max_fitness_r_bis: float
-        Maximum fitness from the action set and from the Q_r_bis function
-    beta_rl: float
-        Learning rate of RL
-    gamma: float
-        Reinforcement rate
+        cl: BEACSClassifier
+        step_reward: int
+        max_fitness_r: float
+        max_fitness_r_bis: float
+        beta_rl: float
+        gamma: float
     """
     if RandomNumberGenerator.random() < 0.5:
         cl.err += beta_rl * (abs(step_reward + gamma * max_fitness_r_bis - cl.r) - cl.err)

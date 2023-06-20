@@ -13,11 +13,14 @@ from agents.acs2.ACS2ClassifiersList import ACS2ClassifiersList
 
 
 class ACS2(Agent):
+    """
+    Represents an ACS2 agent
+    """
 
     def __init__(self,
             cfg: BaseConfiguration,
             population: ACS2ClassifiersList=None
-            ):
+            ) -> None:
         super().__init__(
             cfg=cfg,
             population=population or ACS2ClassifiersList(),

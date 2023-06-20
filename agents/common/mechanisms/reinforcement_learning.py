@@ -13,21 +13,16 @@ def update_classifier_q_learning(
         gamma: float
     ) -> None:
     """
-    Applies adapted Double Q-Learning according to current reinforcement
-    `reward` and back-propagated reinforcement `maximum_fitness`.
+    Applies Q-Learning according to current reinforcement
+    `step_reward` and back-propagated reinforcement `max_fitness`.
 
     Parameters
     ----------
-    cl:
-        Classifier with `r` and `ir` properties
-    step_reward: int
-        Current reward obtained from the environment after executing step
-    max_fitness: float
-        Maximum fitness from the action set
-    beta_rl: float
-        Learning rate of RL
-    gamma: float
-        Reinforcement rate
+        cl
+        step_reward: int
+        max_fitness: float
+        beta_rl: float
+        gamma: float
     """
     cl.r += beta_rl * (step_reward + gamma * max_fitness - cl.r)
     cl.ir += beta_rl * (step_reward - cl.ir)

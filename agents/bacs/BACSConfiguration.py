@@ -60,7 +60,7 @@ class BACSConfiguration(BaseConfiguration):
         self.bs_max = bs_max
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "BACS additional parameters:" \
             "\n\t- Bs_max: [{}]" \
         .format(

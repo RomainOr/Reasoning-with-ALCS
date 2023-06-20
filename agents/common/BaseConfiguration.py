@@ -56,7 +56,7 @@ class BaseConfiguration():
         self.chi = chi
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "BaseConfiguration:" \
             "\n\t- Classifier length: [{}]" \
             "\n\t- Number of possible actions: [{}]" \

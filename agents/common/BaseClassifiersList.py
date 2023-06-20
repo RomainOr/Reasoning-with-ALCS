@@ -27,7 +27,7 @@ class BaseClassifiersList(TypedList):
     def form_match_set(
             self,
             situation: Perception
-        ):
+        ) -> BaseClassifiersList:
         """
         Builds theBaseClassifiersList from the whole population with all classifiers whose condition
         matches the current situation.
@@ -55,7 +55,7 @@ class BaseClassifiersList(TypedList):
     def form_action_set(
             self,
             action_classifier: BaseClassifier
-        ):
+        ) -> BaseClassifiersList:
         """
         Builds theBaseClassifiersList from the match set with all classifiers whose actions
         match the ones of the selected classifier.
@@ -76,7 +76,7 @@ class BaseClassifiersList(TypedList):
     def find_best_classifier(
             self,
             situation: Perception
-        ):
+        ) -> BaseClassifier:
         return max([cl for cl in self if cl.does_match(situation) and cl.does_anticipate_change()],key=attrgetter('fitness'),default=None)
 
 
@@ -123,7 +123,7 @@ class BaseClassifiersList(TypedList):
             action_set.extend(new_action_cls)
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "\n".join(str(classifier)
             for classifier
             in sorted(self, key=lambda cl: -cl.fitness))

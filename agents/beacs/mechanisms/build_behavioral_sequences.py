@@ -7,33 +7,31 @@
 from typing import Optional
 
 from agents.common.Perception import Perception
+from agents.common.classifier_components.Condition import Condition
+from agents.common.classifier_components.Effect import Effect
 
+from agents.beacs.classifier_components.EffectList import EffectList
 from agents.beacs.classifier_components.BEACSClassifier import BEACSClassifier
 
 
 def updated_passthrough(
-        child_effect, 
-        penultimate_effect, 
-        last_effect, 
-        perception,
-        child_condition
-    ):
+        child_effect: Effect,
+        penultimate_effect: EffectList, 
+        last_effect: EffectList, 
+        perception: Perception,
+        child_condition: Condition
+    ) -> None:
     """
-    Passthrough operator defined by Stolzmann that we have refined.
+    Passthrough operator inspired by Stolzmann's one.
     It is only used on the effect component of classifiers.
 
     Parameters
     ----------
-    child_effect
-        The effect component to compute and the result
-    penultimate_effect
-        The effect component of the penultimate classifier
-    last_effect
-        The effect component of the last classifier
-    perception
-        The current perception to refine the effect component of the child
-    child_condition
-        Condition component to remove unnecessary specification of effect attributes
+        child_effect: Effect
+        penultimate_effect: EffectList
+        last_effect: EffectList
+        perception: Perception
+        child_condition: Condition
     """
     for i in range(len(child_effect)):
         change_anticipated = last_effect[0][i] != child_effect.wildcard
@@ -71,16 +69,11 @@ def create_behavioral_classifier(
 
     Parameters
     ----------
-    penultimate_classifier: Classifier
-        Penultimate classifier selected through classifier selection previously
-    cl: Classifier
-        Current classifier of the action set
-    p1: Perception
-        Perception received after the action is done
-    pai_state: Perception
-        Perception of the Perceptual Aliasing State
-    time: int
-        Curretn epoch
+        penultimate_classifier: BEACSClassifier
+        cl: BEACSClassifier
+        p1: Perception
+        pai_state: Perception
+        time: int
 
     Returns
     ----------

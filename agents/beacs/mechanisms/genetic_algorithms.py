@@ -6,10 +6,12 @@
 
 from agents.common.RandomNumberGenerator import RandomNumberGenerator
 
+from agents.beacs.classifier_components.BEACSClassifier import BEACSClassifier
+
 
 def mutation_enhanced_trace(
-        cl1,
-        cl2,
+        cl1: BEACSClassifier,
+        cl2: BEACSClassifier,
         mu: float
     ) -> None:
     """
@@ -17,12 +19,9 @@ def mutation_enhanced_trace(
 
     Parameters
     ----------
-    cl1
-        First classifier
-    cl2
-        Second classifier
-    mu
-        Mutation rate
+        cl1: BEACSClassifier
+        cl2: BEACSClassifier
+        mu: float
     """
     for idx in range(len(cl1.condition)):
         #

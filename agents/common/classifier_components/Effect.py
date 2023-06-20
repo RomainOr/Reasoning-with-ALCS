@@ -16,10 +16,6 @@ class Effect(AbstractPerception):
     to be caused by the specified action.
     """
 
-    def __init__(self, observation, wildcard='#', oktypes=(str, dict)):
-        super().__init__(observation, wildcard, oktypes)
-
-
     @property
     def specify_change(self) -> bool:
         """
@@ -29,25 +25,27 @@ class Effect(AbstractPerception):
         Returns
         -------
         bool
-            True if the effect part predicts a change, False otherwise
         """
         return any(True for e in self if e != self.wildcard)
 
 
-    def is_specializable(self, p0: Perception, p1: Perception) -> bool:
+    def is_specializable(
+            self, 
+            p0: Perception, 
+            p1: Perception
+        ) -> bool:
         """
         Determines if the effect part can be modified to anticipate
         changes from `p0` to `p1` correctly by only specializing attributes.
+
         Parameters
         ----------
-        p0: Perception
-            previous perception
-        p1: Perception
-            current perception
+            p0: Perception
+            p1: Perception
+        
         Returns
         -------
         bool
-            True if specializable, false otherwise
         """
         for p0i, p1i, ei in zip(p0, p1, self):
             if ei != self.wildcard:
@@ -66,15 +64,12 @@ class Effect(AbstractPerception):
 
         Parameters
         ----------
-        p0: Perception
-            Previous perception
-        p1: Perception
-            Current perception
+            p0: Perception
+            p1: Perception
 
         Returns
         -------
         bool
-            True the anticipation is correct
         """
         def item_anticipate_change(
                 item,
@@ -92,13 +87,43 @@ class Effect(AbstractPerception):
         return all(item_anticipate_change(eitem, p0[idx], p1[idx], self.wildcard) for idx, eitem in enumerate(self))
 
 
-    def subsumes(self, other: Effect) -> bool:
+    def subsumes(
+            self, 
+            other: Effect
+        ) -> bool:
+        """
+        Determines if the effect subsumes another effect.
+
+        Parameters
+        ----------
+            other: Effect
+
+        Returns
+        -------
+        bool
+        """
         for si, oi in zip(self, other):
             if si != oi: return False
         return True
 
 
-    def getEffectAttribute(self, perception, index):
+    def getEffectAttribute(
+            self,
+            perception: Perception,
+            index: int
+        ) -> dict:
+        """
+        Get the probabilities for one attribute.
+
+        Parameters
+        ----------
+            perception: Perception
+            index: int
+
+        Returns
+        -------
+        dict
+        """
         if self[index] == self.wildcard:
             return {int(perception[index]):1.0}
         else:
