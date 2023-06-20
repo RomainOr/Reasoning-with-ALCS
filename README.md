@@ -9,8 +9,9 @@ Then, you have to create a conda environment according to the environment file i
 
 ` conda env create -f environment.yml `
 
-The main libraires used within this project are : 
-` gym numpy matplotlib parmap statistics ray pandas networkx jupyter-notebook seaborn statsmodels`
+Really **check** that the variable `PYTHONHASHSEED` has been set to `0` in your newly created environment, so that you can reproduce some results if needed.
+
+The main libraires used within this project are listed in the `environment.yml` file.
 
 ## License
 
