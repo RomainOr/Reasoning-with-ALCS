@@ -38,11 +38,6 @@ def plot_rewards(df, metrics_trial_frequency_explore, number_of_exploit_steps, a
     exploit_df = df.query("phase == 'exploit'")
     explore_df.plot(y='reward', ax=ax, c='blue', linewidth=0.5, legend=False)
     exploit_df.plot(y='reward', ax=ax, c='red', linewidth=0.5, legend=False)
-    if number_of_exploit_steps and len(number_of_exploit_steps) > 0:
-        ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore, ymin=min(min(explore_df['reward']), min(exploit_df['reward']))-1, ymax=max(max(explore_df['reward']), max(exploit_df['reward']))+1, colors='black', linestyle='dashed')
-        ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0], ymin=min(explore_df['reward'])-1, ymax=max(exploit_df['reward'])+1, colors='black', linestyle='dashed')
-        if len(number_of_exploit_steps) > 1:
-            ax.vlines(x=len(explore_df)*metrics_trial_frequency_explore+number_of_exploit_steps[0]+number_of_exploit_steps[1], ymin=min(exploit_df['reward'])-1, ymax=max(exploit_df['steps_in_trial'])+1, colors='black', linestyle='dashed')
     ax.set_title("Rewards", fontsize=TITLE_TEXT_SIZE)
     ax.set_xlabel("Trial", fontsize=AXIS_TEXT_SIZE)
     ax.set_ylabel("Rewards", fontsize=AXIS_TEXT_SIZE)
