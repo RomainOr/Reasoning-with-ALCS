@@ -164,9 +164,13 @@ class BEACSClassifier(BaseClassifier):
         max_r = max(self.r, self.r_bis)
         min_r = min(self.r, self.r_bis)
         diff = max_r - min_r + epsilon
+        quality = self.q
+        prediction_reward = max_r
         if self.behavioral_sequence:
-            return self.q * (max_r - diff * len(self.behavioral_sequence) / self.cfg.bs_max)
-        return self.q * max_r
+            prediction_reward = max_r - diff * len(self.behavioral_sequence) / self.cfg.bs_max
+        if prediction_reward < 0:
+            quality = 1. / quality
+        return quality * prediction_reward
 
 
     def is_enhanced(self) -> bool:
