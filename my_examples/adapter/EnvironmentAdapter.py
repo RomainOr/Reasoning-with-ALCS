@@ -12,36 +12,31 @@ class EnvironmentAdapter:
     This implementation works for environments which provide LCS-compatible
     state and action representations (no conversion needed).
 
-    Subclass this class in PyALCS integration to provide an adapter
-    for a specific environment.
+    Subclass this class to provide an adapter for a specific environment.
     """
 
-    @staticmethod
-    def to_lcs_action(env, env_action):
+    def to_lcs_action(self, env, env_action):
         """
         Converts environment representation of an action to LCS
         representation.
         """
         return env_action
 
-    @staticmethod
-    def to_genotype(env, phenotype):
+    def to_genotype(self, env, phenotype):
         """
         Converts environment representation of a state to LCS
         representation.
         """
         return phenotype
 
-    @staticmethod
-    def to_env_action(env, lcs_action):
+    def to_env_action(self, env, lcs_action):
         """
         Converts LCS representation of an action to environment
         representation.
         """
         return lcs_action
 
-    @staticmethod
-    def to_phenotype(env, genotype):
+    def to_phenotype(self, env, genotype):
         """
         Converts LCS representation of a state to environment
         representation.
