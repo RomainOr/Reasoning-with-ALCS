@@ -110,7 +110,7 @@ def plot_policy(ax, population, pos_bucket, vel_bucket, pos_range = [-1.2, 0.6],
     }
     fitness_matrix = np.zeros([vel_bucket, pos_bucket])
     for (y, x), val in np.ndenumerate(fitness_matrix):
-        best_cl = population.find_best_classifier_unconstrained((str(x+1), str(y+1)))
+        best_cl = population.find_best_classifier((str(x+1), str(y+1)), have_to_anticipate_changes=False)
         if best_cl:
             fitness_matrix[y][x] = best_cl.fitness
         else:
@@ -118,7 +118,7 @@ def plot_policy(ax, population, pos_bucket, vel_bucket, pos_range = [-1.2, 0.6],
     policy_matrix = np.empty([pos_bucket, vel_bucket]).astype(str)
     for (x, y), val in np.ndenumerate(policy_matrix):
         policy_matrix[x][y] = ''
-        best_cl = population.find_best_classifier_unconstrained((str(x+1), str(y+1)))
+        best_cl = population.find_best_classifier((str(x+1), str(y+1)), have_to_anticipate_changes=False)
         if best_cl:
             policy_matrix[x][y] = ACTION_LOOKUP[best_cl.action]
         else:
