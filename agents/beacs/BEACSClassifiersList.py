@@ -46,9 +46,9 @@ class BEACSClassifiersList(BaseClassifiersList):
         BEACSClassifiersList
         """
         matching = [cl for cl in self if cl.does_match(situation)]
-        matching_with_change_anticipated = [cl for cl in matching if cl.does_anticipate_change()]
-        max_fitness_r = max((cl.q*cl.r for cl in matching_with_change_anticipated), default=0.)
-        max_fitness_r_bis = max((cl.q*cl.r_bis for cl in matching_with_change_anticipated), default=0.)
+        #matching_with_change_anticipated = [cl for cl in matching if cl.does_anticipate_change()]
+        max_fitness_r = max((cl.q*cl.r for cl in matching), default=0.)
+        max_fitness_r_bis = max((cl.q*cl.r_bis for cl in matching), default=0.)
         return BEACSClassifiersList(*matching), max_fitness_r, max_fitness_r_bis
 
 
