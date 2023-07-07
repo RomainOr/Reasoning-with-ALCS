@@ -58,7 +58,7 @@ class Agent:
         raise NotImplementedError("Subclasses should implement this method.")
 
 
-    def apply_CRACS(self) -> None:
+    def apply_CRACS(self, keep_unreliable:bool=True) -> None:
         # Removing subsumed classifiers and unwanted behavioral classifiers
         classifiers_to_keep = []
         for cl in self.population:
@@ -73,6 +73,8 @@ class Agent:
                 to_keep = False
             if to_keep and cl.behavioral_sequence is not None and \
                 not cl.does_anticipate_change() and len(cl.effect)==1:
+                to_keep = False
+            if to_keep and not keep_unreliable and not cl.is_reliable():
                 to_keep = False
             if to_keep:
                 classifiers_to_keep.append(cl)
