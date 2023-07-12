@@ -51,7 +51,7 @@ def plot_mountaincar_performance(metrics_df, env_name, metrics_trial_frequency_e
     ax4.axhline(y = -110.0, color = 'g', linestyle = '-')
     plt.subplots_adjust(top=0.86, wspace=0.3, hspace=0.3)
 
-def plot_average_mountaincar_performance(ax, metrics_explore, metrics_trial_frequency_explore, NUMBER_OF_EXPLORE_TRIALS, metrics_exploit, NUMBER_OF_EXPLOIT_TRIALS_RL):
+def plot_average_mountaincar_performance(ax, metrics_explore, metrics_trial_frequency_explore, NUMBER_OF_EXPLORE_TRIALS, metrics_exploit, NUMBER_OF_EXPLOIT_TRIALS):
     if ax is None:
         ax = plt.gca()
 
@@ -64,20 +64,20 @@ def plot_average_mountaincar_performance(ax, metrics_explore, metrics_trial_freq
     print("Average number of reward to solve the mountaincar is ",avg_step_explore,
         " for a total of ", NUMBER_OF_EXPLORE_TRIALS, " trials in EXPLORATION")
 
-    if NUMBER_OF_EXPLOIT_TRIALS_RL:
-        avg_step_exploit_rl = 0
+    if NUMBER_OF_EXPLOIT_TRIALS:
+        avg_step_exploit = 0
         for trial in metrics_exploit:
             trials.append(trial['reward'])
-            avg_step_exploit_rl += trial['reward']
-        avg_step_exploit_rl /= NUMBER_OF_EXPLOIT_TRIALS_RL
-        print("Average number of rewards to solve the mountaincar is ",avg_step_exploit_rl,
-            " for a total of ", NUMBER_OF_EXPLOIT_TRIALS_RL, " trials in EXPLOITATION with Reinforcement Module")
-        avg_step_exploit_rl_last_100 = 0
+            avg_step_exploit += trial['reward']
+        avg_step_exploit /= NUMBER_OF_EXPLOIT_TRIALS
+        print("Average number of rewards to solve the mountaincar is ",avg_step_exploit,
+            " for a total of ", NUMBER_OF_EXPLOIT_TRIALS, " trials in EXPLOITATION with Reinforcement Module")
+        avg_step_exploit_last_100 = 0
         for trial in metrics_exploit[-100:]:
             trials.append(trial['reward'])
-            avg_step_exploit_rl_last_100 += trial['reward']
-        avg_step_exploit_rl_last_100 /= 100
-        print("Average number of rewards to solve the mountaincar is ",avg_step_exploit_rl_last_100,
+            avg_step_exploit_last_100 += trial['reward']
+        avg_step_exploit_last_100 /= 100
+        print("Average number of rewards to solve the mountaincar is ",avg_step_exploit_last_100,
             " for the last 100 trials in EXPLOITATION with Reinforcement Module")
 
     # https://github.com/openai/gym/wiki/Leaderboard#mountaincar-v0
