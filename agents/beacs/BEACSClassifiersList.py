@@ -11,7 +11,6 @@ import agents.common.mechanisms.alp as alp_common
 import agents.common.mechanisms.genetic_algorithms as ga
 from agents.common.Perception import Perception
 from agents.common.BaseClassifiersList import BaseClassifiersList
-from agents.common.classifier_components.BaseClassifier import BaseClassifier
 
 import agents.beacs.mechanisms.alp as alp_beacs
 from agents.beacs.BEACSConfiguration import BEACSConfiguration

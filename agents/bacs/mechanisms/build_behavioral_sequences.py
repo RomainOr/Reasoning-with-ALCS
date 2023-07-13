@@ -6,7 +6,6 @@
 
 from typing import Optional
 
-from agents.common.Perception import Perception
 from agents.common.classifier_components.BaseClassifier import BaseClassifier
 from agents.common.classifier_components.Condition import Condition
 from agents.common.classifier_components.Effect import Effect
