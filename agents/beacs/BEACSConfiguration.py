@@ -16,7 +16,7 @@ class BEACSConfiguration(BaseConfiguration):
             classifier_length: int,
             number_of_possible_actions: int,
             classifier_wildcard='#',
-            environment_adapter=EnvironmentAdapter,
+            environment_adapter=EnvironmentAdapter(),
             user_metrics_collector_fcn: Callable = None,
             metrics_trial_frequency: int = 5,
             epsilon: float=0.5,
