@@ -28,14 +28,14 @@ All other files that don't have this boilerplate are licensed under the MIT lice
 
 ## How to set up experiments with Ray
 
-Currently only available with :
-- MazeBenchBeacs_Ray.ipynb
+Currently available with :
+- Maze - Bench - Beacs.ipynb
 
 On Local Mode :
 1. Open the desired jupyter-notebook that has Ray.
-2. Comment or delete `ray.init(address='auto', _redis_password='5241590000000000')` if present.
-3. Uncomment or write `ray.init(num_cpus=NB_OF_PROCESSES, ignore_reinit_error=True)` if not present.
-4. Start running the code of he jupyter-notebook.
+2. Comment or delete `ray.init(address='auto', _redis_password='5241590000000000', runtime_env=runtime_env)` if present.
+3. Uncomment or write `ray.init(ignore_reinit_error=True, runtime_env=runtime_env)` if not present.
+4. Start running the code of the jupyter-notebook.
 
 On Remote Mode :
 1. Start a first ssh tunnel towards your server : `ssh -L <port>:<addressip>:<port jupyter> <user>@<addressip>`
