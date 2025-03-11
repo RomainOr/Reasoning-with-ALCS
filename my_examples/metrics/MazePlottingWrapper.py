@@ -95,7 +95,7 @@ def build_action_matrix(env, population):
         # Path or Obstacle - best classfier fitness
         if x == 0 or x ==3:
             perception = env.env.maze.perception(index[1], index[0])
-            best_cl = population.find_best_classifier(perception)
+            best_cl = population.find_best_classifier(perception, have_to_anticipate_changes=False)
             if best_cl:
                 if action[index].find(ACTION_LOOKUP[best_cl.action]) == -1:
                     action[index] += ACTION_LOOKUP[best_cl.action]

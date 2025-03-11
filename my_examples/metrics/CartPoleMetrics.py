@@ -42,3 +42,14 @@ def _mean_reliable_classifier_specificity(
         return float(sum(cl.specificity for cl in reliable_classifiers)) / len(reliable_classifiers)
     else:
         return 1.
+
+def _check_cartpole_solved_requirement(trials):
+    average_scores=[]
+    solved = -1
+    for i in range(len(trials)-100):
+        check_solved = trials[i:i+100]
+        average = float(sum(check_solved) / 100)
+        average_scores.append(average)
+        if average >= 475.0 and solved == -1:
+            solved = 100+1+i
+    return average_scores, solved
