@@ -13,6 +13,8 @@ from ..envs.MazeF1 import MazeF1
 from ..envs.MazeF2 import MazeF2
 from ..envs.MazeF3 import MazeF3
 from ..envs.MazeF4 import MazeF4
+from ..envs.MazeF8 import MazeF8
+from ..envs.MazeF9 import MazeF9
 from ..envs.Maze4 import Maze4
 from ..envs.Maze5 import Maze5
 from ..envs.Maze7 import Maze7

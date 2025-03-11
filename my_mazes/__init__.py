@@ -184,3 +184,15 @@ register(
     entry_point='my_mazes.envs:MazeOntoLcs',
     max_episode_steps=100
 )
+
+register(
+    id='MazeF8-v0',
+    entry_point='my_mazes.envs:MazeF8',
+    max_episode_steps=100
+)
+
+register(
+    id='MazeF9-v0',
+    entry_point='my_mazes.envs:MazeF9',
+    max_episode_steps=100
+)
