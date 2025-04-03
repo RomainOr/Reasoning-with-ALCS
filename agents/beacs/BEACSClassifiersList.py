@@ -11,7 +11,6 @@ import agents.common.mechanisms.alp as alp_common
 import agents.common.mechanisms.genetic_algorithms as ga
 from agents.common.Perception import Perception
 from agents.common.BaseClassifiersList import BaseClassifiersList
-from agents.common.classifier_components.BaseClassifier import BaseClassifier
 
 import agents.beacs.mechanisms.alp as alp_beacs
 from agents.beacs.BEACSConfiguration import BEACSConfiguration
@@ -46,9 +45,8 @@ class BEACSClassifiersList(BaseClassifiersList):
         BEACSClassifiersList
         """
         matching = [cl for cl in self if cl.does_match(situation)]
-        matching_with_change_anticipated = [cl for cl in matching if cl.does_anticipate_change()]
-        max_fitness_r = max((cl.q*cl.r for cl in matching_with_change_anticipated), default=0.)
-        max_fitness_r_bis = max((cl.q*cl.r_bis for cl in matching_with_change_anticipated), default=0.)
+        max_fitness_r = max((cl.q*cl.r for cl in matching), default=0.)
+        max_fitness_r_bis = max((cl.q*cl.r_bis for cl in matching), default=0.)
         return BEACSClassifiersList(*matching), max_fitness_r, max_fitness_r_bis
 
 

@@ -83,7 +83,7 @@ class BEACSClassifier(BaseClassifier):
         return f"C:{self.condition} A:{self.action} {str(self.behavioral_sequence)} E:{str(self.effect)}\n" \
             f"q: {self.q:<6.4} r: {self.r:<6.4} r_bis: {self.r_bis:<6.4} ir: {self.ir:<6.4} f: {self.fitness:<6.4} err: {self.err:<6.4}\n" \
             f"exp: {self.exp:<5} num: {self.num} ee: {self.ee}\n" \
-            f"Mark: {str(self.mark)} Can_be_generalized: {str(self.effect.enhanced_trace_ga)} Aliased_state: {''.join(str(attr) for attr in self.aliased_state)} PAI_state: {''.join(str(attr) for attr in self.pai_state)}\n" \
+            f"Mark: {str(self.mark)} Can_be_generalized: {str(self.effect.enhanced_trace_ga)} Aliased_state: {'.'.join(str(attr) for attr in self.aliased_state)} PAI_state: {'.'.join(str(attr) for attr in self.pai_state)}\n" \
             f"tga: {self.tga:<5} tbseq: {self.tbseq:<5} talp: {self.talp:<5} tav: {self.tav:<6.4} \n" \
 
 
@@ -164,9 +164,13 @@ class BEACSClassifier(BaseClassifier):
         max_r = max(self.r, self.r_bis)
         min_r = min(self.r, self.r_bis)
         diff = max_r - min_r + epsilon
+        quality = self.q
+        prediction_reward = max_r
         if self.behavioral_sequence:
-            return self.q * (max_r - diff * len(self.behavioral_sequence) / self.cfg.bs_max)
-        return self.q * max_r
+            prediction_reward = max_r - diff * len(self.behavioral_sequence) / self.cfg.bs_max
+        if prediction_reward < 0:
+            quality = 1. / quality
+        return quality * prediction_reward
 
 
     def is_enhanced(self) -> bool:

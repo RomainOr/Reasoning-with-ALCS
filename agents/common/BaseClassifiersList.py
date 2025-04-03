@@ -75,9 +75,10 @@ class BaseClassifiersList(TypedList):
 
     def find_best_classifier(
             self,
-            situation: Perception
+            situation: Perception,
+            have_to_anticipate_changes:bool = True
         ) -> BaseClassifier:
-        return max([cl for cl in self if cl.does_match(situation) and cl.does_anticipate_change()],key=attrgetter('fitness'),default=None)
+        return max([cl for cl in self if cl.does_match(situation) and ((not have_to_anticipate_changes) or cl.does_anticipate_change())],key=attrgetter('fitness'),default=None)
 
 
     def expand(self) -> List[BaseClassifier]:

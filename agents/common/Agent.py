@@ -58,7 +58,7 @@ class Agent:
         raise NotImplementedError("Subclasses should implement this method.")
 
 
-    def apply_CRACS(self) -> None:
+    def apply_CRACS(self, keep_unreliable:bool=True) -> None:
         # Removing subsumed classifiers and unwanted behavioral classifiers
         classifiers_to_keep = []
         for cl in self.population:
@@ -73,6 +73,8 @@ class Agent:
                 to_keep = False
             if to_keep and cl.behavioral_sequence is not None and \
                 not cl.does_anticipate_change() and len(cl.effect)==1:
+                to_keep = False
+            if to_keep and not keep_unreliable and not cl.is_reliable():
                 to_keep = False
             if to_keep:
                 classifiers_to_keep.append(cl)
@@ -105,6 +107,26 @@ class Agent:
         return self._evaluate(env, trials, self._run_trial_explore)
 
 
+    def explore_to_exploit(self, env, trials) -> Tuple:
+        """
+        Explores the environment in given set of trials and slowly decreases
+        epsilon of the greedy action selection.
+
+        Parameters
+        ----------
+        env
+            environment
+        trials
+            number of trials
+
+        Returns
+        -------
+        Tuple
+            population of classifiers and metrics
+        """
+        return self._evaluate(env, trials, self._run_trial_explore, True)
+
+
     def exploit(self, env, trials) -> Tuple:
         """
         Exploits the environments in given set of trials (always executing
@@ -125,7 +147,7 @@ class Agent:
         return self._evaluate(env, trials, self._run_trial_exploit)
 
 
-    def _evaluate(self, env, max_trials: int, func: Callable) -> Tuple:
+    def _evaluate(self, env, max_trials: int, func: Callable, decresing_epsilon:bool=False) -> Tuple:
         """
         Runs the classifier in desired strategy (see `func`) and collects
         metrics.
@@ -173,5 +195,8 @@ class Agent:
                 metrics.append(m)
 
             current_trial += 1
+
+            if decresing_epsilon:
+                self.cfg.epsilon = max(self.cfg.epsilon-(1./max_trials), 0.)
 
         return self.get_population(), metrics
