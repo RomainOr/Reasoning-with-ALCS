@@ -21,8 +21,8 @@ class CartPoleEnvironmentAdapter(EnvironmentAdapter):
         representation.
         """
         def _discretize(env, obs):
-            upper_bounds = [env.env.observation_space.high[0], 0.5, env.env.observation_space.high[2], math.radians(50)]
-            lower_bounds = [env.env.observation_space.low[0], -0.5, env.env.observation_space.low[2], -math.radians(50)]
+            upper_bounds = [env.env.observation_space.high[0], 0.5, env.env.observation_space.high[2], 1]
+            lower_bounds = [env.env.observation_space.low[0], -0.5, env.env.observation_space.low[2], -1]
             ratios = [(obs[i] + abs(lower_bounds[i])) / (upper_bounds[i] - lower_bounds[i]) for i in range(len(obs))]
             new_obs = [int(round((self.buckets[i] - 1) * ratios[i])) for i in range(len(obs))]
             new_obs = [min(self.buckets[i] - 1, max(0, new_obs[i])) for i in range(len(obs))]
