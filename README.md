@@ -5,13 +5,23 @@
 Python 3.x has to be installed to use BEACS. 
 We suggest you to use *conda* or *miniconda*.
 
-Then, you have to create a conda environment according to the environment file included in the repository :
+Then, you have to create a conda environment with the following libraries :
 
-` conda env create -f environment.yml `
+```bash
+conda create --name alcs
+conda activate alcs
+conda install conda-forge::gym conda-forge::ray-all numpy matplotlib seaborn pandas statistics statsmodels notebook
+```
 
-Really **check** that the variable `PYTHONHASHSEED` has been set to `0` in your newly created environment, so that you can reproduce some results if needed.
+Really **check** that the variable `PYTHONHASHSEED` has been set to `0` in your newly created environment, so that you can reproduce some results if needed :
+```bash
+conda env config vars set PYTHONHASHSEED='0'
+```
 
-The main libraires used within this project are listed in the `environment.yml` file.
+This command can be used to check variables of your environment :
+```bash
+conda env config vars list
+```
 
 ## License
 
