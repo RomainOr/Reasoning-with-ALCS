@@ -32,11 +32,11 @@ def _maze_metrics(
             population,
             environment
         ) -> float:
-        transitions = environment.unwrapped.maze.get_all_possible_transitions()
+        transitions = environment.unwrapped.get_all_possible_transitions()
         env_trans = []
         for start, action, end in transitions:
-            p0 = environment.unwrapped.maze.build_perception_from_location(*start)
-            p1 = environment.unwrapped.maze.build_perception_from_location(*end)
+            p0 = environment.unwrapped.build_perception_from_location(*start)
+            p1 = environment.unwrapped.build_perception_from_location(*end)
             env_trans.append((p0, action, p1))
         # Take into consideration only reliable classifiers
         reliable_classifiers = [cl for cl in population if cl.is_reliable() and cl.behavioral_sequence is None]
@@ -62,7 +62,7 @@ def _how_many_eps_match_non_aliased_states(
         env
     ) -> int:
     counter = 0
-    non_aliased_perceptions = env.unwrapped.maze.get_all_non_aliased_states()
+    non_aliased_perceptions = env.unwrapped.get_all_non_aliased_states()
     enhanced_classifiers = [cl for cl in pop if cl.is_reliable() and cl.is_enhanced()]
     for percept in non_aliased_perceptions:
         for cl in enhanced_classifiers:
@@ -112,7 +112,7 @@ def _enhanced_effect_error(
         classifier_length,
         random_attribute_length
     ) -> float:
-    theoritical_probabilities = environment.unwrapped.maze.get_theoritical_probabilities()
+    theoritical_probabilities = environment.unwrapped.get_theoritical_probabilities()
     # Accumulation of difference in probabilities
     error_pep = 0.
     # For all possible destinations from each path cell
