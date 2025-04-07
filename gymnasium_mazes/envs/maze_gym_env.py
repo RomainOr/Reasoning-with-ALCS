@@ -20,7 +20,9 @@ OBSERVATION_MAPPING = {
     'EXIT'      : 9
 }
 
+
 class Actions(Enum):
+
     NORTH = 0
     NORTHEAST = 1
     EAST = 2
@@ -29,6 +31,30 @@ class Actions(Enum):
     SOUTHWEST = 5
     WEST = 6
     NORTHWEST = 7
+
+    @classmethod
+    def get_action_from_two_neighboring_positions(cls, start, end):
+        DIRECTION_LOOKUP = {
+            'NORTH' : Actions.NORTH,
+            'NORHTEAST': Actions.NORTHEAST,
+            'EAST' : Actions.EAST,
+            'SOUTHEAST': Actions.SOUTHEAST,
+            'SOUTH' : Actions.SOUTH,
+            'SOUTHWEST': Actions.SOUTHWEST,
+            'WEST' : Actions.WEST,
+            'NORTHWEST': Actions.NORTHWEST
+        }
+        direction = ''
+        if end[1] + 1 == start[1]:
+            direction += 'NORTH'
+        if end[1] - 1 == start[1]:
+            direction += 'SOUTH'
+        if end[0] + 1 == start[0]:
+            direction += 'WEST'
+        if end[0] - 1 == start[0]:
+            direction += 'EAST'
+        return DIRECTION_LOOKUP[direction].value
+
 
 class MazeObservationSpace(gym.Space):
     def __init__(self, n):
@@ -231,18 +257,6 @@ class MazeGymEnv(gym.Env):
             g.add_edges_from(edges)
         return g
 
-    def _distinguish_direction(self, start, end):
-        direction = ''
-        if end[1] + 1 == start[1]:
-            direction += 'N'
-        if end[1] - 1 == start[1]:
-            direction += 'S'
-        if end[0] + 1 == start[0]:
-            direction += 'W'
-        if end[0] - 1 == start[0]:
-            direction += 'E'
-        return direction
-
     def get_all_aliased_states(self):
         all_aliased_states = []
         for x in range(0, self.max_x):
@@ -260,24 +274,14 @@ class MazeGymEnv(gym.Env):
         return all_non_aliased_states
 
     def get_all_possible_transitions(self):
-        DIRECTION_LOOKUP = {
-            'N' : Actions.NORTH.value,
-            'NE': Actions.NORTHEAST.value,
-            'E' : Actions.EAST.value,
-            'SE': Actions.SOUTHEAST.value,
-            'S' : Actions.SOUTH.value,
-            'SW': Actions.SOUTHWEST.value,
-            'W' : Actions.WEST.value,
-            'NW': Actions.NORTHWEST.value
-        }
         transitions = []
         g = self._create_graph()
         path_nodes = (node for node, data
             in g.nodes(data=True) if data['type'] == 'path')
         for node in path_nodes:
             for neighbour in nx.all_neighbors(g, node):
-                direction = self._distinguish_direction(node, neighbour)
-                transitions.append((node, DIRECTION_LOOKUP[direction], neighbour))
+                action = Actions.get_action_from_two_neighboring_positions(node, neighbour)
+                transitions.append((node, action, neighbour))
         return transitions
 
     def get_theoritical_probabilities(self, slippery_prob = 0.):
