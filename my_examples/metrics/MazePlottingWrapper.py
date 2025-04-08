@@ -60,13 +60,13 @@ def update_matrix_index(original, tmp_x, tmp_y, action):
     return tmp_x, tmp_y
 
 def build_fitness_matrix(env, population):
-    original = env.env.maze.matrix
+    original = env.unwrapped.maze
     fitness = original.copy()
     # Think about more 'functional' way of doing this
     for index, x in np.ndenumerate(original):
         # Path or obstacle - best classfier fitness
         if x == 0 or x == 3:
-            perception = env.env.maze.perception(index[1], index[0])
+            perception = env.unwrapped.build_perception_from_location(index[1], index[0])
             best_cl = population.find_best_classifier(perception)
             if best_cl:
                 fitness[index] = max(best_cl.fitness, fitness[index])
@@ -86,7 +86,7 @@ def build_action_matrix(env, population):
         0: u'↑', 1: u'↗', 2: u'→', 3: u'↘',
         4: u'↓', 5: u'↙', 6: u'←', 7: u'↖'
     }
-    original = env.env.maze.matrix
+    original = env.unwrapped.maze
     action = original.copy().astype(str)
     # Think about more 'functional' way of doing this
     for index, x in np.ndenumerate(original):
@@ -94,7 +94,7 @@ def build_action_matrix(env, population):
     for index, x in np.ndenumerate(original):
         # Path or Obstacle - best classfier fitness
         if x == 0 or x ==3:
-            perception = env.env.maze.perception(index[1], index[0])
+            perception = env.unwrapped.build_perception_from_location(index[1], index[0])
             best_cl = population.find_best_classifier(perception, have_to_anticipate_changes=False)
             if best_cl:
                 if action[index].find(ACTION_LOOKUP[best_cl.action]) == -1:
@@ -117,8 +117,8 @@ def plot_policy(env, agent, ax=None, TITLE_TEXT_SIZE=18, AXIS_TEXT_SIZE=12):
         ax = plt.gca()
     ax.set_aspect("equal")
     # Handy variables
-    max_x = env.env.maze.max_x
-    max_y = env.env.maze.max_y
+    max_x = env.unwrapped.max_x
+    max_y = env.unwrapped.max_y
     fitness_matrix = build_fitness_matrix(env, agent.population)
     action_matrix = build_action_matrix(env, agent.population)
     # Render maze as image

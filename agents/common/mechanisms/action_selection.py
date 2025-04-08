@@ -153,7 +153,7 @@ def choose_random_classifiers(
     BaseClassifier
     """
     nb_of_cll = len(cll)
-    rand = RandomNumberGenerator.integers(nb_of_cll + cfg.number_of_possible_actions)
+    rand = RandomNumberGenerator.integers(nb_of_cll + cfg.number_of_possible_actions, dtype=int)
     if rand < nb_of_cll:
         return cll[rand]
     action = rand - nb_of_cll
