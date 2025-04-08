@@ -109,8 +109,7 @@ def _when_full_knowledge_is_achieved(metrics) -> tuple:
 def _enhanced_effect_error(
         population,
         environment,
-        classifier_length,
-        random_attribute_length
+        classifier_length
     ) -> float:
     theoritical_probabilities = environment.unwrapped.get_theoritical_probabilities()
     # Accumulation of difference in probabilities
@@ -140,22 +139,10 @@ def _enhanced_effect_error(
                     # Second error computation
                     for key in theoritical_prob_of_attribute:
                         error_pep += abs(theoritical_prob_of_attribute[key] - effect_attribute.get(key, 0.0))
-                for ra in range(classifier_length-random_attribute_length, classifier_length):
-                    # First, get effect attribute
-                    effect_attribute = most_experienced_classifier.effect.getEffectAttribute(perception,ra)
-                    # We consider here the probabilities are defined as 50% to get 1 and 50% to get 0. Could be automated and linked to environmental properties
-                    theoritical_prob_of_attribute = {1:0.5, 0:0.5}
-                    # Second error computation
-                    for key in theoritical_prob_of_attribute:
-                        error_pep += abs(theoritical_prob_of_attribute[key] - effect_attribute.get(key, 0.0))
             # None case as default case to increase error
             else:
                 for direction in prob:
                     theoritical_prob_of_attribute = prob[direction]
-                    for key in theoritical_prob_of_attribute:
-                        error_pep += abs(theoritical_prob_of_attribute[key])
-                for ra in range(classifier_length-random_attribute_length, classifier_length):
-                    theoritical_prob_of_attribute = {1:0.5, 0:0.5}
                     for key in theoritical_prob_of_attribute:
                         error_pep += abs(theoritical_prob_of_attribute[key])
     return error_pep * 100 / (len(theoritical_probabilities)*8*classifier_length)

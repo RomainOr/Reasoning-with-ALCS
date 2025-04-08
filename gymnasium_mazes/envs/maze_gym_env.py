@@ -12,15 +12,6 @@ import gymnasium as gym
 import networkx as nx
 import numpy as np
 
-OBSERVATION_MAPPING = {
-    'ALIASING'  : -1,
-    'PATH'      : 0,
-    'WALL'      : 1,
-    'ANIMAT'    : 5,
-    'EXIT'      : 9
-}
-
-
 class Actions(Enum):
 
     NORTH = 0
@@ -57,6 +48,15 @@ class Actions(Enum):
 
 
 class MazeObservationSpace(gym.Space):
+
+    OBSERVATION_MAPPING = {
+        'ALIASING'  : -1,
+        'PATH'      : 0,
+        'WALL'      : 1,
+        'ANIMAT'    : 5,
+        'EXIT'      : 9
+    }
+
     def __init__(self, n):
         # n is the number of visible neighbour fields, typically 8
         self.n = n
@@ -64,22 +64,41 @@ class MazeObservationSpace(gym.Space):
 
     def sample(self):
         return tuple(
-            self.np_random.choice(OBSERVATION_MAPPING.values()) for _ in range(self.n))
+            self.np_random.choice(self.OBSERVATION_MAPPING.values()) for _ in range(self.n))
 
     def contains(self, x):
-        return all(elem in (OBSERVATION_MAPPING.values()) for elem in x)
+        return all(elem in (self.OBSERVATION_MAPPING.values()) for elem in x)
+    
+    def get_mappping(self, key):
+        return self.OBSERVATION_MAPPING.get(key)
+    
+    def render_element(self, el):
+        if el == self.OBSERVATION_MAPPING['WALL']:
+            return gym.utils.colorize('■', 'gray')
+        elif el == self.OBSERVATION_MAPPING['PATH']:
+            return gym.utils.colorize('□', 'white')
+        elif el == self.OBSERVATION_MAPPING['EXIT']:
+            return gym.utils.colorize('$', 'yellow')
+        elif el == self.OBSERVATION_MAPPING['ANIMAT']:
+            return gym.utils.colorize('A', 'red')
+        elif el == self.OBSERVATION_MAPPING['ALIASING']:
+            return gym.utils.colorize('■', 'cyan')
+        else:
+            return gym.utils.colorize(el, 'black')
 
 
 class MazeGymEnv(gym.Env):
     metadata = {'render_modes': ['human', 'ansi', 'aliasing_human'], "render_fps": 1}
 
-    def __init__(self, matrix, aliasing_matrix, render_mode='aliasing_human'):
+    def __init__(self, matrix, aliasing_matrix, slippery_prob=0., render_mode='aliasing_human'):
         self.maze = matrix
         self.aliased_maze_to_plot = aliasing_matrix
         self.max_x = self.maze.shape[1]
         self.max_y = self.maze.shape[0]
-        self._agent_location = np.array([-1, -1], dtype=int)
+
         self.action_space = gym.spaces.Discrete(len(Actions))
+        self._slippery_prob = slippery_prob
+        self._agent_location = np.array([-1, -1], dtype=int)
         self._action_to_direction = {
             Actions.NORTH.value: np.array([0, -1]),
             Actions.NORTHEAST.value: np.array([1, -1]),
@@ -101,8 +120,13 @@ class MazeGymEnv(gym.Env):
 
     def step(self, action):
         previous_observation = self._get_obs()
-        if previous_observation[action] != str(OBSERVATION_MAPPING['WALL']):
-            self._agent_location += self._action_to_direction[action]
+        if self.np_random.random() < self._slippery_prob:
+            random_action = self.np_random.integers(len(Actions))
+            if previous_observation[random_action] != str(self.observation_space.get_mappping('WALL')):
+                self._agent_location += self._action_to_direction[random_action]
+        else:
+            if previous_observation[action] != str(self.observation_space.get_mappping('WALL')):
+                self._agent_location += self._action_to_direction[action]
         observation = self._get_obs()
         reward = self._get_reward()
         terminated = self._is_terminated()
@@ -164,7 +188,7 @@ class MazeGymEnv(gym.Env):
         return {}
 
     def _is_exit(self, pos_x, pos_y):
-        return self.maze[pos_y, pos_x] == OBSERVATION_MAPPING['EXIT']
+        return self.maze[pos_y, pos_x] == self.observation_space.get_mappping('EXIT')
 
     def _get_reward(self):
         if self._is_exit(self._agent_location[0], self._agent_location[1]):
@@ -175,7 +199,7 @@ class MazeGymEnv(gym.Env):
         return self._is_exit(self._agent_location[0], self._agent_location[1])
 
     def _is_path(self, pos_x, pos_y):
-        return self.maze[pos_y, pos_x] == OBSERVATION_MAPPING['PATH']
+        return self.maze[pos_y, pos_x] == self.observation_space.get_mappping('PATH')
 
     def _insert_animat(self):
         possible_coords = []
@@ -202,24 +226,10 @@ class MazeGymEnv(gym.Env):
             situation = np.copy(self.aliased_maze_to_plot)
         else:
             situation = np.copy(self.maze)
-        situation[self._agent_location[1], self._agent_location[0]] = OBSERVATION_MAPPING['ANIMAT']
+        situation[self._agent_location[1], self._agent_location[0]] = self.observation_space.get_mappping('ANIMAT')
         for row in situation:
-            outfile.write(" ".join(self._render_element(el) for el in row))
+            outfile.write(" ".join(self.observation_space.render_element(el) for el in row))
             outfile.write("\n")
-
-    def _render_element(self, el):
-        if el == OBSERVATION_MAPPING['WALL']:
-            return gym.utils.colorize('■', 'gray')
-        elif el == OBSERVATION_MAPPING['PATH']:
-            return gym.utils.colorize('□', 'white')
-        elif el == OBSERVATION_MAPPING['EXIT']:
-            return gym.utils.colorize('$', 'yellow')
-        elif el == OBSERVATION_MAPPING['ANIMAT']:
-            return gym.utils.colorize('A', 'red')
-        elif el == OBSERVATION_MAPPING['ALIASING']:
-            return gym.utils.colorize('■', 'cyan')
-        else:
-            return gym.utils.colorize(el, 'black')
 
     def _get_possible_neighbour_cords(self, pos_x, pos_y) -> tuple:
         """
@@ -261,7 +271,7 @@ class MazeGymEnv(gym.Env):
         all_aliased_states = []
         for x in range(0, self.max_x):
             for y in range(0, self.max_y):
-                if self.aliased_maze_to_plot[y, x] == OBSERVATION_MAPPING['ALIASING']:
+                if self.aliased_maze_to_plot[y, x] == self.observation_space.get_mappping('ALIASING'):
                     all_aliased_states.append(self.build_perception_from_location(x, y))
         return list(dict.fromkeys(all_aliased_states))
 
@@ -269,7 +279,7 @@ class MazeGymEnv(gym.Env):
         all_non_aliased_states = []
         for x in range(0, self.max_x):
             for y in range(0, self.max_y):
-                if self.aliased_maze_to_plot[y, x] == OBSERVATION_MAPPING['PATH']:
+                if self.aliased_maze_to_plot[y, x] == self.observation_space.get_mappping('PATH'):
                     all_non_aliased_states.append(self.build_perception_from_location(x, y))
         return all_non_aliased_states
 
@@ -284,7 +294,7 @@ class MazeGymEnv(gym.Env):
                 transitions.append((node, action, neighbour))
         return transitions
 
-    def get_theoritical_probabilities(self, slippery_prob = 0.):
+    def get_theoritical_probabilities(self):
         # get all transitions
         transitions = []
         for node, action, neighbour in self.get_all_possible_transitions():
@@ -320,15 +330,15 @@ class MazeGymEnv(gym.Env):
                     theoritical_probabilities[a.value] = {}
                     for i in range(len(reachable_states)):
                         if int(reachable_states[i][a.value]) in theoritical_probabilities[a.value]:
-                            theoritical_probabilities[a.value][int(reachable_states[i][a.value])] += 1. - (number_of_actions -1 ) * slippery_prob / number_of_actions
+                            theoritical_probabilities[a.value][int(reachable_states[i][a.value])] += 1. - (number_of_actions -1 ) * self._slippery_prob / number_of_actions
                         else:
-                            theoritical_probabilities[a.value][int(reachable_states[i][a.value])] = 1. - (number_of_actions -1 ) * slippery_prob / number_of_actions
+                            theoritical_probabilities[a.value][int(reachable_states[i][a.value])] = 1. - (number_of_actions -1 ) * self._slippery_prob / number_of_actions
                 # 2° taking in consideration the aliasing states due to the perceptual aliasing issue 
                 for _, prob in action_and_reachable_states[key]["probabilities"].items():
                     for symbol in prob:
                         prob[symbol] /= len(reachable_states)
                 # 3° update the probabilities depending on slippery if the action done is not the expected one
-            slip_rate_by_action = slippery_prob / number_of_actions #(uniform distribution)
+            slip_rate_by_action = self._slippery_prob / number_of_actions #(uniform distribution)
             for selected_action in action_and_reachable_states:
                 theoritical_probabilities = action_and_reachable_states[selected_action]["probabilities"]
                 for slippery_action in Actions:

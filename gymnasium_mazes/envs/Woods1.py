@@ -13,7 +13,7 @@ from ..envs import MazeGymEnv
 import numpy as np
 
 class Woods1(MazeGymEnv):
-    def __init__(self, render_mode='aliasing_human'):
+    def __init__(self, slippery_prob=0., render_mode='aliasing_human'):
         super().__init__(
             np.matrix([
             [1, 1, 1, 1, 1],
@@ -29,5 +29,6 @@ class Woods1(MazeGymEnv):
             [1, 0, 0, 0, 1],
             [1, 1, 1, 1, 1],
             ]),
+            slippery_prob=slippery_prob,
             render_mode=render_mode
         )
