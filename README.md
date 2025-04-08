@@ -10,7 +10,7 @@ Then, you have to create a conda environment with the following libraries :
 ```bash
 conda create --name alcs
 conda activate alcs
-conda install conda-forge::gym conda-forge::ray-all numpy matplotlib seaborn pandas statistics statsmodels notebook
+conda install conda-forge::gymnasium conda-forge::ray-all numpy matplotlib seaborn pandas statistics statsmodels notebook
 ```
 
 Really **check** that the variable `PYTHONHASHSEED` has been set to `0` in your newly created environment, so that you can reproduce some results if needed :
