@@ -12,29 +12,26 @@ import gymnasium as gym
 import networkx as nx
 import numpy as np
 
-class Actions(Enum):
 
-    NORTH = 0
-    NORTHEAST = 1
-    EAST = 2
-    SOUTHEAST = 3
-    SOUTH = 4
-    SOUTHWEST = 5
-    WEST = 6
-    NORTHWEST = 7
+class Actions(bytes, Enum):
+
+    NORTH = 0, np.array([0, -1])
+    NORTHEAST = 1, np.array([1, -1])
+    EAST = 2, np.array([1, 0])
+    SOUTHEAST = 3, np.array([1, 1])
+    SOUTH = 4, np.array([0, 1])
+    SOUTHWEST = 5, np.array([-1, 1])
+    WEST = 6, np.array([-1, 0])
+    NORTHWEST = 7, np.array([-1, -1])
+
+    def __new__(cls, value, np_direction):
+        obj = bytes.__new__(cls, [value])
+        obj._value_ = value
+        obj.np_direction = np_direction
+        return obj
 
     @classmethod
     def get_action_from_two_neighboring_positions(cls, start, end):
-        DIRECTION_LOOKUP = {
-            'NORTH' : Actions.NORTH,
-            'NORHTEAST': Actions.NORTHEAST,
-            'EAST' : Actions.EAST,
-            'SOUTHEAST': Actions.SOUTHEAST,
-            'SOUTH' : Actions.SOUTH,
-            'SOUTHWEST': Actions.SOUTHWEST,
-            'WEST' : Actions.WEST,
-            'NORTHWEST': Actions.NORTHWEST
-        }
         direction = ''
         if end[1] + 1 == start[1]:
             direction += 'NORTH'
@@ -44,7 +41,7 @@ class Actions(Enum):
             direction += 'WEST'
         if end[0] - 1 == start[0]:
             direction += 'EAST'
-        return DIRECTION_LOOKUP[direction].value
+        return Actions[direction].value
 
 
 class MazeObservationSpace(gym.Space):
@@ -95,20 +92,9 @@ class MazeGymEnv(gym.Env):
         self.aliased_maze_to_plot = aliasing_matrix
         self.max_x = self.maze.shape[1]
         self.max_y = self.maze.shape[0]
-
         self.action_space = gym.spaces.Discrete(len(Actions))
         self._slippery_prob = slippery_prob
         self._agent_location = np.array([-1, -1], dtype=int)
-        self._action_to_direction = {
-            Actions.NORTH.value: np.array([0, -1]),
-            Actions.NORTHEAST.value: np.array([1, -1]),
-            Actions.EAST.value: np.array([1, 0]),
-            Actions.SOUTHEAST.value: np.array([1, 1]),
-            Actions.SOUTH.value: np.array([0, 1]),
-            Actions.SOUTHWEST.value: np.array([-1, 1]),
-            Actions.WEST.value: np.array([-1, 0]),
-            Actions.NORTHWEST.value: np.array([-1, -1])
-        }
         self.observation_space = MazeObservationSpace(8)
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
@@ -123,16 +109,16 @@ class MazeGymEnv(gym.Env):
         if self.np_random.random() < self._slippery_prob:
             random_action = self.np_random.integers(len(Actions))
             if previous_observation[random_action] != str(self.observation_space.get_mappping('WALL')):
-                self._agent_location += self._action_to_direction[random_action]
+                self._agent_location += Actions(random_action).np_direction
         else:
             if previous_observation[action] != str(self.observation_space.get_mappping('WALL')):
-                self._agent_location += self._action_to_direction[action]
+                self._agent_location += Actions(action).np_direction
         observation = self._get_obs()
         reward = self._get_reward()
         terminated = self._is_terminated()
         info = self._get_info()
-        truncated = False
-        return observation, reward, terminated, truncated, info
+        #Truncation is managed by TimeLimit Wrapper automatically set up
+        return observation, reward, terminated, False, info
 
     def build_perception_from_location(self, pos_x, pos_y):
         if not (0 <= pos_x < self.max_x):
@@ -326,13 +312,14 @@ class MazeGymEnv(gym.Env):
                 theoritical_probabilities = action_and_reachable_states[key]["probabilities"]
                 reachable_states = action_and_reachable_states[key]["reachable_states"]
                 # 1° set up the probabilities depending on slippery if the action done is the expected one
-                for a in Actions:
-                    theoritical_probabilities[a.value] = {}
+                for act in Actions:
+                    a = act.value
+                    theoritical_probabilities[a] = {}
                     for i in range(len(reachable_states)):
-                        if int(reachable_states[i][a.value]) in theoritical_probabilities[a.value]:
-                            theoritical_probabilities[a.value][int(reachable_states[i][a.value])] += 1. - (number_of_actions -1 ) * self._slippery_prob / number_of_actions
+                        if int(reachable_states[i][a]) in theoritical_probabilities[a]:
+                            theoritical_probabilities[a][int(reachable_states[i][a])] += 1. - (number_of_actions -1 ) * self._slippery_prob / number_of_actions
                         else:
-                            theoritical_probabilities[a.value][int(reachable_states[i][a.value])] = 1. - (number_of_actions -1 ) * self._slippery_prob / number_of_actions
+                            theoritical_probabilities[a][int(reachable_states[i][a])] = 1. - (number_of_actions -1 ) * self._slippery_prob / number_of_actions
                 # 2° taking in consideration the aliasing states due to the perceptual aliasing issue 
                 for _, prob in action_and_reachable_states[key]["probabilities"].items():
                     for symbol in prob:
@@ -344,10 +331,11 @@ class MazeGymEnv(gym.Env):
                 for slippery_action in Actions:
                     if selected_action != slippery_action.value:
                         slippery_reachable_states = action_and_reachable_states[slippery_action.value]["reachable_states"]
-                        for a in Actions:
+                        for act in Actions:
+                            a = act.value
                             for i in range(len(slippery_reachable_states)):
-                                if int(slippery_reachable_states[i][a.value]) in theoritical_probabilities[a.value]:
-                                    theoritical_probabilities[a.value][int(slippery_reachable_states[i][a.value])] += slip_rate_by_action / len(slippery_reachable_states)
+                                if int(slippery_reachable_states[i][a]) in theoritical_probabilities[a]:
+                                    theoritical_probabilities[a][int(slippery_reachable_states[i][a])] += slip_rate_by_action / len(slippery_reachable_states)
                                 else:
-                                    theoritical_probabilities[a.value][int(slippery_reachable_states[i][a.value])] = slip_rate_by_action / len(slippery_reachable_states)
+                                    theoritical_probabilities[a][int(slippery_reachable_states[i][a])] = slip_rate_by_action / len(slippery_reachable_states)
         return result
