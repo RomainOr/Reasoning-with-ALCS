@@ -234,13 +234,10 @@ all_envs = [env for env in gym.envs.registry]
 maze_envs = []
 maze_envs_name = []
 for env in all_envs:
-    if "MazeF3" in env:
-    #if filter_envs_typeIII(env) or filter_envs_typeII(env) or filter_envs_typeI(env) or filter_envs_na(env):
+    if filter_envs_typeIII(env) or filter_envs_typeII(env) or filter_envs_typeI(env) or filter_envs_na(env):
         maze_envs_name.append(env)
         for i in range(NUMBER_OF_ITERATIONS_TO_BENCH):
             maze_envs.append(env)
-
-
 
 futures = [bench_on_maze.remote(env) for env in maze_envs]
 results = ray.get(futures)
