@@ -39,20 +39,12 @@ All other files that don't have this boilerplate are licensed under the MIT lice
 ## How to set up experiments with Ray
 
 Currently available with :
-- Maze - Bench - Beacs.ipynb
+- Maze - Bench - Beacs.py
 
 On Local Mode :
-1. Open the desired jupyter-notebook that has Ray.
-2. Comment or delete `ray.init(address='auto', _redis_password='5241590000000000', runtime_env=runtime_env)` if present.
-3. Uncomment or write `ray.init(ignore_reinit_error=True, runtime_env=runtime_env)` if not present.
-4. Start running the code of the jupyter-notebook.
 
-On Remote Mode :
-1. Start a first ssh tunnel towards your server : `ssh -L <port>:<addressip>:<port jupyter> <user>@<addressip>`
-2. Launch a Jupyter server and be sure you can access it through your tunnel. Think about using `jupyter-notebook --port <port jupyter> --no-browser` or updating the config file.
-3. Launch a Ray server with : `ray start --head --dashboard-host "0.0.0.0"`. Be carefull about where you start the server, otherwise you'll need to change some lines of code in the import part of the ray remote function.
-4. Start a second ssh tunnel towards your ray dashbord : `ssh -L <port>:<addressip>:8265 <user>@<addressip>`. 8265 is the default dashboard ray port and can be changed if needed with *--dashboard-port* option in the previous step.
-5. Open the desired jupyter-notebook that has Ray.
-6. Uncomment or write `ray.init(address='auto', _redis_password='5241590000000000')` if not present. *_redis_password* can be another one and is given when the ray server is started.
-7. Comment or delete `ray.init(num_cpus=NB_OF_PROCESSES, ignore_reinit_error=True)` if present.
-8. Start running the code of he jupyter-notebook.
+0. Go to my_examples directory.
+1. Laucnh ray dashboard with `ray start --head` in terminal.
+2. Submit ray job with `RAY_ADDRESS='http://127.0.0.1:8265' ray job submit  -- python Maze\ -\ Bench\ -\ Beacs.py`. Ray address used is the default one.
+3. Go to ray dashboard url and see the process runnning.
+4. To stop ray dashboard process, `ray stop`.
